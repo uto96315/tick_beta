@@ -17,22 +17,42 @@ class SettingsPage extends ConsumerWidget {
     final settings = app.settings;
     final controller = ref.read(appControllerProvider.notifier);
     return Scaffold(
+      backgroundColor: TickColors.cream,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
-            Text(l10n.settings, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.schedule, style: const TextStyle(fontWeight: FontWeight.w700)),
-              subtitle: Text(_scheduleLine(app), style: const TextStyle(color: TickColors.muted)),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/settings/schedule'),
+            Row(
+              children: [
+                IconButton(onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back, color: TickColors.ink)),
+                Text(l10n.settings, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: TickColors.ink)),
+              ],
             ),
-            Text(l10n.languageFollows, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
+            Padding(
+              padding: const EdgeInsets.only(left: 12, bottom: 12),
+              child: Text(l10n.languageFollows, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
+            ),
+            PopCard(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text(l10n.schedule, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(_scheduleLine(app), style: const TextStyle(color: TickColors.muted)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/settings/schedule'),
+                  ),
+                  ListTile(
+                    title: Text(l10n.history, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/history'),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
             PopCard(
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
                 children: [
                   SwitchListTile(title: Text(l10n.notifyChunk), value: settings.notifySegment, onChanged: (value) => controller.updateSettings(settings.copyWith(notifySegment: value))),
@@ -43,129 +63,139 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Text(l10n.endAction, style: const TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final action in EndAction.values)
-                  ChoiceChip(
-                    label: Text(_endLabel(l10n, action)),
-                    selected: settings.endAction == action,
-                    onSelected: (_) => controller.updateSettings(settings.copyWith(endAction: action)),
+            PopCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.endAction, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final action in EndAction.values)
+                        ChoiceChip(
+                          label: Text(_endLabel(l10n, action)),
+                          selected: settings.endAction == action,
+                          onSelected: (_) => controller.updateSettings(settings.copyWith(endAction: action)),
+                        ),
+                    ],
                   ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(l10n.visual, style: const TextStyle(fontWeight: FontWeight.w800)),
-            Text(l10n.visualHelp),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final visual in TimerVisual.values)
-                  ChoiceChip(
-                    label: Text(_visualLabel(l10n, visual)),
-                    selected: settings.visual == visual,
-                    onSelected: (_) => controller.updateSettings(settings.copyWith(visual: visual)),
-                  ),
-              ],
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.showCharacter),
-              value: settings.showCharacter,
-              onChanged: (value) => controller.updateSettings(settings.copyWith(showCharacter: value)),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.autoStart),
-              subtitle: Text(l10n.autoStartHelp),
-              value: settings.autoStart,
-              onChanged: (value) => controller.updateSettings(settings.copyWith(autoStart: value)),
-            ),
-            const SizedBox(height: 8),
-            Text(l10n.trigger, style: const TextStyle(fontWeight: FontWeight.w800)),
-            Text(l10n.camouflageHint),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final trigger in CamouflageTrigger.values)
-                  ChoiceChip(
-                    label: Text(_triggerLabel(l10n, trigger)),
-                    selected: settings.camouflageTrigger == trigger,
-                    onSelected: (_) {
-                      if (!app.premium && trigger != CamouflageTrigger.corner) {
-                        context.push('/settings/premium');
-                        return;
-                      }
-                      controller.updateSettings(settings.copyWith(camouflageTrigger: trigger));
-                    },
-                  ),
-              ],
-            ),
-            if (!app.premium) Text(l10n.premiumCamouflage, style: const TextStyle(fontSize: 13)),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final look in CamouflageLook.values)
-                  ChoiceChip(
-                    label: Text(_lookLabel(l10n, look)),
-                    selected: settings.camouflageLook == look,
-                    onSelected: (_) {
-                      if (!app.premium && look != CamouflageLook.home) {
-                        context.push('/settings/premium');
-                        return;
-                      }
-                      controller.updateSettings(settings.copyWith(camouflageLook: look));
-                    },
+            PopCard(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: SwitchListTile(
+                title: Text(l10n.autoStart),
+                subtitle: Text(l10n.autoStartHelp),
+                value: settings.autoStart,
+                onChanged: (value) => controller.updateSettings(settings.copyWith(autoStart: value)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            PopCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.trigger, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 4),
+                  Text(l10n.camouflageHint, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final trigger in CamouflageTrigger.values)
+                        ChoiceChip(
+                          label: premiumLabel(_triggerLabel(l10n, trigger), locked: !app.premium && trigger != CamouflageTrigger.corner),
+                          selected: settings.camouflageTrigger == trigger,
+                          onSelected: (_) {
+                            if (!app.premium && trigger != CamouflageTrigger.corner) {
+                              context.push('/settings/premium');
+                              return;
+                            }
+                            controller.updateSettings(settings.copyWith(camouflageTrigger: trigger));
+                          },
+                        ),
+                    ],
                   ),
-              ],
-            ),
-            if (!app.premium) Text(l10n.premiumLooks, style: const TextStyle(fontSize: 13)),
-            const SizedBox(height: 16),
-            Text(l10n.chickVoiceTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final voice in ChickVoice.values)
-                  ChoiceChip(
-                    label: Text(_voiceLabel(l10n, voice)),
-                    selected: settings.chickVoice == voice,
-                    onSelected: (_) {
-                      if (!app.premium && voice != ChickVoice.plain) {
-                        context.push('/settings/premium');
-                        return;
-                      }
-                      controller.updateSettings(settings.copyWith(chickVoice: voice));
-                    },
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final look in CamouflageLook.values)
+                        ChoiceChip(
+                          label: premiumLabel(_lookLabel(l10n, look), locked: !app.premium && look != CamouflageLook.home),
+                          selected: settings.camouflageLook == look,
+                          onSelected: (_) {
+                            if (!app.premium && look != CamouflageLook.home) {
+                              context.push('/settings/premium');
+                              return;
+                            }
+                            controller.updateSettings(settings.copyWith(camouflageLook: look));
+                          },
+                        ),
+                    ],
                   ),
-              ],
+                ],
+              ),
             ),
-            if (!app.premium) Text(l10n.premiumVoice, style: const TextStyle(fontSize: 13)),
-            if (app.premium && settings.chickVoice == ChickVoice.custom) ...[
-              const SizedBox(height: 8),
-              _CustomLineField(initial: settings.customChickLine, hint: l10n.customLine, onSave: (value) => controller.updateSettings(settings.copyWith(customChickLine: value))),
-            ],
-            const SizedBox(height: 16),
-            ListTile(contentPadding: EdgeInsets.zero, title: Text(l10n.account), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/account')),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.premium),
-              subtitle: Text(app.premium ? l10n.premiumOwned : l10n.freeTier),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/settings/premium'),
+            const SizedBox(height: 12),
+            PopCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.chickVoiceTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final voice in ChickVoice.values)
+                        ChoiceChip(
+                          label: premiumLabel(_voiceLabel(l10n, voice), locked: !app.premium && voice != ChickVoice.plain),
+                          selected: settings.chickVoice == voice,
+                          onSelected: (_) {
+                            if (!app.premium && voice != ChickVoice.plain) {
+                              context.push('/settings/premium');
+                              return;
+                            }
+                            controller.updateSettings(settings.copyWith(chickVoice: voice));
+                          },
+                        ),
+                    ],
+                  ),
+                  if (app.premium && settings.chickVoice == ChickVoice.custom) ...[
+                    const SizedBox(height: 8),
+                    _CustomLineField(initial: settings.customChickLine, hint: l10n.customLine, onSave: (value) => controller.updateSettings(settings.copyWith(customChickLine: value))),
+                  ],
+                ],
+              ),
             ),
-            ListTile(contentPadding: EdgeInsets.zero, title: Text(l10n.fakeCall), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/call')),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.camouflage),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => ref.read(appControllerProvider.notifier).setCamouflage(true),
+            const SizedBox(height: 12),
+            PopCard(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Column(
+                children: [
+                  ListTile(title: Text(l10n.account, style: const TextStyle(fontWeight: FontWeight.w800)), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/account')),
+                  ListTile(
+                    leading: const PremiumMark(size: 32),
+                    title: Text(l10n.premium, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: Text(app.premium ? l10n.premiumOwned : l10n.freeTier),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/settings/premium'),
+                  ),
+                  ListTile(title: Text(l10n.fakeCall, style: const TextStyle(fontWeight: FontWeight.w800)), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/call')),
+                  ListTile(
+                    title: Text(l10n.camouflage, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => ref.read(appControllerProvider.notifier).setCamouflage(true),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -178,15 +208,6 @@ String _scheduleLine(AppState app) {
   if (app.patterns.isEmpty) return '';
   final pattern = app.patterns.first;
   return '${pattern.start.label} – ${pattern.end.label}';
-}
-
-String _visualLabel(AppLocalizations l10n, TimerVisual visual) {
-  return switch (visual) {
-    TimerVisual.tiles => l10n.visualTiles,
-    TimerVisual.map => l10n.visualMap,
-    TimerVisual.character => l10n.visualCharacter,
-    TimerVisual.gauge => l10n.visualGauge,
-  };
 }
 
 String _endLabel(AppLocalizations l10n, EndAction action) {

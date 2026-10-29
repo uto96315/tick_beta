@@ -14,7 +14,7 @@ enum ChickVoice { plain, lazy, kansai, custom }
 
 enum CallSound { classic, soft, bright }
 
-enum ChickMood { heavy, tired, sleepy }
+enum ChickMood { heavy, hungry, sleepy, cheer, fine, away }
 
 CamouflageLook shownLook(bool premium, CamouflageLook look) {
   if (premium || look == CamouflageLook.home) return look;

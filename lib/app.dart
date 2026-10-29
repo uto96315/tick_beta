@@ -104,7 +104,7 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
               router.go('/free');
             case .home:
               ref.read(appControllerProvider.notifier).acknowledgeFreedom();
-              router.go('/home');
+              router.go('/');
             case .history:
               ref.read(appControllerProvider.notifier).acknowledgeFreedom();
               if (id != null) router.go('/history/$id');

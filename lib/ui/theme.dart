@@ -6,6 +6,7 @@ class TickColors {
   static const sky = Color(0xFFBFE6FB);
   static const skySoft = Color(0xFFEAF6FD);
   static const paper = Color(0xFFF5FAFD);
+  static const cream = Color(0xFFFFF6E8);
   static const ink = Color(0xFF1B2A4A);
   static const muted = Color(0xFF7C8BA3);
   static const yellow = Color(0xFFFFD15C);
@@ -86,6 +87,30 @@ class TickTheme {
       ),
     );
   }
+}
+
+class PremiumMark extends StatelessWidget {
+  const PremiumMark({super.key, this.size = 18});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset('assets/images/icon/premium_icon.png', width: size, height: size, fit: BoxFit.contain);
+  }
+}
+
+Widget premiumLabel(String text, {required bool locked, double size = 16}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(text),
+      if (locked) ...[
+        const SizedBox(width: 4),
+        PremiumMark(size: size),
+      ],
+    ],
+  );
 }
 
 class PopCard extends StatelessWidget {

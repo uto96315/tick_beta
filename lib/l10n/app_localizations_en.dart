@@ -830,10 +830,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodHeavy => 'Heavy';
 
   @override
-  String get moodTired => 'Tired';
+  String get moodSleepy => 'Sleepy';
 
   @override
-  String get moodSleepy => 'Sleepy';
+  String get moodHungry => 'Hungry';
 
   @override
   String get moodCall => 'Call in this mood';
@@ -926,13 +926,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodHeavy3 => 'Today can be a heavy one.';
 
   @override
-  String get moodTired1 => 'Tired.';
+  String get moodHungry1 => 'Hungry. Food first is allowed.';
 
   @override
-  String get moodTired2 => 'You got this far.';
+  String get moodHungry2 => 'Sitting here hungry. Time still shrinks.';
 
   @override
-  String get moodTired3 => 'Rest. Time keeps going.';
+  String get moodHungry3 => 'A meal, and this chunk. Both sound good.';
 
   @override
   String get moodSleepy1 => 'Sleepy.';
@@ -961,4 +961,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slackMore => 'Get more calls';
+
+  @override
+  String get shiftClock => 'Until';
+
+  @override
+  String hourNow(int count) {
+    return 'This hour ($count)';
+  }
+
+  @override
+  String get chunkDone => 'Done';
+
+  @override
+  String get moodTitle => 'Mood right now?';
+
+  @override
+  String get todaySoFar => 'Today';
+
+  @override
+  String get toolCall => 'Fake call';
+
+  @override
+  String get toolBreak => 'Break';
+
+  @override
+  String get toolExcuse => 'Excuse\ngenerator';
+
+  @override
+  String get toolAway => 'Step away';
+
+  @override
+  String get moodCheer => 'Trying';
+
+  @override
+  String get moodFine => 'Good';
+
+  @override
+  String get moodFine1 => 'Today feels a little lighter.';
+
+  @override
+  String get moodFine2 => 'This pace is enough. No need to push.';
+
+  @override
+  String get moodFine3 => 'Not a bad day. Keep going like this.';
+
+  @override
+  String get moodAway => 'Slacking';
+
+  @override
+  String get homePause => 'Pause';
+
+  @override
+  String get excuseTitle => 'An excuse';
+
+  @override
+  String get excuseCopied => 'Copied';
+
+  @override
+  String get excuse1 => 'A call came in. I\'ll step out.';
+
+  @override
+  String get excuse2 => 'Printing something. Back in a minute.';
+
+  @override
+  String get excuse3 => 'Restroom. Won\'t be long.';
+
+  @override
+  String get excuse4 => 'Checking a file in the other room.';
+
+  @override
+  String get excuse5 => 'Grabbing my charger.';
 }

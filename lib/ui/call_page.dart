@@ -33,7 +33,7 @@ class CallPage extends ConsumerWidget {
             children: [
               for (final sound in CallSound.values)
                 ChoiceChip(
-                  label: Text(_soundLabel(l10n, sound)),
+                  label: premiumLabel(_soundLabel(l10n, sound), locked: !app.premium && sound != CallSound.classic),
                   selected: app.settings.callSound == sound,
                   onSelected: (_) {
                     if (!app.premium && sound != CallSound.classic) {
@@ -45,7 +45,6 @@ class CallPage extends ConsumerWidget {
                 ),
             ],
           ),
-          if (!app.premium) Text(l10n.premiumSounds, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 12),
           for (final caller in app.callers) _CallerTile(caller: caller),
           const SizedBox(height: 8),
@@ -78,9 +77,8 @@ class CallPage extends ConsumerWidget {
               name.dispose();
               emoji.dispose();
             },
-            child: Text(l10n.addCaller),
+            child: premiumLabel(l10n.addCaller, locked: !app.premium),
           ),
-          if (!app.premium) Text(l10n.premiumCallers, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 16),
           Text(l10n.callLater, style: const TextStyle(fontWeight: FontWeight.w800)),
           for (final call in app.scheduledCalls.where((item) => !item.fired))
@@ -113,6 +111,7 @@ class _CallerTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final premium = ref.watch(appControllerProvider.select((state) => state.premium));
     return PopCard(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
@@ -125,13 +124,13 @@ class _CallerTile extends ConsumerWidget {
             TextButton(onPressed: () => _schedule(context, ref), child: Text(l10n.callLater)),
             TextButton(
               onPressed: () {
-                if (!ref.read(appControllerProvider).premium) {
+                if (!premium) {
                   context.push('/settings/premium');
                   return;
                 }
                 ref.read(appControllerProvider.notifier).scheduleBeforeEnd(caller.id);
               },
-              child: Text(l10n.callBeforeEnd),
+              child: premiumLabel(l10n.callBeforeEnd, locked: !premium),
             ),
             if (caller.custom)
               TextButton(onPressed: () => ref.read(appControllerProvider.notifier).deleteCaller(caller.id), child: Text(l10n.delete)),
@@ -143,7 +142,15 @@ class _CallerTile extends ConsumerWidget {
             if (image == null) return;
             await ref.read(appControllerProvider.notifier).setCallerPhoto(caller.id, image.path);
           },
-          icon: const Icon(Icons.photo_outlined),
+          icon: premium
+              ? const Icon(Icons.photo_outlined)
+              : const Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(Icons.photo_outlined),
+                    Positioned(right: -8, top: -8, child: PremiumMark(size: 16)),
+                  ],
+                ),
         ),
       ),
     );

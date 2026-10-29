@@ -737,7 +737,7 @@ Future<void> _openSlack(BuildContext context, WidgetRef ref) async {
                 Navigator.pop(sheetContext);
                 context.push('/settings/premium');
               },
-              child: Text(l10n.slackMore),
+              child: const PremiumMark(size: 28),
             ),
           ],
         ),

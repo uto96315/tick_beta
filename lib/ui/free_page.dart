@@ -29,7 +29,7 @@ class FreePage extends ConsumerWidget {
               FilledButton(
                 onPressed: () {
                   ref.read(appControllerProvider.notifier).acknowledgeFreedom();
-                  context.go('/home');
+                  context.go('/');
                 },
                 child: Text(l10n.goHome),
               ),

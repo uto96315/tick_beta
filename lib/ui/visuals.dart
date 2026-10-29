@@ -15,6 +15,7 @@ enum ChickPose {
   attention,
   notice,
   love,
+  hungry,
   done,
   goodjob,
   surprise,
@@ -60,6 +61,7 @@ class TickMascot extends StatelessWidget {
     ChickPose.attention: 'assets/images/character/attention.png',
     ChickPose.notice: 'assets/images/character/notice.png',
     ChickPose.love: 'assets/images/character/love.png',
+    ChickPose.hungry: 'assets/images/character/hungly.png',
     ChickPose.done: 'assets/images/character/done.png',
     ChickPose.goodjob: 'assets/images/character/goodjob.png',
     ChickPose.surprise: 'assets/images/character/surprise.png',
@@ -133,7 +135,7 @@ class _LivingMascotState extends State<LivingMascot>
 Duration _span(ChickPose pose) {
   return switch (pose) {
     ChickPose.sleep => const Duration(milliseconds: 1800),
-    ChickPose.tired => const Duration(milliseconds: 1500),
+    ChickPose.tired || ChickPose.hungry => const Duration(milliseconds: 1500),
     ChickPose.surprise => const Duration(milliseconds: 700),
     ChickPose.cheer ||
     ChickPose.happy ||
@@ -163,6 +165,10 @@ Widget _move(ChickPose pose, double t, Widget child) {
     ChickPose.tired => Transform.rotate(
       angle: 0.05 * wave,
       child: Transform.translate(offset: Offset(0, 4 * t), child: child),
+    ),
+    ChickPose.hungry => Transform.rotate(
+      angle: 0.04 * wave,
+      child: Transform.translate(offset: Offset(0, 5 * t), child: child),
     ),
     ChickPose.attention ||
     ChickPose.notice => Transform.rotate(angle: 0.07 * wave, child: child),

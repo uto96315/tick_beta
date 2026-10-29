@@ -816,10 +816,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get moodHeavy => 'だるい';
 
   @override
-  String get moodTired => '疲れた';
+  String get moodSleepy => '眠い';
 
   @override
-  String get moodSleepy => '眠い';
+  String get moodHungry => 'お腹すいた';
 
   @override
   String get moodCall => 'この気分で電話';
@@ -912,13 +912,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get moodHeavy3 => '今日は重いでいい。';
 
   @override
-  String get moodTired1 => '疲れたね。';
+  String get moodHungry1 => 'お腹が空いた。何か食べてからでいい。';
 
   @override
-  String get moodTired2 => 'ここまで来た。';
+  String get moodHungry2 => '空腹のまま座っている。時間のほうは減る。';
 
   @override
-  String get moodTired3 => '休んでいい。時間は進む。';
+  String get moodHungry3 => 'ごはんと、この区切り。どっちも欲しい。';
 
   @override
   String get moodSleepy1 => '眠い。';
@@ -947,4 +947,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get slackMore => '回数を増やす';
+
+  @override
+  String get shiftClock => '定時';
+
+  @override
+  String hourNow(int count) {
+    return '今の1時間（$countコマ）';
+  }
+
+  @override
+  String get chunkDone => '完了';
+
+  @override
+  String get moodTitle => '今の気分は？';
+
+  @override
+  String get todaySoFar => '今日の進捗';
+
+  @override
+  String get toolCall => '偽着信';
+
+  @override
+  String get toolBreak => '休憩タイマー';
+
+  @override
+  String get toolExcuse => '言い訳\nジェネレーター';
+
+  @override
+  String get toolAway => 'ちょっと離席';
+
+  @override
+  String get moodCheer => '頑張る';
+
+  @override
+  String get moodFine => 'ご機嫌';
+
+  @override
+  String get moodFine1 => '今日は、少し軽い。';
+
+  @override
+  String get moodFine2 => 'このペースでいい。無理しなくていい。';
+
+  @override
+  String get moodFine3 => '悪くない日だ。このまま進もう。';
+
+  @override
+  String get moodAway => 'サボり中';
+
+  @override
+  String get homePause => '一時停止';
+
+  @override
+  String get excuseTitle => '言い訳';
+
+  @override
+  String get excuseCopied => 'コピーした';
+
+  @override
+  String get excuse1 => '電話が来たので、少し外します。';
+
+  @override
+  String get excuse2 => '印刷してきます。すぐ戻ります。';
+
+  @override
+  String get excuse3 => 'ちょっとお手洗いです。';
+
+  @override
+  String get excuse4 => '別室で資料を確認してきます。';
+
+  @override
+  String get excuse5 => '充電器を取ってきます。';
 }

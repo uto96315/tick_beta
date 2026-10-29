@@ -1706,17 +1706,17 @@ abstract class AppLocalizations {
   /// **'Heavy'**
   String get moodHeavy;
 
-  /// No description provided for @moodTired.
-  ///
-  /// In en, this message translates to:
-  /// **'Tired'**
-  String get moodTired;
-
   /// No description provided for @moodSleepy.
   ///
   /// In en, this message translates to:
   /// **'Sleepy'**
   String get moodSleepy;
+
+  /// No description provided for @moodHungry.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungry'**
+  String get moodHungry;
 
   /// No description provided for @moodCall.
   ///
@@ -1898,23 +1898,23 @@ abstract class AppLocalizations {
   /// **'Today can be a heavy one.'**
   String get moodHeavy3;
 
-  /// No description provided for @moodTired1.
+  /// No description provided for @moodHungry1.
   ///
   /// In en, this message translates to:
-  /// **'Tired.'**
-  String get moodTired1;
+  /// **'Hungry. Food first is allowed.'**
+  String get moodHungry1;
 
-  /// No description provided for @moodTired2.
+  /// No description provided for @moodHungry2.
   ///
   /// In en, this message translates to:
-  /// **'You got this far.'**
-  String get moodTired2;
+  /// **'Sitting here hungry. Time still shrinks.'**
+  String get moodHungry2;
 
-  /// No description provided for @moodTired3.
+  /// No description provided for @moodHungry3.
   ///
   /// In en, this message translates to:
-  /// **'Rest. Time keeps going.'**
-  String get moodTired3;
+  /// **'A meal, and this chunk. Both sound good.'**
+  String get moodHungry3;
 
   /// No description provided for @moodSleepy1.
   ///
@@ -1969,6 +1969,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get more calls'**
   String get slackMore;
+
+  /// No description provided for @shiftClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Until'**
+  String get shiftClock;
+
+  /// No description provided for @hourNow.
+  ///
+  /// In en, this message translates to:
+  /// **'This hour ({count})'**
+  String hourNow(int count);
+
+  /// No description provided for @chunkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get chunkDone;
+
+  /// No description provided for @moodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood right now?'**
+  String get moodTitle;
+
+  /// No description provided for @todaySoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todaySoFar;
+
+  /// No description provided for @toolCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake call'**
+  String get toolCall;
+
+  /// No description provided for @toolBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get toolBreak;
+
+  /// No description provided for @toolExcuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse\ngenerator'**
+  String get toolExcuse;
+
+  /// No description provided for @toolAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Step away'**
+  String get toolAway;
+
+  /// No description provided for @moodCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trying'**
+  String get moodCheer;
+
+  /// No description provided for @moodFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get moodFine;
+
+  /// No description provided for @moodFine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Today feels a little lighter.'**
+  String get moodFine1;
+
+  /// No description provided for @moodFine2.
+  ///
+  /// In en, this message translates to:
+  /// **'This pace is enough. No need to push.'**
+  String get moodFine2;
+
+  /// No description provided for @moodFine3.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a bad day. Keep going like this.'**
+  String get moodFine3;
+
+  /// No description provided for @moodAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Slacking'**
+  String get moodAway;
+
+  /// No description provided for @homePause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get homePause;
+
+  /// No description provided for @excuseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An excuse'**
+  String get excuseTitle;
+
+  /// No description provided for @excuseCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get excuseCopied;
+
+  /// No description provided for @excuse1.
+  ///
+  /// In en, this message translates to:
+  /// **'A call came in. I\'ll step out.'**
+  String get excuse1;
+
+  /// No description provided for @excuse2.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing something. Back in a minute.'**
+  String get excuse2;
+
+  /// No description provided for @excuse3.
+  ///
+  /// In en, this message translates to:
+  /// **'Restroom. Won\'t be long.'**
+  String get excuse3;
+
+  /// No description provided for @excuse4.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking a file in the other room.'**
+  String get excuse4;
+
+  /// No description provided for @excuse5.
+  ///
+  /// In en, this message translates to:
+  /// **'Grabbing my charger.'**
+  String get excuse5;
 }
 
 class _AppLocalizationsDelegate
