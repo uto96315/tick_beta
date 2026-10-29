@@ -176,7 +176,7 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsNothing);
   });
 
-  testWidgets('each bottom tab opens its own page', (tester) async {
+  testWidgets('settings opens from the corner and there is no tab bar', (tester) async {
     tester.view.physicalSize = const Size(402, 874);
     tester.view.devicePixelRatio = 1;
     tester.platformDispatcher.localeTestValue = const Locale('ja');
@@ -196,27 +196,15 @@ void main() {
     );
     await tester.pump();
 
-    Future<void> openTab(IconData icon) async {
-      await tester.tap(find.byIcon(icon));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(tester.takeException(), isNull);
-    }
-
-    final shown = AppLocalizations.of(tester.element(find.byType(NavigationBar)));
-
-    await openTab(Icons.timer_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1);
-    expect(find.text(shown.noSession), findsOneWidget);
-    await openTab(Icons.history_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 2);
-    expect(find.text(shown.historyWork), findsOneWidget);
-    await openTab(Icons.settings_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 3);
-    expect(find.text(shown.schedule), findsOneWidget);
-    await openTab(Icons.home_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 0);
+    final shown = AppLocalizations.of(tester.element(find.text('Ozio')));
+    expect(find.byType(NavigationBar), findsNothing);
     expect(find.text(shown.appTitle), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(find.text(shown.schedule), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -231,9 +219,10 @@ void main() {
     expect(find.text(l10n.updateRequiredTitle), findsOneWidget);
     expect(find.text(l10n.updateLater), findsNothing);
 
-    await tester.tapAt(tester.getCenter(find.byIcon(Icons.timer_rounded)));
+    await tester.tapAt(tester.getCenter(find.byIcon(Icons.settings_outlined)));
     await tester.pump();
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 0);
+    expect(find.text(l10n.updateRequiredTitle), findsOneWidget);
+    expect(find.text(l10n.schedule), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
