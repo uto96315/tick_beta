@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/copy.dart';
+import 'package:tick/ui/premium_offer.dart';
 import 'package:tick/ui/router.dart';
 import 'package:tick/ui/theme.dart';
 import 'package:tick/ui/tutorial_page.dart';
@@ -22,7 +23,8 @@ class TickApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (context, child) => _Effects(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) =>
+          _Effects(child: child ?? const SizedBox.shrink()),
     );
   }
 }
@@ -35,7 +37,8 @@ class _Effects extends ConsumerStatefulWidget {
   ConsumerState<_Effects> createState() => _EffectsState();
 }
 
-class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver {
+class _EffectsState extends ConsumerState<_Effects>
+    with WidgetsBindingObserver {
   int _burstSeen = 0;
   int _encourageSeen = 0;
   int _flashSeen = 0;
@@ -56,7 +59,9 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    ref.read(appControllerProvider.notifier).setForeground(state == AppLifecycleState.resumed);
+    ref
+        .read(appControllerProvider.notifier)
+        .setForeground(state == AppLifecycleState.resumed);
   }
 
   @override
@@ -65,7 +70,9 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
       final l10n = AppLocalizations.of(context);
       if (next.burstNonce != _burstSeen && next.burstCount > 0) {
         _burstSeen = next.burstNonce;
-        final text = next.burstCount == 1 ? l10n.burstOne : '${next.burstCount} ${l10n.burstMany}';
+        final text = next.burstCount == 1
+            ? l10n.burstOne
+            : '${next.burstCount} ${l10n.burstMany}';
         final pose = next.burstCount > 1 ? ChickPose.goodjob : ChickPose.notice;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -83,15 +90,24 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
           }
         });
       }
-      if (next.encouragementNonce != _encourageSeen && next.encouragementNonce > 0) {
+      if (next.encouragementNonce != _encourageSeen &&
+          next.encouragementNonce > 0) {
         _encourageSeen = next.encouragementNonce;
       }
       if (next.flash != null && next.flash!.nonce != _flashSeen) {
         _flashSeen = next.flash!.nonce;
-        final text = flashText(l10n, next.flash!.code, next.flash!.detail);
+        final code = next.flash!.code;
+        final detail = next.flash!.detail;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+          if (code == 'premium' || code == 'limit') {
+            final nav = rootNavigatorKey.currentContext;
+            if (nav != null) showPremiumOffer(nav, ref);
+            return;
+          }
+          final text = flashText(l10n, code, detail);
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(text)));
         });
       }
       if (previous?.pendingFreedom != true && next.pendingFreedom) {
@@ -104,7 +120,7 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
               router.go('/free');
             case .home:
               ref.read(appControllerProvider.notifier).acknowledgeFreedom();
-              router.go('/home');
+              router.go('/');
             case .history:
               ref.read(appControllerProvider.notifier).acknowledgeFreedom();
               if (id != null) router.go('/history/$id');
@@ -114,11 +130,20 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
       if (previous?.offline != true && next.offline) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.offline)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.offline)));
         });
       }
     });
-    final tutorial = ref.watch(appControllerProvider.select((state) => state.ready && !state.settings.tutorialSeen && state.liveCall == null && !state.camouflage));
+    final tutorial = ref.watch(
+      appControllerProvider.select(
+        (state) =>
+            state.ready &&
+            !state.settings.tutorialSeen &&
+            state.liveCall == null &&
+            !state.camouflage,
+      ),
+    );
     return Stack(
       children: [
         widget.child,
@@ -133,14 +158,27 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
               color: TickColors.navy,
               borderRadius: BorderRadius.circular(20),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     if (_bannerPose != null) ...[
                       TickMascot(size: 56, pose: _bannerPose),
                       const SizedBox(width: 12),
                     ],
-                    Expanded(child: Text(_banner!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18))),
+                    Expanded(
+                      child: Text(
+                        _banner!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

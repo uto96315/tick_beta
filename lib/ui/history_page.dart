@@ -23,11 +23,20 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     final l10n = AppLocalizations.of(context);
     final history = ref.watch(appControllerProvider.select((state) => state.history));
     return Scaffold(
+      backgroundColor: TickColors.cream,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           children: [
-            Text(l10n.historyWork, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+                  icon: const Icon(Icons.arrow_back, color: TickColors.ink),
+                ),
+                Text(l10n.historyWork, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+              ],
+            ),
             const SizedBox(height: 12),
             SegmentedButton<bool>(
               segments: [
@@ -68,7 +77,7 @@ class _HistoryCard extends StatelessWidget {
     return PopCard(
       padding: const EdgeInsets.all(16),
       child: InkWell(
-        onTap: () => context.go('/history/${record.id}'),
+        onTap: () => context.push('/history/${record.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -120,7 +129,7 @@ class _Month extends StatelessWidget {
             final hit = marked.contains(dateKey(date));
             final record = hit ? history.where((item) => dateKey(item.workDate) == dateKey(date)).firstOrNull : null;
             return InkWell(
-              onTap: record == null ? null : () => context.go('/history/${record.id}'),
+              onTap: record == null ? null : () => context.push('/history/${record.id}'),
               child: Center(
                 child: Container(
                   width: 32,

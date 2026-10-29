@@ -758,6 +758,78 @@ abstract class AppLocalizations {
   /// **'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.'**
   String get premiumPitch;
 
+  /// No description provided for @registerAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Register an account'**
+  String get registerAccount;
+
+  /// No description provided for @registerAccountHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'An email brings this back after a reinstall.'**
+  String get registerAccountHelp;
+
+  /// No description provided for @premiumOfferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get premiumOfferTitle;
+
+  /// No description provided for @premiumOfferLead.
+  ///
+  /// In en, this message translates to:
+  /// **'One purchase. The work disguise gets a little freer.'**
+  String get premiumOfferLead;
+
+  /// No description provided for @premiumOfferCalls.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake calls, as often as you want'**
+  String get premiumOfferCalls;
+
+  /// No description provided for @premiumOfferCallers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your own callers'**
+  String get premiumOfferCallers;
+
+  /// No description provided for @premiumOfferSounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a ringtone'**
+  String get premiumOfferSounds;
+
+  /// No description provided for @premiumOfferLooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap the screen for notes or a calendar'**
+  String get premiumOfferLooks;
+
+  /// No description provided for @premiumOfferVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'More ways for the chick to talk'**
+  String get premiumOfferVoice;
+
+  /// No description provided for @premiumOfferBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'A call ten minutes before the end'**
+  String get premiumOfferBefore;
+
+  /// No description provided for @premiumOfferLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get premiumOfferLater;
+
+  /// No description provided for @premiumOfferBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} to start'**
+  String premiumOfferBuy(String price);
+
   /// No description provided for @premiumOwned.
   ///
   /// In en, this message translates to:
@@ -1706,17 +1778,17 @@ abstract class AppLocalizations {
   /// **'Heavy'**
   String get moodHeavy;
 
-  /// No description provided for @moodTired.
-  ///
-  /// In en, this message translates to:
-  /// **'Tired'**
-  String get moodTired;
-
   /// No description provided for @moodSleepy.
   ///
   /// In en, this message translates to:
   /// **'Sleepy'**
   String get moodSleepy;
+
+  /// No description provided for @moodHungry.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungry'**
+  String get moodHungry;
 
   /// No description provided for @moodCall.
   ///
@@ -1898,23 +1970,23 @@ abstract class AppLocalizations {
   /// **'Today can be a heavy one.'**
   String get moodHeavy3;
 
-  /// No description provided for @moodTired1.
+  /// No description provided for @moodHungry1.
   ///
   /// In en, this message translates to:
-  /// **'Tired.'**
-  String get moodTired1;
+  /// **'Hungry. Food first is allowed.'**
+  String get moodHungry1;
 
-  /// No description provided for @moodTired2.
+  /// No description provided for @moodHungry2.
   ///
   /// In en, this message translates to:
-  /// **'You got this far.'**
-  String get moodTired2;
+  /// **'Sitting here hungry. Time still shrinks.'**
+  String get moodHungry2;
 
-  /// No description provided for @moodTired3.
+  /// No description provided for @moodHungry3.
   ///
   /// In en, this message translates to:
-  /// **'Rest. Time keeps going.'**
-  String get moodTired3;
+  /// **'A meal, and this chunk. Both sound good.'**
+  String get moodHungry3;
 
   /// No description provided for @moodSleepy1.
   ///
@@ -1969,6 +2041,606 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get more calls'**
   String get slackMore;
+
+  /// No description provided for @shiftClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Until'**
+  String get shiftClock;
+
+  /// No description provided for @hourNow.
+  ///
+  /// In en, this message translates to:
+  /// **'This hour ({count})'**
+  String hourNow(int count);
+
+  /// No description provided for @chunkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get chunkDone;
+
+  /// No description provided for @moodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood right now?'**
+  String get moodTitle;
+
+  /// No description provided for @todaySoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todaySoFar;
+
+  /// No description provided for @toolCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake call'**
+  String get toolCall;
+
+  /// No description provided for @toolBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get toolBreak;
+
+  /// No description provided for @toolExcuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse\ngenerator'**
+  String get toolExcuse;
+
+  /// No description provided for @toolAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Step away'**
+  String get toolAway;
+
+  /// No description provided for @moodCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trying'**
+  String get moodCheer;
+
+  /// No description provided for @moodFine.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get moodFine;
+
+  /// No description provided for @moodFine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Today feels a little lighter.'**
+  String get moodFine1;
+
+  /// No description provided for @moodFine2.
+  ///
+  /// In en, this message translates to:
+  /// **'This pace is enough. No need to push.'**
+  String get moodFine2;
+
+  /// No description provided for @moodFine3.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a bad day. Keep going like this.'**
+  String get moodFine3;
+
+  /// No description provided for @moodAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Slacking'**
+  String get moodAway;
+
+  /// No description provided for @homePause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get homePause;
+
+  /// No description provided for @excuseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An excuse'**
+  String get excuseTitle;
+
+  /// No description provided for @excuseCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get excuseCopied;
+
+  /// No description provided for @excuse1.
+  ///
+  /// In en, this message translates to:
+  /// **'A call came in. I\'ll step out.'**
+  String get excuse1;
+
+  /// No description provided for @excuse2.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing something. Back in a minute.'**
+  String get excuse2;
+
+  /// No description provided for @excuse3.
+  ///
+  /// In en, this message translates to:
+  /// **'Restroom. Won\'t be long.'**
+  String get excuse3;
+
+  /// No description provided for @excuse4.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking a file in the other room.'**
+  String get excuse4;
+
+  /// No description provided for @excuse5.
+  ///
+  /// In en, this message translates to:
+  /// **'Grabbing my charger.'**
+  String get excuse5;
+
+  /// No description provided for @labTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle LAB'**
+  String get labTitle;
+
+  /// No description provided for @labSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompts from everyone'**
+  String get labSubtitle;
+
+  /// No description provided for @labToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s prompt'**
+  String get labToday;
+
+  /// No description provided for @labTodayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is featured today.'**
+  String get labTodayEmpty;
+
+  /// No description provided for @labSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All prompts'**
+  String get labSeeAll;
+
+  /// No description provided for @labSit.
+  ///
+  /// In en, this message translates to:
+  /// **'At a desk'**
+  String get labSit;
+
+  /// No description provided for @labStand.
+  ///
+  /// In en, this message translates to:
+  /// **'On your feet'**
+  String get labStand;
+
+  /// No description provided for @labQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Quietly'**
+  String get labQuiet;
+
+  /// No description provided for @labSitHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Something for your hands'**
+  String get labSitHelp;
+
+  /// No description provided for @labStandHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Something for your head'**
+  String get labStandHelp;
+
+  /// No description provided for @labQuietHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Short, and easy to hide'**
+  String get labQuietHelp;
+
+  /// No description provided for @labSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t open this while driving or doing something risky.'**
+  String get labSafety;
+
+  /// No description provided for @labPropose.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest a prompt'**
+  String get labPropose;
+
+  /// No description provided for @labEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get labEntries;
+
+  /// No description provided for @labEmptyEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody yet. You can be first.'**
+  String get labEmptyEntries;
+
+  /// No description provided for @labEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this filter.'**
+  String get labEmptyList;
+
+  /// No description provided for @labAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get labAnswer;
+
+  /// No description provided for @labAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One short line'**
+  String get labAnswerHint;
+
+  /// No description provided for @labConfirmPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this?'**
+  String get labConfirmPost;
+
+  /// No description provided for @labSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get labSend;
+
+  /// No description provided for @labPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get labPosted;
+
+  /// No description provided for @labDrawLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing comes next.'**
+  String get labDrawLater;
+
+  /// No description provided for @labLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get labLike;
+
+  /// No description provided for @labReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get labReport;
+
+  /// No description provided for @labReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get labReported;
+
+  /// No description provided for @labLocalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This stays on this iPhone. Other people won\'t see it.'**
+  String get labLocalOnly;
+
+  /// No description provided for @labLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the latest. Showing what we already have.'**
+  String get labLoadError;
+
+  /// No description provided for @labOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get labOpen;
+
+  /// No description provided for @labClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get labClosed;
+
+  /// No description provided for @labCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String labCount(int count);
+
+  /// No description provided for @labUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {time}'**
+  String labUntil(String time);
+
+  /// No description provided for @labChoiceResult.
+  ///
+  /// In en, this message translates to:
+  /// **'How people answered'**
+  String get labChoiceResult;
+
+  /// No description provided for @labCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s it'**
+  String get labCorrect;
+
+  /// No description provided for @labWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Not that one'**
+  String get labWrong;
+
+  /// No description provided for @labYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer'**
+  String get labYourAnswer;
+
+  /// No description provided for @labProposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get labProposeTitle;
+
+  /// No description provided for @labProposeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What do people do?'**
+  String get labProposeBody;
+
+  /// No description provided for @labCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it fits'**
+  String get labCategory;
+
+  /// No description provided for @labProposeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'How they answer'**
+  String get labProposeFormat;
+
+  /// No description provided for @labFormatOgiri.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption'**
+  String get labFormatOgiri;
+
+  /// No description provided for @labFormatQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get labFormatQuiz;
+
+  /// No description provided for @labFormatChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Two choices'**
+  String get labFormatChoice;
+
+  /// No description provided for @labFormatDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing'**
+  String get labFormatDraw;
+
+  /// No description provided for @labChoicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choices, one per line'**
+  String get labChoicesHint;
+
+  /// No description provided for @labCorrectOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'The right answer can wait for a review.'**
+  String get labCorrectOptional;
+
+  /// No description provided for @labProposeSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the suggestion'**
+  String get labProposeSend;
+
+  /// No description provided for @labProposeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent. It stays private until someone publishes it.'**
+  String get labProposeDone;
+
+  /// No description provided for @labReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review prompts'**
+  String get labReview;
+
+  /// No description provided for @labReviewLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Review opens only for the signed-in operator account.'**
+  String get labReviewLocked;
+
+  /// No description provided for @labPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get labPending;
+
+  /// No description provided for @labAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get labAccepted;
+
+  /// No description provided for @labRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get labRejected;
+
+  /// No description provided for @labAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get labAccept;
+
+  /// No description provided for @labReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get labReject;
+
+  /// No description provided for @labPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get labPublish;
+
+  /// No description provided for @labPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get labPublished;
+
+  /// No description provided for @labHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get labHide;
+
+  /// No description provided for @labHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get labHidden;
+
+  /// No description provided for @labReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get labReports;
+
+  /// No description provided for @labNoReports.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports'**
+  String get labNoReports;
+
+  /// No description provided for @labNoProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions yet'**
+  String get labNoProposals;
+
+  /// No description provided for @labOfficial.
+  ///
+  /// In en, this message translates to:
+  /// **'Write an official prompt'**
+  String get labOfficial;
+
+  /// No description provided for @labFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature today'**
+  String get labFeatured;
+
+  /// No description provided for @labNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'That prompt isn\'t here.'**
+  String get labNotFound;
+
+  /// No description provided for @labAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get labAll;
+
+  /// No description provided for @labSortCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Most answers'**
+  String get labSortCount;
+
+  /// No description provided for @labRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Liked'**
+  String get labRank;
+
+  /// No description provided for @labRankEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No likes yet. Reading is enough.'**
+  String get labRankEmpty;
+
+  /// No description provided for @labFailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Write something first.'**
+  String get labFailEmpty;
+
+  /// No description provided for @labFailLong.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s a bit long.'**
+  String get labFailLong;
+
+  /// No description provided for @labFailAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'You already sent one.'**
+  String get labFailAlready;
+
+  /// No description provided for @labFailClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This one is closed.'**
+  String get labFailClosed;
+
+  /// No description provided for @labFailSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t like your own.'**
+  String get labFailSelf;
+
+  /// No description provided for @labFailForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'That one\'s for the operator.'**
+  String get labFailForbidden;
+
+  /// No description provided for @labFailOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'It didn\'t go through.'**
+  String get labFailOffline;
+
+  /// No description provided for @labFailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t fit this prompt.'**
+  String get labFailInvalid;
+
+  /// No description provided for @labFailContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave out phone numbers and email addresses.'**
+  String get labFailContact;
 }
 
 class _AppLocalizationsDelegate

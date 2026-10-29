@@ -10,6 +10,7 @@ import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/copy.dart';
 import 'package:tick/ui/interval_choices.dart';
+import 'package:tick/ui/premium_offer.dart';
 import 'package:tick/ui/theme.dart';
 import 'package:tick/ui/visuals.dart';
 
@@ -735,9 +736,9 @@ Future<void> _openSlack(BuildContext context, WidgetRef ref) async {
             TextButton(
               onPressed: () {
                 Navigator.pop(sheetContext);
-                context.push('/settings/premium');
+                showPremiumOffer(context, ref);
               },
-              child: Text(l10n.slackMore),
+              child: const PremiumMark(size: 28),
             ),
           ],
         ),

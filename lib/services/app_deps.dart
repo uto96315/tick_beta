@@ -11,6 +11,8 @@ import 'package:tick/firebase_options.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/services/io/asset_ringtone.dart';
 import 'package:tick/services/io/firebase_auth_gateway.dart';
+import 'package:tick/lab/memory_lab.dart';
+import 'package:tick/services/io/firestore_lab.dart';
 import 'package:tick/services/io/firestore_sync.dart';
 import 'package:tick/services/io/local_notifications.dart';
 import 'package:tick/services/io/remote_update.dart';
@@ -25,6 +27,11 @@ Future<AppDeps> loadAppDeps() async {
   final purchases = StorePurchaseGateway();
   final ringtone = AssetRingtone();
   final ids = const Uuid();
+  String language() {
+    final code = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    return code == 'ja' ? 'ja' : 'en';
+  }
+
   var firebaseReady = false;
   AuthGateway auth = LocalAuthGateway(
     AuthUser(
@@ -38,8 +45,12 @@ Future<AppDeps> loadAppDeps() async {
   UpdatePolicySource updates = const UnavailableUpdates();
   if (kFirebaseConfigured) {
     try {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+      );
       auth = FirebaseAuthGateway();
       sync = FirestoreSync();
       updates = FirebaseUpdatePolicy();
@@ -48,6 +59,13 @@ Future<AppDeps> loadAppDeps() async {
       debugPrint('Firebase stayed off: $error');
     }
   }
+  final lab = firebaseReady
+      ? FirestoreLabStore(auth: auth, newId: ids.v4, languageCode: language)
+      : MemoryLabStore.solo(
+          uid: store.state.uid ?? 'local',
+          newId: ids.v4,
+          languageCode: language,
+        );
   return AppDeps(
     store: store,
     auth: auth,
@@ -58,12 +76,10 @@ Future<AppDeps> loadAppDeps() async {
     clock: SystemClock(),
     firebaseConfigured: firebaseReady,
     newId: ids.v4,
-    languageCode: () {
-      final code = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-      return code == 'ja' ? 'ja' : 'en';
-    },
+    languageCode: language,
     installedBuild: installedBuild,
     updates: updates,
+    lab: lab,
     savePhoto: (callerId, sourcePath) async {
       final directory = await getApplicationDocumentsDirectory();
       final folder = Directory('${directory.path}/callers');

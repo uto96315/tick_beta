@@ -347,6 +347,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.';
 
   @override
+  String get registerAccount => 'Register an account';
+
+  @override
+  String get registerAccountHelp =>
+      'An email brings this back after a reinstall.';
+
+  @override
+  String get premiumOfferTitle => 'Premium';
+
+  @override
+  String get premiumOfferLead =>
+      'One purchase. The work disguise gets a little freer.';
+
+  @override
+  String get premiumOfferCalls => 'Fake calls, as often as you want';
+
+  @override
+  String get premiumOfferCallers => 'Add your own callers';
+
+  @override
+  String get premiumOfferSounds => 'Choose a ringtone';
+
+  @override
+  String get premiumOfferLooks => 'Swap the screen for notes or a calendar';
+
+  @override
+  String get premiumOfferVoice => 'More ways for the chick to talk';
+
+  @override
+  String get premiumOfferBefore => 'A call ten minutes before the end';
+
+  @override
+  String get premiumOfferLater => 'Not now';
+
+  @override
+  String premiumOfferBuy(String price) {
+    return '$price to start';
+  }
+
+  @override
   String get premiumOwned => 'Premium is on';
 
   @override
@@ -830,10 +870,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodHeavy => 'Heavy';
 
   @override
-  String get moodTired => 'Tired';
+  String get moodSleepy => 'Sleepy';
 
   @override
-  String get moodSleepy => 'Sleepy';
+  String get moodHungry => 'Hungry';
 
   @override
   String get moodCall => 'Call in this mood';
@@ -926,13 +966,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodHeavy3 => 'Today can be a heavy one.';
 
   @override
-  String get moodTired1 => 'Tired.';
+  String get moodHungry1 => 'Hungry. Food first is allowed.';
 
   @override
-  String get moodTired2 => 'You got this far.';
+  String get moodHungry2 => 'Sitting here hungry. Time still shrinks.';
 
   @override
-  String get moodTired3 => 'Rest. Time keeps going.';
+  String get moodHungry3 => 'A meal, and this chunk. Both sound good.';
 
   @override
   String get moodSleepy1 => 'Sleepy.';
@@ -961,4 +1001,315 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slackMore => 'Get more calls';
+
+  @override
+  String get shiftClock => 'Until';
+
+  @override
+  String hourNow(int count) {
+    return 'This hour ($count)';
+  }
+
+  @override
+  String get chunkDone => 'Done';
+
+  @override
+  String get moodTitle => 'Mood right now?';
+
+  @override
+  String get todaySoFar => 'Today';
+
+  @override
+  String get toolCall => 'Fake call';
+
+  @override
+  String get toolBreak => 'Break';
+
+  @override
+  String get toolExcuse => 'Excuse\ngenerator';
+
+  @override
+  String get toolAway => 'Step away';
+
+  @override
+  String get moodCheer => 'Trying';
+
+  @override
+  String get moodFine => 'Good';
+
+  @override
+  String get moodFine1 => 'Today feels a little lighter.';
+
+  @override
+  String get moodFine2 => 'This pace is enough. No need to push.';
+
+  @override
+  String get moodFine3 => 'Not a bad day. Keep going like this.';
+
+  @override
+  String get moodAway => 'Slacking';
+
+  @override
+  String get homePause => 'Pause';
+
+  @override
+  String get excuseTitle => 'An excuse';
+
+  @override
+  String get excuseCopied => 'Copied';
+
+  @override
+  String get excuse1 => 'A call came in. I\'ll step out.';
+
+  @override
+  String get excuse2 => 'Printing something. Back in a minute.';
+
+  @override
+  String get excuse3 => 'Restroom. Won\'t be long.';
+
+  @override
+  String get excuse4 => 'Checking a file in the other room.';
+
+  @override
+  String get excuse5 => 'Grabbing my charger.';
+
+  @override
+  String get labTitle => 'Idle LAB';
+
+  @override
+  String get labSubtitle => 'Prompts from everyone';
+
+  @override
+  String get labToday => 'Today\'s prompt';
+
+  @override
+  String get labTodayEmpty => 'Nothing is featured today.';
+
+  @override
+  String get labSeeAll => 'All prompts';
+
+  @override
+  String get labSit => 'At a desk';
+
+  @override
+  String get labStand => 'On your feet';
+
+  @override
+  String get labQuiet => 'Quietly';
+
+  @override
+  String get labSitHelp => 'Something for your hands';
+
+  @override
+  String get labStandHelp => 'Something for your head';
+
+  @override
+  String get labQuietHelp => 'Short, and easy to hide';
+
+  @override
+  String get labSafety =>
+      'Don\'t open this while driving or doing something risky.';
+
+  @override
+  String get labPropose => 'Suggest a prompt';
+
+  @override
+  String get labEntries => 'Answers';
+
+  @override
+  String get labEmptyEntries => 'Nobody yet. You can be first.';
+
+  @override
+  String get labEmptyList => 'Nothing in this filter.';
+
+  @override
+  String get labAnswer => 'Answer';
+
+  @override
+  String get labAnswerHint => 'One short line';
+
+  @override
+  String get labConfirmPost => 'Send this?';
+
+  @override
+  String get labSend => 'Send';
+
+  @override
+  String get labPosted => 'Sent';
+
+  @override
+  String get labDrawLater => 'Drawing comes next.';
+
+  @override
+  String get labLike => 'Like';
+
+  @override
+  String get labReport => 'Report';
+
+  @override
+  String get labReported => 'Got it';
+
+  @override
+  String get labLocalOnly =>
+      'This stays on this iPhone. Other people won\'t see it.';
+
+  @override
+  String get labLoadError =>
+      'Couldn\'t load the latest. Showing what we already have.';
+
+  @override
+  String get labOpen => 'Open';
+
+  @override
+  String get labClosed => 'Closed';
+
+  @override
+  String labCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String labUntil(String time) {
+    return 'Until $time';
+  }
+
+  @override
+  String get labChoiceResult => 'How people answered';
+
+  @override
+  String get labCorrect => 'That\'s it';
+
+  @override
+  String get labWrong => 'Not that one';
+
+  @override
+  String get labYourAnswer => 'Your answer';
+
+  @override
+  String get labProposeTitle => 'Title';
+
+  @override
+  String get labProposeBody => 'What do people do?';
+
+  @override
+  String get labCategory => 'Where it fits';
+
+  @override
+  String get labProposeFormat => 'How they answer';
+
+  @override
+  String get labFormatOgiri => 'Caption';
+
+  @override
+  String get labFormatQuiz => 'Quiz';
+
+  @override
+  String get labFormatChoice => 'Two choices';
+
+  @override
+  String get labFormatDraw => 'Drawing';
+
+  @override
+  String get labChoicesHint => 'Choices, one per line';
+
+  @override
+  String get labCorrectOptional => 'The right answer can wait for a review.';
+
+  @override
+  String get labProposeSend => 'Send the suggestion';
+
+  @override
+  String get labProposeDone =>
+      'Sent. It stays private until someone publishes it.';
+
+  @override
+  String get labReview => 'Review prompts';
+
+  @override
+  String get labReviewLocked =>
+      'Review opens only for the signed-in operator account.';
+
+  @override
+  String get labPending => 'Waiting';
+
+  @override
+  String get labAccepted => 'Accepted';
+
+  @override
+  String get labRejected => 'Declined';
+
+  @override
+  String get labAccept => 'Accept';
+
+  @override
+  String get labReject => 'Decline';
+
+  @override
+  String get labPublish => 'Publish';
+
+  @override
+  String get labPublished => 'Published';
+
+  @override
+  String get labHide => 'Hide';
+
+  @override
+  String get labHidden => 'Hidden';
+
+  @override
+  String get labReports => 'Reports';
+
+  @override
+  String get labNoReports => 'No reports';
+
+  @override
+  String get labNoProposals => 'No suggestions yet';
+
+  @override
+  String get labOfficial => 'Write an official prompt';
+
+  @override
+  String get labFeatured => 'Feature today';
+
+  @override
+  String get labNotFound => 'That prompt isn\'t here.';
+
+  @override
+  String get labAll => 'All';
+
+  @override
+  String get labSortCount => 'Most answers';
+
+  @override
+  String get labRank => 'Liked';
+
+  @override
+  String get labRankEmpty => 'No likes yet. Reading is enough.';
+
+  @override
+  String get labFailEmpty => 'Write something first.';
+
+  @override
+  String get labFailLong => 'That\'s a bit long.';
+
+  @override
+  String get labFailAlready => 'You already sent one.';
+
+  @override
+  String get labFailClosed => 'This one is closed.';
+
+  @override
+  String get labFailSelf => 'You can\'t like your own.';
+
+  @override
+  String get labFailForbidden => 'That one\'s for the operator.';
+
+  @override
+  String get labFailOffline => 'It didn\'t go through.';
+
+  @override
+  String get labFailInvalid => 'That doesn\'t fit this prompt.';
+
+  @override
+  String get labFailContact => 'Leave out phone numbers and email addresses.';
 }

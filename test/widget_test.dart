@@ -8,6 +8,7 @@ import 'package:tick/domain/app_update.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/segments.dart';
 import 'package:tick/l10n/app_localizations.dart';
+import 'package:tick/lab/memory_lab.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/copy.dart';
@@ -18,13 +19,34 @@ import 'package:tick/ui/visuals.dart';
 
 void main() {
   test('timer pose follows breaks, the end, and how far the day has gone', () {
-    expect(timerPose(ratio: 0.2, remaining: 20, onBreak: true, pastShift: false), ChickPose.sleep);
-    expect(timerPose(ratio: 1, remaining: 0, onBreak: false, pastShift: true), ChickPose.done);
-    expect(timerPose(ratio: 0.5, remaining: 10, onBreak: false, pastShift: true), ChickPose.surprise);
-    expect(timerPose(ratio: 0.8, remaining: 2, onBreak: false, pastShift: false), ChickPose.attention);
-    expect(timerPose(ratio: 0.6, remaining: 10, onBreak: false, pastShift: false), ChickPose.cheer);
-    expect(timerPose(ratio: 0.3, remaining: 10, onBreak: false, pastShift: false), ChickPose.happy);
-    expect(timerPose(ratio: 0.1, remaining: 20, onBreak: false, pastShift: false), ChickPose.tired);
+    expect(
+      timerPose(ratio: 0.2, remaining: 20, onBreak: true, pastShift: false),
+      ChickPose.sleep,
+    );
+    expect(
+      timerPose(ratio: 1, remaining: 0, onBreak: false, pastShift: true),
+      ChickPose.done,
+    );
+    expect(
+      timerPose(ratio: 0.5, remaining: 10, onBreak: false, pastShift: true),
+      ChickPose.surprise,
+    );
+    expect(
+      timerPose(ratio: 0.8, remaining: 2, onBreak: false, pastShift: false),
+      ChickPose.attention,
+    );
+    expect(
+      timerPose(ratio: 0.6, remaining: 10, onBreak: false, pastShift: false),
+      ChickPose.cheer,
+    );
+    expect(
+      timerPose(ratio: 0.3, remaining: 10, onBreak: false, pastShift: false),
+      ChickPose.happy,
+    );
+    expect(
+      timerPose(ratio: 0.1, remaining: 20, onBreak: false, pastShift: false),
+      ChickPose.tired,
+    );
   });
 
   testWidgets('finished chunks show a check on the tile board', (tester) async {
@@ -58,7 +80,15 @@ void main() {
           body: SegmentBoard(
             views: [
               for (final minute in [0, 15, 30, 45, 0])
-                SegmentView(done: minute == 0 && minute == 0, current: minute == 15, fraction: minute == 15 ? 0.4 : minute < 15 ? 1 : 0),
+                SegmentView(
+                  done: minute == 0 && minute == 0,
+                  current: minute == 15,
+                  fraction: minute == 15
+                      ? 0.4
+                      : minute < 15
+                      ? 1
+                      : 0,
+                ),
             ],
             visual: TimerVisual.tiles,
             showCharacter: false,
@@ -96,7 +126,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dark interval choices keep the other labels readable', (tester) async {
+  testWidgets('dark interval choices keep the other labels readable', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('ja'),
@@ -104,7 +136,12 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           backgroundColor: TickColors.navy,
-          body: IntervalChoices(minutes: 15, onDark: true, onPreset: (_) {}, onCustom: () {}),
+          body: IntervalChoices(
+            minutes: 15,
+            onDark: true,
+            onPreset: (_) {},
+            onCustom: () {},
+          ),
         ),
       ),
     );
@@ -156,7 +193,10 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('13')).dy, lessThan(tester.getTopLeft(find.text('12')).dy));
+    expect(
+      tester.getTopLeft(find.text('13')).dy,
+      lessThan(tester.getTopLeft(find.text('12')).dy),
+    );
   });
 
   testWidgets('a break slot is not a work check', (tester) async {
@@ -176,7 +216,9 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsNothing);
   });
 
-  testWidgets('each bottom tab opens its own page', (tester) async {
+  testWidgets('settings opens from the corner and there is no tab bar', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(402, 874);
     tester.view.devicePixelRatio = 1;
     tester.platformDispatcher.localeTestValue = const Locale('ja');
@@ -196,44 +238,41 @@ void main() {
     );
     await tester.pump();
 
-    Future<void> openTab(IconData icon) async {
-      await tester.tap(find.byIcon(icon));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(tester.takeException(), isNull);
-    }
-
-    final shown = AppLocalizations.of(tester.element(find.byType(NavigationBar)));
-
-    await openTab(Icons.timer_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1);
-    expect(find.text(shown.noSession), findsOneWidget);
-    await openTab(Icons.history_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 2);
-    expect(find.text(shown.historyWork), findsOneWidget);
-    await openTab(Icons.settings_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 3);
-    expect(find.text(shown.schedule), findsOneWidget);
-    await openTab(Icons.home_rounded);
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 0);
+    final shown = AppLocalizations.of(tester.element(find.text('Ozio')));
+    expect(find.byType(NavigationBar), findsNothing);
     expect(find.text(shown.appTitle), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+    expect(find.text(shown.schedule), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
 
-  testWidgets('an old build is blocked until the required update', (tester) async {
+  testWidgets('an old build is blocked until the required update', (
+    tester,
+  ) async {
     await _pumpApp(
       tester,
-      updates: const _FixedUpdates(UpdatePolicy(minBuild: 9, latestBuild: 9, url: 'https://example.com/tick')),
+      updates: const _FixedUpdates(
+        UpdatePolicy(
+          minBuild: 9,
+          latestBuild: 9,
+          url: 'https://example.com/tick',
+        ),
+      ),
     );
     final l10n = AppLocalizations.of(tester.element(find.byType(UpdateGate)));
     expect(find.text(l10n.updateRequiredTitle), findsOneWidget);
     expect(find.text(l10n.updateLater), findsNothing);
 
-    await tester.tapAt(tester.getCenter(find.byIcon(Icons.timer_rounded)));
+    await tester.tapAt(tester.getCenter(find.byIcon(Icons.settings_outlined)));
     await tester.pump();
-    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 0);
+    expect(find.text(l10n.updateRequiredTitle), findsOneWidget);
+    expect(find.text(l10n.schedule), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -242,7 +281,13 @@ void main() {
   testWidgets('a newer build can be postponed', (tester) async {
     await _pumpApp(
       tester,
-      updates: const _FixedUpdates(UpdatePolicy(minBuild: 0, latestBuild: 9, url: 'https://example.com/tick')),
+      updates: const _FixedUpdates(
+        UpdatePolicy(
+          minBuild: 0,
+          latestBuild: 9,
+          url: 'https://example.com/tick',
+        ),
+      ),
     );
     final l10n = AppLocalizations.of(tester.element(find.byType(UpdateGate)));
     expect(find.text(l10n.updateAvailableTitle), findsOneWidget);
@@ -265,7 +310,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChickTalk(lines: chickLines(l10n, ChickPose.tired), onDark: true),
+          body: ChickTalk(
+            lines: chickLines(l10n, ChickPose.tired),
+            onDark: true,
+          ),
         ),
       ),
     );
@@ -278,14 +326,63 @@ void main() {
     for (final pose in ChickPose.values) {
       expect(chickLines(l10n, pose), hasLength(3));
     }
-    expect(chickLines(l10n, ChickPose.tired, voice: ChickVoice.kansai).first, l10n.voiceKansai1);
-    expect(chickLines(l10n, ChickPose.tired, voice: ChickVoice.custom, custom: '  ねむい  '), ['ねむい']);
+    expect(
+      chickLines(l10n, ChickPose.tired, voice: ChickVoice.kansai).first,
+      l10n.voiceKansai1,
+    );
+    expect(
+      chickLines(
+        l10n,
+        ChickPose.tired,
+        voice: ChickVoice.custom,
+        custom: '  ねむい  ',
+      ),
+      ['ねむい'],
+    );
     expect(moodLines(l10n, ChickMood.sleepy), hasLength(3));
     expect(moodPose(ChickMood.sleepy), ChickPose.sleep);
   });
+
+  testWidgets('idle lab opens from home and shows today\'s prompt', (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.localeTestValue = const Locale('ja');
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearLocaleTestValue();
+    });
+    final persisted = PersistedState.seed(languageCode: 'ja');
+    persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [depsProvider.overrideWithValue(_testDeps(persisted))],
+        child: const TickApp(),
+      ),
+    );
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    final lab = find.byKey(const ValueKey('lab-entry'));
+    final scrollable = find.byWidgetPredicate(
+      (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+    );
+    await tester.scrollUntilVisible(lab, 400, scrollable: scrollable);
+    await tester.tap(lab);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('こんな会社は嫌だ'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
 }
 
-Future<void> _pumpApp(WidgetTester tester, {required UpdatePolicySource updates}) async {
+Future<void> _pumpApp(
+  WidgetTester tester, {
+  required UpdatePolicySource updates,
+}) async {
   tester.view.physicalSize = const Size(402, 874);
   tester.view.devicePixelRatio = 1;
   addTearDown(() {
@@ -296,7 +393,9 @@ Future<void> _pumpApp(WidgetTester tester, {required UpdatePolicySource updates}
   persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [depsProvider.overrideWithValue(_testDeps(persisted, updates: updates))],
+      overrides: [
+        depsProvider.overrideWithValue(_testDeps(persisted, updates: updates)),
+      ],
       child: const TickApp(),
     ),
   );
@@ -317,7 +416,14 @@ class _FixedUpdates implements UpdatePolicySource {
 AppDeps _testDeps(PersistedState persisted, {UpdatePolicySource? updates}) {
   return AppDeps(
     store: LocalStore(persisted),
-    auth: LocalAuthGateway(const AuthUser(uid: 'local', anonymous: true, email: null, provider: 'local')),
+    auth: LocalAuthGateway(
+      const AuthUser(
+        uid: 'local',
+        anonymous: true,
+        email: null,
+        provider: 'local',
+      ),
+    ),
     sync: NoopSync(),
     notifications: NoopNotifications(),
     purchases: UnavailablePurchases(),
@@ -329,5 +435,11 @@ AppDeps _testDeps(PersistedState persisted, {UpdatePolicySource? updates}) {
     savePhoto: (_, _) async => null,
     installedBuild: 2,
     updates: updates ?? const UnavailableUpdates(),
+    lab: MemoryLabStore.solo(
+      uid: 'local',
+      newId: () => 'id',
+      languageCode: () => 'ja',
+      sharesWithOthers: true,
+    ),
   );
 }

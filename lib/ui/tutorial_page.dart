@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/theme.dart';
-import 'package:tick/ui/visuals.dart';
+
+const _pages = [
+  'assets/images/tutorial/turorial01.png',
+  'assets/images/tutorial/tutorial02.png',
+  'assets/images/tutorial/tutorial03.png',
+];
 
 class TutorialOverlay extends ConsumerStatefulWidget {
   const TutorialOverlay({super.key});
@@ -25,17 +30,12 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final steps = [
-      (ChickPose.normal, l10n.tutorial1Title, l10n.tutorial1Body),
-      (ChickPose.attention, l10n.tutorial2Title, l10n.tutorial2Body),
-      (ChickPose.notice, l10n.tutorial3Title, l10n.tutorial3Body),
-    ];
-    final last = _index == steps.length - 1;
+    final last = _index == _pages.length - 1;
     return Material(
-      color: TickColors.skySoft,
+      color: TickColors.cream,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
           child: Column(
             children: [
               Align(
@@ -48,27 +48,18 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay> {
               Expanded(
                 child: PageView.builder(
                   controller: _page,
-                  itemCount: steps.length,
+                  itemCount: _pages.length,
                   onPageChanged: (index) => setState(() => _index = index),
                   itemBuilder: (context, index) {
-                    final step = steps[index];
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TickMascot(size: 180, pose: step.$1),
-                        const SizedBox(height: 24),
-                        Text(step.$2, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: TickColors.ink)),
-                        const SizedBox(height: 12),
-                        Text(step.$3, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, height: 1.5, color: TickColors.muted)),
-                      ],
-                    );
+                    return Image.asset(_pages[index], fit: BoxFit.contain);
                   },
                 ),
               ),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < steps.length; i++)
+                  for (var i = 0; i < _pages.length; i++)
                     Container(
                       width: 8,
                       height: 8,
@@ -77,7 +68,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay> {
                     ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               FilledButton(
                 onPressed: () {
                   if (last) {
