@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tick/data/local_store.dart';
 import 'package:tick/firebase_gate.dart';
@@ -12,11 +13,14 @@ import 'package:tick/services/io/asset_ringtone.dart';
 import 'package:tick/services/io/firebase_auth_gateway.dart';
 import 'package:tick/services/io/firestore_sync.dart';
 import 'package:tick/services/io/local_notifications.dart';
+import 'package:tick/services/io/remote_update.dart';
 import 'package:tick/services/io/store_purchases.dart';
 import 'package:uuid/uuid.dart';
 
 Future<AppDeps> loadAppDeps() async {
   final store = await LocalStore.open();
+  final info = await PackageInfo.fromPlatform();
+  final installedBuild = int.tryParse(info.buildNumber) ?? 0;
   final notifications = LocalNotificationGateway();
   final purchases = StorePurchaseGateway();
   final ringtone = AssetRingtone();
@@ -31,12 +35,14 @@ Future<AppDeps> loadAppDeps() async {
     ),
   );
   RemoteSync sync = NoopSync();
+  UpdatePolicySource updates = const UnavailableUpdates();
   if (kFirebaseConfigured) {
     try {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
       auth = FirebaseAuthGateway();
       sync = FirestoreSync();
+      updates = FirebaseUpdatePolicy();
       firebaseReady = true;
     } catch (error) {
       debugPrint('Firebase stayed off: $error');
@@ -56,6 +62,8 @@ Future<AppDeps> loadAppDeps() async {
       final code = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
       return code == 'ja' ? 'ja' : 'en';
     },
+    installedBuild: installedBuild,
+    updates: updates,
     savePhoto: (callerId, sourcePath) async {
       final directory = await getApplicationDocumentsDirectory();
       final folder = Directory('${directory.path}/callers');

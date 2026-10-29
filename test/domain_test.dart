@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tick/domain/app_update.dart';
 import 'package:tick/domain/engine.dart';
 import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/iso_week.dart';
@@ -135,6 +136,41 @@ void main() {
     expect(overtimeOf(done), const Duration(minutes: 30));
   });
 
+  test('editing the shift updates the live end and keeps added time', () {
+    final now = DateTime(2026, 10, 26, 15);
+    final session = extendSession(
+      buildSession(
+        SessionDraft(
+          id: 's',
+          now: now,
+          actualStart: DateTime(2026, 10, 26, 9),
+          plannedEnd: DateTime(2026, 10, 26, 18),
+          originalPlannedEnd: DateTime(2026, 10, 26, 18),
+          intervalMinutes: 60,
+          breaks: [TimeRange(start: DateTime(2026, 10, 26, 12), end: DateTime(2026, 10, 26, 13))],
+          patternId: 'day',
+          shiftKey: 'old',
+          celebrateElapsed: false,
+        ),
+      ),
+      30,
+      now,
+    );
+    final shift = ResolvedShift(
+      workDate: DateTime(2026, 10, 26),
+      start: DateTime(2026, 10, 26, 10),
+      end: DateTime(2026, 10, 26, 19),
+      breaks: [TimeRange(start: DateTime(2026, 10, 26, 12, 30), end: DateTime(2026, 10, 26, 13, 30))],
+      patternId: 'day',
+      label: 'Day',
+    );
+    final aligned = realignSession(session, shift, now);
+    expect(aligned.actualStart, DateTime(2026, 10, 26, 10));
+    expect(aligned.originalPlannedEnd, DateTime(2026, 10, 26, 19));
+    expect(aligned.plannedEnd, DateTime(2026, 10, 26, 19, 30));
+    expect(aligned.breaks.single.start, DateTime(2026, 10, 26, 12, 30));
+  });
+
   test('iso weeks and the free call allowance', () {
     expect(isoWeekKey(DateTime(2021, 1, 1)), '2020-W53');
     expect(isoWeekKey(DateTime(2021, 1, 4)), '2021-W01');
@@ -222,5 +258,47 @@ void main() {
     final free = Entitlement(premium: false, updatedAt: DateTime(2026, 5, 1), source: 'none');
     final paid = Entitlement(premium: true, updatedAt: DateTime(2026, 1, 1), source: 'store');
     expect(mergeEntitlement(free, paid).premium, isTrue);
+  });
+
+  test('free accounts stay on the plain camouflage, voice, and ringtone', () {
+    expect(shownLook(false, CamouflageLook.notes), CamouflageLook.home);
+    expect(shownLook(true, CamouflageLook.calendar), CamouflageLook.calendar);
+    expect(shownVoice(false, ChickVoice.kansai), ChickVoice.plain);
+    expect(shownVoice(true, ChickVoice.lazy), ChickVoice.lazy);
+    expect(shownSound(false, CallSound.bright), CallSound.classic);
+    final settings = AppSettings.fromJson({'tutorialSeen': true});
+    expect(settings.camouflageLook, CamouflageLook.home);
+    expect(settings.chickVoice, ChickVoice.plain);
+    expect(settings.callSound, CallSound.classic);
+    expect(settings.customChickLine, isEmpty);
+    expect(settings.slackIntroSeen, isFalse);
+  });
+
+  test('build numbers choose a forced update, an optional one, or nothing', () {
+    const url = 'https://example.com/tick';
+    expect(
+      decideUpdate(currentBuild: 2, minBuild: 9, latestBuild: 9, dismissedBuild: 9, url: url).kind,
+      UpdateKind.required,
+    );
+    expect(
+      decideUpdate(currentBuild: 2, minBuild: 0, latestBuild: 9, dismissedBuild: 0, url: url).kind,
+      UpdateKind.optional,
+    );
+    expect(
+      decideUpdate(currentBuild: 2, minBuild: 0, latestBuild: 9, dismissedBuild: 9, url: url).kind,
+      UpdateKind.none,
+    );
+    expect(
+      decideUpdate(currentBuild: 2, minBuild: 0, latestBuild: 9, dismissedBuild: 0, url: '').kind,
+      UpdateKind.none,
+    );
+    expect(
+      decideUpdate(currentBuild: 9, minBuild: 3, latestBuild: 9, dismissedBuild: 0, url: url).kind,
+      UpdateKind.none,
+    );
+    expect(
+      decideUpdate(currentBuild: 0, minBuild: 1, latestBuild: 1, dismissedBuild: 0, url: url).kind,
+      UpdateKind.none,
+    );
   });
 }

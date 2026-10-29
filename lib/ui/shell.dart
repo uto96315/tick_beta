@@ -13,13 +13,16 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: shell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) => shell.goBranch(index, initialLocation: index == shell.currentIndex),
+        selectedIndex: shell.currentIndex.clamp(0, shell.route.branches.length - 1),
+        onDestinationSelected: (index) {
+          if (index < 0 || index >= shell.route.branches.length) return;
+          shell.goBranch(index, initialLocation: index == shell.currentIndex);
+        },
         destinations: [
           NavigationDestination(icon: const Icon(Icons.home_rounded), label: l10n.home),
           NavigationDestination(icon: const Icon(Icons.timer_rounded), label: l10n.timer),
           NavigationDestination(icon: const Icon(Icons.history_rounded), label: l10n.history),
-          NavigationDestination(icon: const Icon(Icons.tune_rounded), label: l10n.settings),
+          NavigationDestination(icon: const Icon(Icons.settings_rounded), label: l10n.settings),
         ],
       ),
     );

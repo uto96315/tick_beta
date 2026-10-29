@@ -20,12 +20,11 @@ class SchedulePage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(l10n.noShiftNeeded),
-          const SizedBox(height: 12),
-          Text(l10n.patterns, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-          for (final pattern in app.patterns)
+          Text(l10n.patterns, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          for (final pattern in app.patterns) ...[
             PopCard(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: ListTile(
                 title: Text(pattern.name, style: const TextStyle(fontWeight: FontWeight.w800)),
                 subtitle: Text('${pattern.start.label} – ${pattern.end.label}${pattern.crossesMidnight ? ' (${l10n.nextDay})' : ''}'),
@@ -33,6 +32,8 @@ class SchedulePage extends ConsumerWidget {
                 onTap: () => context.push('/settings/pattern/${pattern.id}'),
               ),
             ),
+            const SizedBox(height: 8),
+          ],
           TextButton(
             onPressed: () => context.push('/settings/pattern/new'),
             child: Text(l10n.newPattern),
@@ -40,19 +41,22 @@ class SchedulePage extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(l10n.weekdays, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          for (var weekday = 1; weekday <= 7; weekday++)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(labels[weekday - 1]),
-              trailing: DropdownButton<String?>(
-                value: app.week.days[weekday],
-                items: [
-                  DropdownMenuItem(value: null, child: Text(l10n.offDay)),
-                  for (final pattern in app.patterns) DropdownMenuItem(value: pattern.id, child: Text(pattern.name)),
-                ],
-                onChanged: (value) => ref.read(appControllerProvider.notifier).assignWeekday(weekday, value),
-              ),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var weekday = 1; weekday <= 7; weekday++)
+                _DayDot(
+                  label: labels[weekday - 1],
+                  on: app.week.days[weekday] != null,
+                  onTap: () {
+                    final ids = <String?>[null, for (final pattern in app.patterns) pattern.id];
+                    final index = ids.indexOf(app.week.days[weekday]);
+                    final next = ids[(index < 0 ? 0 : index + 1) % ids.length];
+                    ref.read(appControllerProvider.notifier).assignWeekday(weekday, next);
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(l10n.overrides, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           for (final override in app.overrides)
@@ -110,6 +114,31 @@ class SchedulePage extends ConsumerWidget {
             ? const []
             : const [BreakTemplate(id: 'break', start: ClockTime(12, 0), end: ClockTime(13, 0))],
         updatedAt: now,
+      ),
+    );
+  }
+}
+
+class _DayDot extends StatelessWidget {
+  const _DayDot({required this.label, required this.on, required this.onTap});
+  final String label;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: on ? TickColors.yellow : Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: on ? TickColors.yellow : TickColors.line),
+        ),
+        child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: TickColors.ink)),
       ),
     );
   }

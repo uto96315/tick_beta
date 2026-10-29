@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tick'**
+  /// **'Ozio'**
   String get appTitle;
 
   /// No description provided for @tagline.
@@ -275,7 +275,7 @@ abstract class AppLocalizations {
   /// No description provided for @vibrationHelp.
   ///
   /// In en, this message translates to:
-  /// **'Haptics play while Tick is open. Notification vibration follows the iPhone mute switch.'**
+  /// **'Haptics play while Ozio is open. Notification vibration follows the iPhone mute switch.'**
   String get vibrationHelp;
 
   /// No description provided for @endAction.
@@ -353,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoStartHelp.
   ///
   /// In en, this message translates to:
-  /// **'Starts on its own only while Tick is open. If the app was closed, it asks next time you open it.'**
+  /// **'Starts on its own only while Ozio is open. If the app was closed, it asks next time you open it.'**
   String get autoStartHelp;
 
   /// No description provided for @schedule.
@@ -413,7 +413,7 @@ abstract class AppLocalizations {
   /// No description provided for @camouflageHint.
   ///
   /// In en, this message translates to:
-  /// **'A static screen inside Tick. It does not pretend to be the iPhone Home Screen.'**
+  /// **'A static screen inside Ozio. It does not pretend to be the iPhone Home Screen.'**
   String get camouflageHint;
 
   /// No description provided for @backHintCorner.
@@ -689,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @anonymous.
   ///
   /// In en, this message translates to:
-  /// **'Using Tick anonymously'**
+  /// **'Using Ozio anonymously'**
   String get anonymous;
 
   /// No description provided for @registerEmail.
@@ -755,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @premiumPitch.
   ///
   /// In en, this message translates to:
-  /// **'A one-time purchase. Unlimited fake calls, your own callers, and more ways to leave camouflage.'**
+  /// **'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.'**
   String get premiumPitch;
 
   /// No description provided for @premiumOwned.
@@ -1025,7 +1025,7 @@ abstract class AppLocalizations {
   /// No description provided for @offline.
   ///
   /// In en, this message translates to:
-  /// **'Offline. Tick keeps going and will sync later.'**
+  /// **'Offline. Ozio keeps going and will sync later.'**
   String get offline;
 
   /// No description provided for @nextDay.
@@ -1249,6 +1249,726 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not started'**
   String get notRunning;
+
+  /// No description provided for @startTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the timer'**
+  String get startTimer;
+
+  /// No description provided for @chunksAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get chunksAhead;
+
+  /// No description provided for @todayProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayProgress;
+
+  /// No description provided for @plannedEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get plannedEnd;
+
+  /// No description provided for @extendChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'How much longer?'**
+  String get extendChoose;
+
+  /// No description provided for @keepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'A little longer. You can do it.'**
+  String get keepGoing;
+
+  /// No description provided for @historyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work history'**
+  String get historyWork;
+
+  /// No description provided for @viewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get viewList;
+
+  /// No description provided for @viewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get viewCalendar;
+
+  /// No description provided for @minuteChunk.
+  ///
+  /// In en, this message translates to:
+  /// **' min chunks'**
+  String get minuteChunk;
+
+  /// No description provided for @hourChunk.
+  ///
+  /// In en, this message translates to:
+  /// **' hour chunks'**
+  String get hourChunk;
+
+  /// No description provided for @intervalCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get intervalCustom;
+
+  /// No description provided for @nowChunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get nowChunk;
+
+  /// No description provided for @tutorialNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tutorialNext;
+
+  /// No description provided for @tutorialSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tutorialSkip;
+
+  /// No description provided for @tutorialStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get tutorialStart;
+
+  /// No description provided for @tutorial1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Split the time until you\'re done'**
+  String get tutorial1Title;
+
+  /// No description provided for @tutorial1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an end time and Ozio breaks the stretch into small chunks.'**
+  String get tutorial1Body;
+
+  /// No description provided for @tutorial2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'How long each chunk is'**
+  String get tutorial2Title;
+
+  /// No description provided for @tutorial2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'On the home screen, choose 15 min, 30 min, 1 hour, or your own length.'**
+  String get tutorial2Body;
+
+  /// No description provided for @tutorial3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you are right now'**
+  String get tutorial3Title;
+
+  /// No description provided for @tutorial3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'The timer shows the current chunk, like Now 4:10–4:30.'**
+  String get tutorial3Body;
+
+  /// No description provided for @updateRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please update'**
+  String get updateRequiredTitle;
+
+  /// No description provided for @updateRequiredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version can\'t continue.'**
+  String get updateRequiredBody;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version is out'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateAvailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep using this one.'**
+  String get updateAvailableBody;
+
+  /// No description provided for @updateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateAction;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @chickNormal1.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting is the hard part.'**
+  String get chickNormal1;
+
+  /// No description provided for @chickNormal2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can stay lazy. The chunks still shrink.'**
+  String get chickNormal2;
+
+  /// No description provided for @chickNormal3.
+  ///
+  /// In en, this message translates to:
+  /// **'Small pieces, until the day ends.'**
+  String get chickNormal3;
+
+  /// No description provided for @chickTired1.
+  ///
+  /// In en, this message translates to:
+  /// **'Still a long way. This chunk will end, though.'**
+  String get chickTired1;
+
+  /// No description provided for @chickTired2.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t need motivation. Time runs out first.'**
+  String get chickTired2;
+
+  /// No description provided for @chickTired3.
+  ///
+  /// In en, this message translates to:
+  /// **'Sitting here still counts as progress.'**
+  String get chickTired3;
+
+  /// No description provided for @chickHappy1.
+  ///
+  /// In en, this message translates to:
+  /// **'A little further. This pace is fine.'**
+  String get chickHappy1;
+
+  /// No description provided for @chickHappy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Not bad. The number is actually going down.'**
+  String get chickHappy2;
+
+  /// No description provided for @chickHappy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish this chunk, and one more is gone.'**
+  String get chickHappy3;
+
+  /// No description provided for @chickCheer1.
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway\'s gone. The view changed.'**
+  String get chickCheer1;
+
+  /// No description provided for @chickCheer2.
+  ///
+  /// In en, this message translates to:
+  /// **'From here, time does the work.'**
+  String get chickCheer2;
+
+  /// No description provided for @chickCheer3.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s something. I mean it.'**
+  String get chickCheer3;
+
+  /// No description provided for @chickAttention1.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there. The door is in sight.'**
+  String get chickAttention1;
+
+  /// No description provided for @chickAttention2.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearly done. You can stop trying so hard.'**
+  String get chickAttention2;
+
+  /// No description provided for @chickAttention3.
+  ///
+  /// In en, this message translates to:
+  /// **'Past this chunk, today is mostly over.'**
+  String get chickAttention3;
+
+  /// No description provided for @chickSurprise1.
+  ///
+  /// In en, this message translates to:
+  /// **'The end time passed. You\'re still here.'**
+  String get chickSurprise1;
+
+  /// No description provided for @chickSurprise2.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving time already arrived.'**
+  String get chickSurprise2;
+
+  /// No description provided for @chickSurprise3.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtime, then. The chunks still shrink.'**
+  String get chickSurprise3;
+
+  /// No description provided for @chickSleep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Break. Nothing is required here.'**
+  String get chickSleep1;
+
+  /// No description provided for @chickSleep2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can close your eyes for this one.'**
+  String get chickSleep2;
+
+  /// No description provided for @chickSleep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay like this until the break ends.'**
+  String get chickSleep3;
+
+  /// No description provided for @chickDone1.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s part is over.'**
+  String get chickDone1;
+
+  /// No description provided for @chickDone2.
+  ///
+  /// In en, this message translates to:
+  /// **'You sat through it. Work can stop now.'**
+  String get chickDone2;
+
+  /// No description provided for @chickDone3.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re free. You can leave.'**
+  String get chickDone3;
+
+  /// No description provided for @chickBack1.
+  ///
+  /// In en, this message translates to:
+  /// **'The timer is moving. Pick up when you\'re back.'**
+  String get chickBack1;
+
+  /// No description provided for @chickBack2.
+  ///
+  /// In en, this message translates to:
+  /// **'Step away. The chunks keep shrinking.'**
+  String get chickBack2;
+
+  /// No description provided for @chickBack3.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll keep it moving. No need to rush back.'**
+  String get chickBack3;
+
+  /// No description provided for @chickNotice1.
+  ///
+  /// In en, this message translates to:
+  /// **'One chunk is done. On to the next.'**
+  String get chickNotice1;
+
+  /// No description provided for @chickNotice2.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s getting smaller. You can see it.'**
+  String get chickNotice2;
+
+  /// No description provided for @chickNotice3.
+  ///
+  /// In en, this message translates to:
+  /// **'One finished. That\'s enough.'**
+  String get chickNotice3;
+
+  /// No description provided for @chickGoodjob1.
+  ///
+  /// In en, this message translates to:
+  /// **'A few are done. Not amazing. Still real.'**
+  String get chickGoodjob1;
+
+  /// No description provided for @chickGoodjob2.
+  ///
+  /// In en, this message translates to:
+  /// **'Further along than it feels.'**
+  String get chickGoodjob2;
+
+  /// No description provided for @chickGoodjob3.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay seated. Another one will go.'**
+  String get chickGoodjob3;
+
+  /// No description provided for @chickLove1.
+  ///
+  /// In en, this message translates to:
+  /// **'Today can stop here.'**
+  String get chickLove1;
+
+  /// No description provided for @chickLove2.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished it. That counts.'**
+  String get chickLove2;
+
+  /// No description provided for @chickLove3.
+  ///
+  /// In en, this message translates to:
+  /// **'You can drop the work face now.'**
+  String get chickLove3;
+
+  /// No description provided for @lookHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get lookHome;
+
+  /// No description provided for @lookNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get lookNotes;
+
+  /// No description provided for @lookCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get lookCalendar;
+
+  /// No description provided for @premiumLooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes and Calendar are Premium'**
+  String get premiumLooks;
+
+  /// No description provided for @chickVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How the chick talks'**
+  String get chickVoiceTitle;
+
+  /// No description provided for @voicePlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain'**
+  String get voicePlain;
+
+  /// No description provided for @voiceLazy.
+  ///
+  /// In en, this message translates to:
+  /// **'Even lazier'**
+  String get voiceLazy;
+
+  /// No description provided for @voiceKansai.
+  ///
+  /// In en, this message translates to:
+  /// **'Kansai'**
+  String get voiceKansai;
+
+  /// No description provided for @voiceCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Your line'**
+  String get voiceCustom;
+
+  /// No description provided for @premiumVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra voices are Premium'**
+  String get premiumVoice;
+
+  /// No description provided for @customLine.
+  ///
+  /// In en, this message translates to:
+  /// **'One line for the chick'**
+  String get customLine;
+
+  /// No description provided for @moodHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy'**
+  String get moodHeavy;
+
+  /// No description provided for @moodTired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tired'**
+  String get moodTired;
+
+  /// No description provided for @moodSleepy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleepy'**
+  String get moodSleepy;
+
+  /// No description provided for @moodCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call in this mood'**
+  String get moodCall;
+
+  /// No description provided for @premiumMoodCall.
+  ///
+  /// In en, this message translates to:
+  /// **'The call after a mood is Premium'**
+  String get premiumMoodCall;
+
+  /// No description provided for @soundClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get soundClassic;
+
+  /// No description provided for @soundSoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get soundSoft;
+
+  /// No description provided for @soundBright.
+  ///
+  /// In en, this message translates to:
+  /// **'Bright'**
+  String get soundBright;
+
+  /// No description provided for @premiumSounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing the ringtone is Premium'**
+  String get premiumSounds;
+
+  /// No description provided for @callBeforeEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'10 min before the end'**
+  String get callBeforeEnd;
+
+  /// No description provided for @beforeEndPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'That time has passed'**
+  String get beforeEndPassed;
+
+  /// No description provided for @noteMilk.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk and eggs'**
+  String get noteMilk;
+
+  /// No description provided for @noteDentist.
+  ///
+  /// In en, this message translates to:
+  /// **'Dentist, next week'**
+  String get noteDentist;
+
+  /// No description provided for @noteReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return the book'**
+  String get noteReturn;
+
+  /// No description provided for @noteMilkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy them on the way home.'**
+  String get noteMilkBody;
+
+  /// No description provided for @noteDentistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon. No work talk.'**
+  String get noteDentistBody;
+
+  /// No description provided for @noteReturnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The due date is close.'**
+  String get noteReturnBody;
+
+  /// No description provided for @calLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get calLunch;
+
+  /// No description provided for @voiceLazy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Ugh. Heavy.'**
+  String get voiceLazy1;
+
+  /// No description provided for @voiceLazy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t want to move. Time still shrinks.'**
+  String get voiceLazy2;
+
+  /// No description provided for @voiceLazy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Today can be like this.'**
+  String get voiceLazy3;
+
+  /// No description provided for @voiceLazy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Motivation is tomorrow\'s problem.'**
+  String get voiceLazy4;
+
+  /// No description provided for @voiceLazy5.
+  ///
+  /// In en, this message translates to:
+  /// **'Sitting here is the job.'**
+  String get voiceLazy5;
+
+  /// No description provided for @voiceLazy6.
+  ///
+  /// In en, this message translates to:
+  /// **'One more chunk. Probably.'**
+  String get voiceLazy6;
+
+  /// No description provided for @voiceKansai1.
+  ///
+  /// In en, this message translates to:
+  /// **'Still a long way, huh.'**
+  String get voiceKansai1;
+
+  /// No description provided for @voiceKansai2.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s coming along.'**
+  String get voiceKansai2;
+
+  /// No description provided for @voiceKansai3.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll take it easy.'**
+  String get voiceKansai3;
+
+  /// No description provided for @voiceKansai4.
+  ///
+  /// In en, this message translates to:
+  /// **'A bit more until the end.'**
+  String get voiceKansai4;
+
+  /// No description provided for @voiceKansai5.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice. Nice.'**
+  String get voiceKansai5;
+
+  /// No description provided for @voiceKansai6.
+  ///
+  /// In en, this message translates to:
+  /// **'You could just go home.'**
+  String get voiceKansai6;
+
+  /// No description provided for @moodHeavy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy. I know.'**
+  String get moodHeavy1;
+
+  /// No description provided for @moodHeavy2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can stay like that. It\'s moving.'**
+  String get moodHeavy2;
+
+  /// No description provided for @moodHeavy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Today can be a heavy one.'**
+  String get moodHeavy3;
+
+  /// No description provided for @moodTired1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tired.'**
+  String get moodTired1;
+
+  /// No description provided for @moodTired2.
+  ///
+  /// In en, this message translates to:
+  /// **'You got this far.'**
+  String get moodTired2;
+
+  /// No description provided for @moodTired3.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest. Time keeps going.'**
+  String get moodTired3;
+
+  /// No description provided for @moodSleepy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleepy.'**
+  String get moodSleepy1;
+
+  /// No description provided for @moodSleepy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Half-open eyes are enough.'**
+  String get moodSleepy2;
+
+  /// No description provided for @moodSleepy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Doze if you want.'**
+  String get moodSleepy3;
+
+  /// No description provided for @slack.
+  ///
+  /// In en, this message translates to:
+  /// **'Step away'**
+  String get slack;
+
+  /// No description provided for @slackIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This is for leaving your seat. It shows a work call, or swaps this app for another screen. Nobody is actually called.'**
+  String get slackIntro;
+
+  /// No description provided for @slackCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Pretend a call came in'**
+  String get slackCall;
+
+  /// No description provided for @slackHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap the screen'**
+  String get slackHide;
+
+  /// No description provided for @slackWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'The free call is once a week.'**
+  String get slackWeekly;
+
+  /// No description provided for @slackMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Get more calls'**
+  String get slackMore;
 }
 
 class _AppLocalizationsDelegate

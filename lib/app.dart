@@ -5,6 +5,9 @@ import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/copy.dart';
 import 'package:tick/ui/router.dart';
 import 'package:tick/ui/theme.dart';
+import 'package:tick/ui/tutorial_page.dart';
+import 'package:tick/ui/update_gate.dart';
+import 'package:tick/ui/visuals.dart';
 
 class TickApp extends ConsumerWidget {
   const TickApp({super.key});
@@ -37,6 +40,7 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
   int _encourageSeen = 0;
   int _flashSeen = 0;
   String? _banner;
+  ChickPose? _bannerPose;
 
   @override
   void initState() {
@@ -62,28 +66,25 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
       if (next.burstNonce != _burstSeen && next.burstCount > 0) {
         _burstSeen = next.burstNonce;
         final text = next.burstCount == 1 ? l10n.burstOne : '${next.burstCount} ${l10n.burstMany}';
+        final pose = next.burstCount > 1 ? ChickPose.goodjob : ChickPose.notice;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          setState(() => _banner = text);
+          setState(() {
+            _banner = text;
+            _bannerPose = pose;
+          });
         });
         Future<void>.delayed(const Duration(milliseconds: 1400), () {
-          if (mounted) setState(() => _banner = null);
+          if (mounted) {
+            setState(() {
+              _banner = null;
+              _bannerPose = null;
+            });
+          }
         });
       }
       if (next.encouragementNonce != _encourageSeen && next.encouragementNonce > 0) {
         _encourageSeen = next.encouragementNonce;
-        final message = encouragement(l10n, next.encouragementIndex);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          showDialog<void>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.extend),
-              content: Text(message),
-              actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close))],
-            ),
-          );
-        });
       }
       if (next.flash != null && next.flash!.nonce != _flashSeen) {
         _flashSeen = next.flash!.nonce;
@@ -117,20 +118,31 @@ class _EffectsState extends ConsumerState<_Effects> with WidgetsBindingObserver 
         });
       }
     });
+    final tutorial = ref.watch(appControllerProvider.select((state) => state.ready && !state.settings.tutorialSeen && state.liveCall == null && !state.camouflage));
     return Stack(
       children: [
         widget.child,
+        if (tutorial) const TutorialOverlay(),
+        const Positioned.fill(child: UpdateGate()),
         if (_banner != null)
           Positioned(
             top: 72,
             left: 24,
             right: 24,
             child: Material(
-              color: TickColors.grape,
+              color: TickColors.navy,
               borderRadius: BorderRadius.circular(20),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                child: Text(_banner!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                child: Row(
+                  children: [
+                    if (_bannerPose != null) ...[
+                      TickMascot(size: 56, pose: _bannerPose),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(child: Text(_banner!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18))),
+                  ],
+                ),
               ),
             ),
           ),

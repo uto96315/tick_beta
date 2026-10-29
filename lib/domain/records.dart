@@ -8,6 +8,29 @@ enum TimerVisual { tiles, map, character, gauge }
 
 enum CamouflageTrigger { corner, longPress, swipe }
 
+enum CamouflageLook { home, notes, calendar }
+
+enum ChickVoice { plain, lazy, kansai, custom }
+
+enum CallSound { classic, soft, bright }
+
+enum ChickMood { heavy, tired, sleepy }
+
+CamouflageLook shownLook(bool premium, CamouflageLook look) {
+  if (premium || look == CamouflageLook.home) return look;
+  return CamouflageLook.home;
+}
+
+ChickVoice shownVoice(bool premium, ChickVoice voice) {
+  if (premium) return voice;
+  return ChickVoice.plain;
+}
+
+CallSound shownSound(bool premium, CallSound sound) {
+  if (premium) return sound;
+  return CallSound.classic;
+}
+
 class BreakSpan {
   const BreakSpan({
     required this.id,
@@ -46,7 +69,9 @@ class BreakSpan {
       id: json['id'] as String? ?? 'break',
       start: start,
       end: end,
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '')?.toLocal() ?? end,
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '')?.toLocal() ??
+          end,
     );
   }
 }
@@ -114,6 +139,7 @@ class TimerSession {
 
   TimerSession copyWith({
     DateTime? plannedEnd,
+    int? intervalMinutes,
     List<BreakSpan>? breaks,
     List<ExtensionRecord>? extensions,
     String? memo,
@@ -126,7 +152,7 @@ class TimerSession {
       actualStart: actualStart,
       plannedEnd: plannedEnd ?? this.plannedEnd,
       originalPlannedEnd: originalPlannedEnd,
-      intervalMinutes: intervalMinutes,
+      intervalMinutes: intervalMinutes ?? this.intervalMinutes,
       breaks: breaks ?? this.breaks,
       extensions: extensions ?? this.extensions,
       patternId: patternId,
@@ -164,7 +190,8 @@ class TimerSession {
       breaks: _spans(json['breaks']),
       extensions: [
         for (final item in json['extensions'] as List? ?? const [])
-          if (item is Map) ExtensionRecord.fromJson(item.cast<String, dynamic>()),
+          if (item is Map)
+            ExtensionRecord.fromJson(item.cast<String, dynamic>()),
       ],
       patternId: json['patternId'] as String?,
       shiftKey: json['shiftKey'] as String?,
@@ -210,7 +237,8 @@ class WorkRecord {
   final String? shiftKey;
   final DateTime updatedAt;
 
-  double get achievementRate => segmentsTotal == 0 ? 0 : segmentsCompleted / segmentsTotal;
+  double get achievementRate =>
+      segmentsTotal == 0 ? 0 : segmentsCompleted / segmentsTotal;
 
   WorkRecord copyWith({
     List<BreakSpan>? breaks,
@@ -267,7 +295,8 @@ class WorkRecord {
       segmentsTotal: (json['segmentsTotal'] as num?)?.toInt() ?? 0,
       extensions: [
         for (final item in json['extensions'] as List? ?? const [])
-          if (item is Map) ExtensionRecord.fromJson(item.cast<String, dynamic>()),
+          if (item is Map)
+            ExtensionRecord.fromJson(item.cast<String, dynamic>()),
       ],
       status: (json['status'] as String?) == EndStatus.early.name
           ? EndStatus.early
@@ -291,7 +320,13 @@ class AppSettings {
     required this.showCharacter,
     required this.autoStart,
     required this.camouflageTrigger,
+    required this.camouflageLook,
+    required this.chickVoice,
+    required this.customChickLine,
+    required this.callSound,
     required this.lastIntervalMinutes,
+    required this.tutorialSeen,
+    required this.slackIntroSeen,
     required this.updatedAt,
   });
 
@@ -304,7 +339,13 @@ class AppSettings {
   final bool showCharacter;
   final bool autoStart;
   final CamouflageTrigger camouflageTrigger;
+  final CamouflageLook camouflageLook;
+  final ChickVoice chickVoice;
+  final String customChickLine;
+  final CallSound callSound;
   final int lastIntervalMinutes;
+  final bool tutorialSeen;
+  final bool slackIntroSeen;
   final DateTime updatedAt;
 
   factory AppSettings.initial(DateTime now) {
@@ -314,11 +355,17 @@ class AppSettings {
       notifySound: true,
       notifyVibration: true,
       endAction: EndAction.celebration,
-      visual: TimerVisual.tiles,
+      visual: TimerVisual.gauge,
       showCharacter: true,
       autoStart: true,
       camouflageTrigger: CamouflageTrigger.corner,
+      camouflageLook: CamouflageLook.home,
+      chickVoice: ChickVoice.plain,
+      customChickLine: '',
+      callSound: CallSound.classic,
       lastIntervalMinutes: 15,
+      tutorialSeen: false,
+      slackIntroSeen: false,
       updatedAt: now,
     );
   }
@@ -333,7 +380,13 @@ class AppSettings {
     bool? showCharacter,
     bool? autoStart,
     CamouflageTrigger? camouflageTrigger,
+    CamouflageLook? camouflageLook,
+    ChickVoice? chickVoice,
+    String? customChickLine,
+    CallSound? callSound,
     int? lastIntervalMinutes,
+    bool? tutorialSeen,
+    bool? slackIntroSeen,
     DateTime? updatedAt,
   }) {
     return AppSettings(
@@ -346,7 +399,13 @@ class AppSettings {
       showCharacter: showCharacter ?? this.showCharacter,
       autoStart: autoStart ?? this.autoStart,
       camouflageTrigger: camouflageTrigger ?? this.camouflageTrigger,
+      camouflageLook: camouflageLook ?? this.camouflageLook,
+      chickVoice: chickVoice ?? this.chickVoice,
+      customChickLine: customChickLine ?? this.customChickLine,
+      callSound: callSound ?? this.callSound,
       lastIntervalMinutes: lastIntervalMinutes ?? this.lastIntervalMinutes,
+      tutorialSeen: tutorialSeen ?? this.tutorialSeen,
+      slackIntroSeen: slackIntroSeen ?? this.slackIntroSeen,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -361,7 +420,13 @@ class AppSettings {
     'showCharacter': showCharacter,
     'autoStart': autoStart,
     'camouflageTrigger': camouflageTrigger.name,
+    'camouflageLook': camouflageLook.name,
+    'chickVoice': chickVoice.name,
+    'customChickLine': customChickLine,
+    'callSound': callSound.name,
     'lastIntervalMinutes': lastIntervalMinutes,
+    'tutorialSeen': tutorialSeen,
+    'slackIntroSeen': slackIntroSeen,
     'updatedAt': updatedAt.toIso8601String(),
   };
 
@@ -374,23 +439,49 @@ class AppSettings {
       notifySegment: json['notifySegment'] as bool? ?? initial.notifySegment,
       notifyEnd: json['notifyEnd'] as bool? ?? initial.notifyEnd,
       notifySound: json['notifySound'] as bool? ?? initial.notifySound,
-      notifyVibration: json['notifyVibration'] as bool? ?? initial.notifyVibration,
-      endAction: EndAction.values.byNameOr(json['endAction'] as String?, initial.endAction),
-      visual: TimerVisual.values.byNameOr(json['visual'] as String?, initial.visual),
+      notifyVibration:
+          json['notifyVibration'] as bool? ?? initial.notifyVibration,
+      endAction: EndAction.values.byNameOr(
+        json['endAction'] as String?,
+        initial.endAction,
+      ),
+      visual: TimerVisual.values.byNameOr(
+        json['visual'] as String?,
+        initial.visual,
+      ),
       showCharacter: json['showCharacter'] as bool? ?? initial.showCharacter,
       autoStart: json['autoStart'] as bool? ?? initial.autoStart,
       camouflageTrigger: CamouflageTrigger.values.byNameOr(
         json['camouflageTrigger'] as String?,
         initial.camouflageTrigger,
       ),
+      camouflageLook: CamouflageLook.values.byNameOr(
+        json['camouflageLook'] as String?,
+        initial.camouflageLook,
+      ),
+      chickVoice: ChickVoice.values.byNameOr(
+        json['chickVoice'] as String?,
+        initial.chickVoice,
+      ),
+      customChickLine: json['customChickLine'] as String? ?? '',
+      callSound: CallSound.values.byNameOr(
+        json['callSound'] as String?,
+        initial.callSound,
+      ),
       lastIntervalMinutes: (json['lastIntervalMinutes'] as num?)?.toInt() ?? 15,
+      tutorialSeen: json['tutorialSeen'] as bool? ?? false,
+      slackIntroSeen: json['slackIntroSeen'] as bool? ?? false,
       updatedAt: initial.updatedAt,
     );
   }
 }
 
 class Entitlement {
-  const Entitlement({required this.premium, required this.updatedAt, required this.source});
+  const Entitlement({
+    required this.premium,
+    required this.updatedAt,
+    required this.source,
+  });
 
   final bool premium;
   final DateTime updatedAt;
@@ -526,7 +617,11 @@ class ScheduledFakeCall {
 }
 
 class Tombstone {
-  const Tombstone({required this.collection, required this.id, required this.deletedAt});
+  const Tombstone({
+    required this.collection,
+    required this.id,
+    required this.deletedAt,
+  });
 
   final String collection;
   final String id;
@@ -601,7 +696,11 @@ DateTime plannedEndOf(WorkRecord record) {
 DateTime _date(String? raw) {
   if (raw == null || raw.length < 10) return dateOnly(DateTime.now());
   final parts = raw.substring(0, 10).split('-');
-  return DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+  return DateTime(
+    int.parse(parts[0]),
+    int.parse(parts[1]),
+    int.parse(parts[2]),
+  );
 }
 
 List<BreakSpan> _spans(Object? raw) {

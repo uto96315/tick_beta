@@ -7,36 +7,133 @@ import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/theme.dart';
 
-class HistoryPage extends ConsumerWidget {
+class HistoryPage extends ConsumerStatefulWidget {
   const HistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends ConsumerState<HistoryPage> {
+  var _calendar = false;
+  late DateTime _month = DateTime(DateTime.now().year, DateTime.now().month);
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final history = ref.watch(appControllerProvider.select((state) => state.history));
     return Scaffold(
       body: SafeArea(
-        child: history.isEmpty
-            ? Center(child: Text(l10n.emptyHistory, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)))
-            : ListView.separated(
-                padding: const EdgeInsets.all(20),
-                itemCount: history.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final record = history[index];
-                  final percent = (record.achievementRate * 100).round();
-                  return PopCard(
-                    padding: const EdgeInsets.all(8),
-                    child: ListTile(
-                      title: Text(dateKey(record.workDate), style: const TextStyle(fontWeight: FontWeight.w800)),
-                      subtitle: Text('${formatHm(record.actualStart)} – ${formatHm(record.actualEnd)}  ·  $percent%'),
-                      trailing: Text(record.status == EndStatus.completed ? l10n.statusDone : l10n.statusEarly),
-                      onTap: () => context.go('/history/${record.id}'),
-                    ),
-                  );
-                },
-              ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          children: [
+            Text(l10n.historyWork, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+            SegmentedButton<bool>(
+              segments: [
+                ButtonSegment(value: false, label: Text(l10n.viewList)),
+                ButtonSegment(value: true, label: Text(l10n.viewCalendar)),
+              ],
+              selected: {_calendar},
+              onSelectionChanged: (value) => setState(() => _calendar = value.first),
+            ),
+            const SizedBox(height: 16),
+            if (history.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 48),
+                child: Text(l10n.emptyHistory, textAlign: TextAlign.center, style: const TextStyle(color: TickColors.muted, fontSize: 16)),
+              )
+            else if (_calendar)
+              _Month(month: _month, history: history, onPrevious: () => setState(() => _month = DateTime(_month.year, _month.month - 1)), onNext: () => setState(() => _month = DateTime(_month.year, _month.month + 1)))
+            else
+              for (final record in history) ...[
+                _HistoryCard(record: record),
+                const SizedBox(height: 10),
+              ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _HistoryCard extends StatelessWidget {
+  const _HistoryCard({required this.record});
+  final WorkRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final percent = (record.achievementRate * 100).round();
+    return PopCard(
+      padding: const EdgeInsets.all(16),
+      child: InkWell(
+        onTap: () => context.go('/history/${record.id}'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(dateKey(record.workDate), style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            Text('${formatHm(record.actualStart)} – ${formatHm(record.actualEnd)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text('${record.segmentsCompleted} / ${record.segmentsTotal}  ·  $percent%', style: const TextStyle(color: TickColors.muted)),
+            const SizedBox(height: 4),
+            Text(record.status == EndStatus.completed ? l10n.statusDone : l10n.statusEarly, style: const TextStyle(color: TickColors.muted)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Month extends StatelessWidget {
+  const _Month({required this.month, required this.history, required this.onPrevious, required this.onNext});
+  final DateTime month;
+  final List<WorkRecord> history;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final first = DateTime(month.year, month.month);
+    final days = DateTime(month.year, month.month + 1, 0).day;
+    final lead = first.weekday - 1;
+    final marked = {for (final record in history) dateKey(record.workDate)};
+    return Column(
+      children: [
+        Row(
+          children: [
+            IconButton(onPressed: onPrevious, icon: const Icon(Icons.chevron_left)),
+            Expanded(child: Text('${month.year}/${month.month}', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800))),
+            IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
+          ],
+        ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: lead + days,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+          itemBuilder: (context, index) {
+            if (index < lead) return const SizedBox.shrink();
+            final day = index - lead + 1;
+            final date = DateTime(month.year, month.month, day);
+            final hit = marked.contains(dateKey(date));
+            final record = hit ? history.where((item) => dateKey(item.workDate) == dateKey(date)).firstOrNull : null;
+            return InkWell(
+              onTap: record == null ? null : () => context.go('/history/${record.id}'),
+              child: Center(
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: hit ? const BoxDecoration(color: TickColors.yellow, shape: BoxShape.circle) : null,
+                  child: Text('$day', style: const TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

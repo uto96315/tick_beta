@@ -12,21 +12,19 @@ class FreePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final showFace = ref.watch(appControllerProvider.select((state) => state.settings.showCharacter));
     return Scaffold(
-      backgroundColor: TickColors.sun,
+      backgroundColor: TickColors.skySoft,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
               const Spacer(),
-              const TickMascot(progress: 1, size: 180),
+              const TickMascot(size: 200, pose: ChickPose.love),
+              const SizedBox(height: 16),
+              Text(l10n.freeTitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, height: 1, color: TickColors.ink)),
               const SizedBox(height: 12),
-              Text(l10n.freeTitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w800, height: 1)),
-              const SizedBox(height: 12),
-              Text(l10n.freeBody, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
-              if (!showFace) const SizedBox.shrink(),
+              Text(l10n.freeBody, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: TickColors.muted)),
               const Spacer(),
               FilledButton(
                 onPressed: () {

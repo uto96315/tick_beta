@@ -37,6 +37,7 @@ class AppState {
     required this.encouragementNonce,
     required this.flash,
     required this.offline,
+    required this.mood,
   });
 
   final bool ready;
@@ -63,6 +64,7 @@ class AppState {
   final int encouragementNonce;
   final Flash? flash;
   final bool offline;
+  final ChickMood? mood;
 
   factory AppState.initial() {
     final now = DateTime.fromMillisecondsSinceEpoch(0);
@@ -91,6 +93,7 @@ class AppState {
       encouragementNonce: 0,
       flash: null,
       offline: false,
+      mood: null,
     );
   }
 }

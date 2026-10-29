@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Tick';
+  String get appTitle => 'Ozio';
 
   @override
   String get tagline => 'A timer for people who\'d rather not';
@@ -98,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vibrationHelp =>
-      'Haptics play while Tick is open. Notification vibration follows the iPhone mute switch.';
+      'Haptics play while Ozio is open. Notification vibration follows the iPhone mute switch.';
 
   @override
   String get endAction => 'When it ends';
@@ -138,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoStartHelp =>
-      'Starts on its own only while Tick is open. If the app was closed, it asks next time you open it.';
+      'Starts on its own only while Ozio is open. If the app was closed, it asks next time you open it.';
 
   @override
   String get schedule => 'Work schedule';
@@ -169,7 +169,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get camouflageHint =>
-      'A static screen inside Tick. It does not pretend to be the iPhone Home Screen.';
+      'A static screen inside Ozio. It does not pretend to be the iPhone Home Screen.';
 
   @override
   String get backHintCorner => 'Tap the top right to go back';
@@ -308,7 +308,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievement => 'Done';
 
   @override
-  String get anonymous => 'Using Tick anonymously';
+  String get anonymous => 'Using Ozio anonymously';
 
   @override
   String get registerEmail => 'Keep this data with email';
@@ -344,7 +344,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumPitch =>
-      'A one-time purchase. Unlimited fake calls, your own callers, and more ways to leave camouflage.';
+      'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.';
 
   @override
   String get premiumOwned => 'Premium is on';
@@ -480,7 +480,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchaseUnavailable => 'The App Store purchase isn\'t available';
 
   @override
-  String get offline => 'Offline. Tick keeps going and will sync later.';
+  String get offline => 'Offline. Ozio keeps going and will sync later.';
 
   @override
   String get nextDay => 'Next day';
@@ -597,4 +597,368 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notRunning => 'Not started';
+
+  @override
+  String get startTimer => 'Start the timer';
+
+  @override
+  String get chunksAhead => 'Left';
+
+  @override
+  String get todayProgress => 'Today';
+
+  @override
+  String get plannedEnd => 'Ends';
+
+  @override
+  String get extendChoose => 'How much longer?';
+
+  @override
+  String get keepGoing => 'A little longer. You can do it.';
+
+  @override
+  String get historyWork => 'Work history';
+
+  @override
+  String get viewList => 'List';
+
+  @override
+  String get viewCalendar => 'Calendar';
+
+  @override
+  String get minuteChunk => ' min chunks';
+
+  @override
+  String get hourChunk => ' hour chunks';
+
+  @override
+  String get intervalCustom => 'Custom';
+
+  @override
+  String get nowChunk => 'Now';
+
+  @override
+  String get tutorialNext => 'Next';
+
+  @override
+  String get tutorialSkip => 'Skip';
+
+  @override
+  String get tutorialStart => 'Start';
+
+  @override
+  String get tutorial1Title => 'Split the time until you\'re done';
+
+  @override
+  String get tutorial1Body =>
+      'Pick an end time and Ozio breaks the stretch into small chunks.';
+
+  @override
+  String get tutorial2Title => 'How long each chunk is';
+
+  @override
+  String get tutorial2Body =>
+      'On the home screen, choose 15 min, 30 min, 1 hour, or your own length.';
+
+  @override
+  String get tutorial3Title => 'Where you are right now';
+
+  @override
+  String get tutorial3Body =>
+      'The timer shows the current chunk, like Now 4:10–4:30.';
+
+  @override
+  String get updateRequiredTitle => 'Please update';
+
+  @override
+  String get updateRequiredBody => 'This version can\'t continue.';
+
+  @override
+  String get updateAvailableTitle => 'A newer version is out';
+
+  @override
+  String get updateAvailableBody => 'You can keep using this one.';
+
+  @override
+  String get updateAction => 'Update';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get chickNormal1 => 'Starting is the hard part.';
+
+  @override
+  String get chickNormal2 => 'You can stay lazy. The chunks still shrink.';
+
+  @override
+  String get chickNormal3 => 'Small pieces, until the day ends.';
+
+  @override
+  String get chickTired1 => 'Still a long way. This chunk will end, though.';
+
+  @override
+  String get chickTired2 => 'You don\'t need motivation. Time runs out first.';
+
+  @override
+  String get chickTired3 => 'Sitting here still counts as progress.';
+
+  @override
+  String get chickHappy1 => 'A little further. This pace is fine.';
+
+  @override
+  String get chickHappy2 => 'Not bad. The number is actually going down.';
+
+  @override
+  String get chickHappy3 => 'Finish this chunk, and one more is gone.';
+
+  @override
+  String get chickCheer1 => 'Halfway\'s gone. The view changed.';
+
+  @override
+  String get chickCheer2 => 'From here, time does the work.';
+
+  @override
+  String get chickCheer3 => 'That\'s something. I mean it.';
+
+  @override
+  String get chickAttention1 => 'Almost there. The door is in sight.';
+
+  @override
+  String get chickAttention2 => 'Nearly done. You can stop trying so hard.';
+
+  @override
+  String get chickAttention3 => 'Past this chunk, today is mostly over.';
+
+  @override
+  String get chickSurprise1 => 'The end time passed. You\'re still here.';
+
+  @override
+  String get chickSurprise2 => 'Leaving time already arrived.';
+
+  @override
+  String get chickSurprise3 => 'Overtime, then. The chunks still shrink.';
+
+  @override
+  String get chickSleep1 => 'Break. Nothing is required here.';
+
+  @override
+  String get chickSleep2 => 'You can close your eyes for this one.';
+
+  @override
+  String get chickSleep3 => 'Stay like this until the break ends.';
+
+  @override
+  String get chickDone1 => 'Today\'s part is over.';
+
+  @override
+  String get chickDone2 => 'You sat through it. Work can stop now.';
+
+  @override
+  String get chickDone3 => 'You\'re free. You can leave.';
+
+  @override
+  String get chickBack1 => 'The timer is moving. Pick up when you\'re back.';
+
+  @override
+  String get chickBack2 => 'Step away. The chunks keep shrinking.';
+
+  @override
+  String get chickBack3 => 'I\'ll keep it moving. No need to rush back.';
+
+  @override
+  String get chickNotice1 => 'One chunk is done. On to the next.';
+
+  @override
+  String get chickNotice2 => 'It\'s getting smaller. You can see it.';
+
+  @override
+  String get chickNotice3 => 'One finished. That\'s enough.';
+
+  @override
+  String get chickGoodjob1 => 'A few are done. Not amazing. Still real.';
+
+  @override
+  String get chickGoodjob2 => 'Further along than it feels.';
+
+  @override
+  String get chickGoodjob3 => 'Stay seated. Another one will go.';
+
+  @override
+  String get chickLove1 => 'Today can stop here.';
+
+  @override
+  String get chickLove2 => 'You finished it. That counts.';
+
+  @override
+  String get chickLove3 => 'You can drop the work face now.';
+
+  @override
+  String get lookHome => 'Home';
+
+  @override
+  String get lookNotes => 'Notes';
+
+  @override
+  String get lookCalendar => 'Calendar';
+
+  @override
+  String get premiumLooks => 'Notes and Calendar are Premium';
+
+  @override
+  String get chickVoiceTitle => 'How the chick talks';
+
+  @override
+  String get voicePlain => 'Plain';
+
+  @override
+  String get voiceLazy => 'Even lazier';
+
+  @override
+  String get voiceKansai => 'Kansai';
+
+  @override
+  String get voiceCustom => 'Your line';
+
+  @override
+  String get premiumVoice => 'Extra voices are Premium';
+
+  @override
+  String get customLine => 'One line for the chick';
+
+  @override
+  String get moodHeavy => 'Heavy';
+
+  @override
+  String get moodTired => 'Tired';
+
+  @override
+  String get moodSleepy => 'Sleepy';
+
+  @override
+  String get moodCall => 'Call in this mood';
+
+  @override
+  String get premiumMoodCall => 'The call after a mood is Premium';
+
+  @override
+  String get soundClassic => 'Classic';
+
+  @override
+  String get soundSoft => 'Soft';
+
+  @override
+  String get soundBright => 'Bright';
+
+  @override
+  String get premiumSounds => 'Changing the ringtone is Premium';
+
+  @override
+  String get callBeforeEnd => '10 min before the end';
+
+  @override
+  String get beforeEndPassed => 'That time has passed';
+
+  @override
+  String get noteMilk => 'Milk and eggs';
+
+  @override
+  String get noteDentist => 'Dentist, next week';
+
+  @override
+  String get noteReturn => 'Return the book';
+
+  @override
+  String get noteMilkBody => 'Buy them on the way home.';
+
+  @override
+  String get noteDentistBody => 'Afternoon. No work talk.';
+
+  @override
+  String get noteReturnBody => 'The due date is close.';
+
+  @override
+  String get calLunch => 'Lunch';
+
+  @override
+  String get voiceLazy1 => 'Ugh. Heavy.';
+
+  @override
+  String get voiceLazy2 => 'Don\'t want to move. Time still shrinks.';
+
+  @override
+  String get voiceLazy3 => 'Today can be like this.';
+
+  @override
+  String get voiceLazy4 => 'Motivation is tomorrow\'s problem.';
+
+  @override
+  String get voiceLazy5 => 'Sitting here is the job.';
+
+  @override
+  String get voiceLazy6 => 'One more chunk. Probably.';
+
+  @override
+  String get voiceKansai1 => 'Still a long way, huh.';
+
+  @override
+  String get voiceKansai2 => 'It\'s coming along.';
+
+  @override
+  String get voiceKansai3 => 'We\'ll take it easy.';
+
+  @override
+  String get voiceKansai4 => 'A bit more until the end.';
+
+  @override
+  String get voiceKansai5 => 'Nice. Nice.';
+
+  @override
+  String get voiceKansai6 => 'You could just go home.';
+
+  @override
+  String get moodHeavy1 => 'Heavy. I know.';
+
+  @override
+  String get moodHeavy2 => 'You can stay like that. It\'s moving.';
+
+  @override
+  String get moodHeavy3 => 'Today can be a heavy one.';
+
+  @override
+  String get moodTired1 => 'Tired.';
+
+  @override
+  String get moodTired2 => 'You got this far.';
+
+  @override
+  String get moodTired3 => 'Rest. Time keeps going.';
+
+  @override
+  String get moodSleepy1 => 'Sleepy.';
+
+  @override
+  String get moodSleepy2 => 'Half-open eyes are enough.';
+
+  @override
+  String get moodSleepy3 => 'Doze if you want.';
+
+  @override
+  String get slack => 'Step away';
+
+  @override
+  String get slackIntro =>
+      'This is for leaving your seat. It shows a work call, or swaps this app for another screen. Nobody is actually called.';
+
+  @override
+  String get slackCall => 'Pretend a call came in';
+
+  @override
+  String get slackHide => 'Swap the screen';
+
+  @override
+  String get slackWeekly => 'The free call is once a week.';
+
+  @override
+  String get slackMore => 'Get more calls';
 }

@@ -64,6 +64,45 @@ TimerSession buildSession(SessionDraft draft) {
   );
 }
 
+/// Applies a saved shift to a running session. Extra time already added stays on top of the new end.
+TimerSession realignSession(TimerSession session, ResolvedShift shift, DateTime now) {
+  final extra = session.plannedEnd.difference(session.originalPlannedEnd);
+  final planned = shift.end.add(extra.isNegative ? Duration.zero : extra);
+  if (!planned.isAfter(shift.start)) return session;
+  final segments = buildSegments(start: shift.start, end: planned, intervalMinutes: session.intervalMinutes);
+  final progress = evaluateSegments(segments: segments, now: now, sessionEnd: planned);
+  return TimerSession(
+    id: session.id,
+    workDate: shift.workDate,
+    actualStart: shift.start,
+    plannedEnd: planned,
+    originalPlannedEnd: shift.end,
+    intervalMinutes: session.intervalMinutes,
+    breaks: [
+      for (final range in shift.breaks)
+        BreakSpan(
+          id: '${session.id}-${range.start.millisecondsSinceEpoch}',
+          start: range.start,
+          end: range.end,
+          updatedAt: now,
+        ),
+    ],
+    extensions: session.extensions,
+    patternId: session.patternId,
+    shiftKey: shift.key,
+    memo: session.memo,
+    celebratedCount: progress.completed,
+    updatedAt: now,
+  );
+}
+
+TimerSession changeInterval(TimerSession session, int minutes, DateTime now) {
+  final interval = minutes.clamp(1, 240);
+  final segments = buildSegments(start: session.actualStart, end: session.plannedEnd, intervalMinutes: interval);
+  final progress = evaluateSegments(segments: segments, now: now, sessionEnd: session.plannedEnd);
+  return session.copyWith(intervalMinutes: interval, celebratedCount: progress.completed, updatedAt: now);
+}
+
 TimerSession extendSession(TimerSession session, int minutes, DateTime now) {
   final previous = session.plannedEnd;
   final nextEnd = previous.add(Duration(minutes: minutes));

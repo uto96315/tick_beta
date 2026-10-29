@@ -30,15 +30,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         return loc == target ? null : target;
       }
       if (app.camouflage) return loc == '/camouflage' ? null : '/camouflage';
-      if (loc == '/incoming' || loc == '/in-call' || loc == '/camouflage') return '/home';
+      if (loc == '/incoming' || loc == '/in-call' || loc == '/camouflage') {
+        return app.session != null ? '/timer' : '/home';
+      }
       return null;
     },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
-          StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, _) => const HomePage())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/timer', builder: (_, _) => const TimerPage())]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/home', builder: (_, _) => const HomePage()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/timer', builder: (_, _) => const TimerPage()),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(

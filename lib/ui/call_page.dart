@@ -10,7 +10,6 @@ import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/theme.dart';
-import 'package:tick/ui/visuals.dart';
 
 class CallPage extends ConsumerWidget {
   const CallPage({super.key});
@@ -28,6 +27,25 @@ class CallPage extends ConsumerWidget {
           Text(app.premium ? l10n.unlimited : l10n.weeklyLimit, style: const TextStyle(fontWeight: FontWeight.w800)),
           Text('${l10n.usedThisWeek}: $used / ${app.premium ? '∞' : FakeCallPolicy.freeWeeklyLimit}'),
           Text(l10n.weekReset, style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final sound in CallSound.values)
+                ChoiceChip(
+                  label: Text(_soundLabel(l10n, sound)),
+                  selected: app.settings.callSound == sound,
+                  onSelected: (_) {
+                    if (!app.premium && sound != CallSound.classic) {
+                      context.push('/settings/premium');
+                      return;
+                    }
+                    ref.read(appControllerProvider.notifier).updateSettings(app.settings.copyWith(callSound: sound));
+                  },
+                ),
+            ],
+          ),
+          if (!app.premium) Text(l10n.premiumSounds, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 12),
           for (final caller in app.callers) _CallerTile(caller: caller),
           const SizedBox(height: 8),
@@ -105,6 +123,16 @@ class _CallerTile extends ConsumerWidget {
           children: [
             TextButton(onPressed: () => ref.read(appControllerProvider.notifier).startFakeCall(caller.id), child: Text(l10n.callNow)),
             TextButton(onPressed: () => _schedule(context, ref), child: Text(l10n.callLater)),
+            TextButton(
+              onPressed: () {
+                if (!ref.read(appControllerProvider).premium) {
+                  context.push('/settings/premium');
+                  return;
+                }
+                ref.read(appControllerProvider.notifier).scheduleBeforeEnd(caller.id);
+              },
+              child: Text(l10n.callBeforeEnd),
+            ),
             if (caller.custom)
               TextButton(onPressed: () => ref.read(appControllerProvider.notifier).deleteCaller(caller.id), child: Text(l10n.delete)),
           ],
@@ -129,6 +157,14 @@ class _CallerTile extends ConsumerWidget {
     final when = DateTime(date.year, date.month, date.day, time.hour, time.minute);
     ref.read(appControllerProvider.notifier).scheduleFakeCall(caller.id, when);
   }
+}
+
+String _soundLabel(AppLocalizations l10n, CallSound sound) {
+  return switch (sound) {
+    CallSound.classic => l10n.soundClassic,
+    CallSound.soft => l10n.soundSoft,
+    CallSound.bright => l10n.soundBright,
+  };
 }
 
 class _Avatar extends StatelessWidget {
@@ -172,8 +208,8 @@ class IncomingPage extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _RoundButton(color: TickColors.coral, icon: Icons.call_end, label: l10n.decline, onTap: () => ref.read(appControllerProvider.notifier).declineCall()),
-                  _RoundButton(color: TickColors.mint, icon: Icons.call, label: l10n.answer, onTap: () => ref.read(appControllerProvider.notifier).answerCall()),
+                  _RoundButton(color: const Color(0xFFE14B4B), icon: Icons.call_end, label: l10n.decline, onTap: () => ref.read(appControllerProvider.notifier).declineCall()),
+                  _RoundButton(color: const Color(0xFF34C759), icon: Icons.call, label: l10n.answer, onTap: () => ref.read(appControllerProvider.notifier).answerCall()),
                 ],
               ),
             ],
@@ -209,8 +245,6 @@ class InCallPage extends ConsumerWidget {
                   Text(formatHms(elapsed), style: const TextStyle(color: Colors.white, fontSize: 28, fontFeatures: [FontFeature.tabularFigures()])),
                   if (call?.muted ?? false) Text(l10n.muted, style: const TextStyle(color: Colors.white70)),
                   const Spacer(),
-                  const TickMascot(progress: 0.4, size: 120, showFace: false),
-                  const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -220,7 +254,7 @@ class InCallPage extends ConsumerWidget {
                         label: l10n.mute,
                         onTap: () => ref.read(appControllerProvider.notifier).toggleMute(),
                       ),
-                      _RoundButton(color: TickColors.coral, icon: Icons.call_end, label: l10n.endCall, onTap: () => ref.read(appControllerProvider.notifier).hangUp()),
+                      _RoundButton(color: const Color(0xFFE14B4B), icon: Icons.call_end, label: l10n.endCall, onTap: () => ref.read(appControllerProvider.notifier).hangUp()),
                     ],
                   ),
                 ],

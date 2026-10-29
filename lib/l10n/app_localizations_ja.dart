@@ -10,7 +10,7 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get appTitle => 'Tick';
+  String get appTitle => 'Ozio';
 
   @override
   String get tagline => '怠惰な人のためのタイマー';
@@ -337,7 +337,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get firebaseLocal => 'このiPhoneの中に保存しています。ログインにはFirebaseプロジェクトが必要です。';
 
   @override
-  String get premiumPitch => '買い切りです。偽着信が無制限になり、発信者の登録とカモフラージュの戻し方が増えます。';
+  String get premiumPitch =>
+      '買い切りです。偽着信が無制限になり、発信者、カモフラージュの画面、着信音、ひよこの口調が増えます。';
 
   @override
   String get premiumOwned => 'プレミアムは有効';
@@ -585,4 +586,365 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notRunning => '未開始';
+
+  @override
+  String get startTimer => 'タイマーを開始';
+
+  @override
+  String get chunksAhead => 'あと';
+
+  @override
+  String get todayProgress => '本日の進捗';
+
+  @override
+  String get plannedEnd => '終了予定';
+
+  @override
+  String get extendChoose => '延長時間を選択してください';
+
+  @override
+  String get keepGoing => 'もうちょっとだけがんばろう！';
+
+  @override
+  String get historyWork => '勤務履歴';
+
+  @override
+  String get viewList => '一覧';
+
+  @override
+  String get viewCalendar => 'カレンダー';
+
+  @override
+  String get minuteChunk => '分刻み';
+
+  @override
+  String get hourChunk => '時間刻み';
+
+  @override
+  String get intervalCustom => '任意';
+
+  @override
+  String get nowChunk => 'いま';
+
+  @override
+  String get tutorialNext => '次へ';
+
+  @override
+  String get tutorialSkip => 'スキップ';
+
+  @override
+  String get tutorialStart => 'はじめる';
+
+  @override
+  String get tutorial1Title => '終わりまで、区切って進む';
+
+  @override
+  String get tutorial1Body => '終了時刻を決めると、そこまでを小さな区切りに分けます。';
+
+  @override
+  String get tutorial2Title => '区切りの長さ';
+
+  @override
+  String get tutorial2Body => 'ホームで 15分、30分、1時間、または好きな分数を選べます。';
+
+  @override
+  String get tutorial3Title => 'いま進んでいるところ';
+
+  @override
+  String get tutorial3Body => 'タイマーには「いま 16:10–16:30」のように、今の区切りの時間が出ます。';
+
+  @override
+  String get updateRequiredTitle => '更新してください';
+
+  @override
+  String get updateRequiredBody => 'このバージョンでは続けられません。';
+
+  @override
+  String get updateAvailableTitle => '新しいバージョンがあります';
+
+  @override
+  String get updateAvailableBody => '今のままでも使えます。';
+
+  @override
+  String get updateAction => '更新する';
+
+  @override
+  String get updateLater => 'あとで';
+
+  @override
+  String get chickNormal1 => '始めるところが、いちばんむずかしい。';
+
+  @override
+  String get chickNormal2 => 'だるくていい。座っていても、区切りは減る。';
+
+  @override
+  String get chickNormal3 => '定時まで、小さく刻んでいこう。';
+
+  @override
+  String get chickTired1 => 'まだ先は長い。でも、この区切りは終わる。';
+
+  @override
+  String get chickTired2 => 'やる気は出なくていい。時間のほうが先に減る。';
+
+  @override
+  String get chickTired3 => '座っているだけでも、進んではいる。';
+
+  @override
+  String get chickHappy1 => '少し進んだ。このペースでいいよ。';
+
+  @override
+  String get chickHappy2 => '悪くない。数字はちゃんと減っている。';
+
+  @override
+  String get chickHappy3 => 'この区切りが終われば、またひとつ減る。';
+
+  @override
+  String get chickCheer1 => '半分は過ぎた。景色が変わってきたね。';
+
+  @override
+  String get chickCheer2 => 'ここまで来たら、あとは時間が働く。';
+
+  @override
+  String get chickCheer3 => 'えらいよ。お世辞じゃなく、そう思う。';
+
+  @override
+  String get chickAttention1 => 'あと少し。出口が見えてきた。';
+
+  @override
+  String get chickAttention2 => 'もうほぼ終わり。力は入れなくていい。';
+
+  @override
+  String get chickAttention3 => 'この区切りを越えれば、今日はかなり終わり。';
+
+  @override
+  String get chickSurprise1 => '定時は過ぎている。まだいるんだね。';
+
+  @override
+  String get chickSurprise2 => '帰る時間は、もう来ているよ。';
+
+  @override
+  String get chickSurprise3 => '残業しているね。区切りは、まだ減る。';
+
+  @override
+  String get chickSleep1 => '休憩だよ。ここでは何もしなくていい。';
+
+  @override
+  String get chickSleep2 => '目を閉じていていい時間だよ。';
+
+  @override
+  String get chickSleep3 => '休みが終わるまで、このままでいい。';
+
+  @override
+  String get chickDone1 => '今日のぶんは、終わり。';
+
+  @override
+  String get chickDone2 => 'よく座っていた。もう仕事じゃなくていい。';
+
+  @override
+  String get chickDone3 => '自由だよ。帰っていい。';
+
+  @override
+  String get chickBack1 => 'タイマーは動いている。戻ったら続きから。';
+
+  @override
+  String get chickBack2 => '席を外しても、区切りは減っていく。';
+
+  @override
+  String get chickBack3 => 'こっちで進めておく。急いで戻らなくていい。';
+
+  @override
+  String get chickNotice1 => '区切りがひとつ終わった。次にいこう。';
+
+  @override
+  String get chickNotice2 => 'ちゃんと減っている。見てわかる。';
+
+  @override
+  String get chickNotice3 => 'ひとつ終わった。それだけでいい。';
+
+  @override
+  String get chickGoodjob1 => 'いくつも終わった。すごいとまでは言わないけど。';
+
+  @override
+  String get chickGoodjob2 => '進んでいるよ。自分で思っているより。';
+
+  @override
+  String get chickGoodjob3 => 'このまま座っていれば、また減る。';
+
+  @override
+  String get chickLove1 => '今日は、ここまででいい。';
+
+  @override
+  String get chickLove2 => 'よく終わらせた。えらいよ。';
+
+  @override
+  String get chickLove3 => 'もう、仕事の顔はしなくていい。';
+
+  @override
+  String get lookHome => 'ホーム';
+
+  @override
+  String get lookNotes => 'メモ';
+
+  @override
+  String get lookCalendar => 'カレンダー';
+
+  @override
+  String get premiumLooks => 'メモとカレンダーはプレミアム';
+
+  @override
+  String get chickVoiceTitle => 'ひよこの口調';
+
+  @override
+  String get voicePlain => 'ふつう';
+
+  @override
+  String get voiceLazy => 'もっとだるい';
+
+  @override
+  String get voiceKansai => '関西弁';
+
+  @override
+  String get voiceCustom => '自分のセリフ';
+
+  @override
+  String get premiumVoice => '口調の追加はプレミアム';
+
+  @override
+  String get customLine => 'ひよこに言わせる一言';
+
+  @override
+  String get moodHeavy => 'だるい';
+
+  @override
+  String get moodTired => '疲れた';
+
+  @override
+  String get moodSleepy => '眠い';
+
+  @override
+  String get moodCall => 'この気分で電話';
+
+  @override
+  String get premiumMoodCall => '電話まで飛ばすのはプレミアム';
+
+  @override
+  String get soundClassic => '標準';
+
+  @override
+  String get soundSoft => 'やわらか';
+
+  @override
+  String get soundBright => '高め';
+
+  @override
+  String get premiumSounds => '着信音の変更はプレミアム';
+
+  @override
+  String get callBeforeEnd => '定時の10分前';
+
+  @override
+  String get beforeEndPassed => 'その時間は過ぎています';
+
+  @override
+  String get noteMilk => '牛乳と卵';
+
+  @override
+  String get noteDentist => '歯医者、来週';
+
+  @override
+  String get noteReturn => '本、返す';
+
+  @override
+  String get noteMilkBody => '帰りに買う。忘れない。';
+
+  @override
+  String get noteDentistBody => '午後。仕事の話はしない。';
+
+  @override
+  String get noteReturnBody => '期限、そろそろ。';
+
+  @override
+  String get calLunch => '昼ごはん';
+
+  @override
+  String get voiceLazy1 => 'あー、だる。';
+
+  @override
+  String get voiceLazy2 => '動きたくない。でも時間は減る。';
+
+  @override
+  String get voiceLazy3 => '今日はこれでいい。';
+
+  @override
+  String get voiceLazy4 => 'やる気は、明日。';
+
+  @override
+  String get voiceLazy5 => '座ってる。それが仕事。';
+
+  @override
+  String get voiceLazy6 => 'もう一区切りだけ。たぶん。';
+
+  @override
+  String get voiceKansai1 => 'まだ先、長いわ。';
+
+  @override
+  String get voiceKansai2 => 'ええ感じに進んでるで。';
+
+  @override
+  String get voiceKansai3 => 'ぼちぼちいこか。';
+
+  @override
+  String get voiceKansai4 => '定時まで、もうちょい。';
+
+  @override
+  String get voiceKansai5 => 'えらいえらい。';
+
+  @override
+  String get voiceKansai6 => '帰ったらええのに。';
+
+  @override
+  String get moodHeavy1 => 'だるい。わかってる。';
+
+  @override
+  String get moodHeavy2 => 'そのままで、進んでる。';
+
+  @override
+  String get moodHeavy3 => '今日は重いでいい。';
+
+  @override
+  String get moodTired1 => '疲れたね。';
+
+  @override
+  String get moodTired2 => 'ここまで来た。';
+
+  @override
+  String get moodTired3 => '休んでいい。時間は進む。';
+
+  @override
+  String get moodSleepy1 => '眠い。';
+
+  @override
+  String get moodSleepy2 => '目、半分でいい。';
+
+  @override
+  String get moodSleepy3 => 'うとうとしてていい。';
+
+  @override
+  String get slack => 'サボる';
+
+  @override
+  String get slackIntro =>
+      '席を外すためのボタンです。仕事の電話が来た画面になるか、このアプリの中身を別の画面にすり替えます。本当の電話はかかりません。';
+
+  @override
+  String get slackCall => '電話が来たことにする';
+
+  @override
+  String get slackHide => '画面を別のものにする';
+
+  @override
+  String get slackWeekly => '無料の電話は、週に1回です。';
+
+  @override
+  String get slackMore => '回数を増やす';
 }

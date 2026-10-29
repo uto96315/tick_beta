@@ -17,13 +17,19 @@ class PremiumPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(premium ? l10n.premiumOwned : l10n.priceFallback, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
+          const Icon(Icons.workspace_premium_rounded, size: 56, color: Color(0xFFF0B429)),
+          const SizedBox(height: 8),
+          Text(premium ? l10n.premiumOwned : l10n.priceFallback, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Text(l10n.premiumPitch),
           const SizedBox(height: 8),
           Text('· ${l10n.unlimited}'),
           Text('· ${l10n.premiumCallers}'),
           Text('· ${l10n.premiumCamouflage}'),
+          Text('· ${l10n.premiumLooks}'),
+          Text('· ${l10n.premiumSounds}'),
+          Text('· ${l10n.premiumVoice}'),
+          Text('· ${l10n.callBeforeEnd}'),
           const SizedBox(height: 20),
           if (!premium)
             FilledButton(

@@ -26,6 +26,7 @@ class PersistedState {
     required this.credits,
     required this.entitlement,
     required this.tombstones,
+    this.dismissedUpdateBuild = 0,
   });
 
   String? uid;
@@ -38,6 +39,7 @@ class PersistedState {
   String? freedomHistoryId;
   String? dismissedShiftKey;
   String? ringingCallerId;
+  int dismissedUpdateBuild;
   List<WorkRecord> history;
   List<WorkPattern> patterns;
   WeekPlan week;
@@ -155,6 +157,7 @@ class PersistedState {
     'freedomHistoryId': freedomHistoryId,
     'dismissedShiftKey': dismissedShiftKey,
     'ringingCallerId': ringingCallerId,
+    'dismissedUpdateBuild': dismissedUpdateBuild,
     'history': history.map((item) => item.toJson()).toList(),
     'patterns': patterns.map((item) => item.toJson()).toList(),
     'week': week.toJson(),
@@ -183,6 +186,7 @@ class PersistedState {
       freedomHistoryId: json['freedomHistoryId'] as String?,
       dismissedShiftKey: json['dismissedShiftKey'] as String?,
       ringingCallerId: json['ringingCallerId'] as String?,
+      dismissedUpdateBuild: (json['dismissedUpdateBuild'] as num?)?.toInt() ?? 0,
       history: _list(json['history'], WorkRecord.fromJson),
       patterns: _list(json['patterns'], WorkPattern.fromJson),
       week: json['week'] is Map

@@ -13,9 +13,13 @@ import 'package:tick/services/gateways.dart';
 import 'package:tick/services/notification_copy.dart';
 import 'package:tick/state/app_state.dart';
 
-final depsProvider = Provider<AppDeps>((ref) => throw StateError('AppDeps is not installed'));
+final depsProvider = Provider<AppDeps>(
+  (ref) => throw StateError('AppDeps is not installed'),
+);
 
-final appControllerProvider = NotifierProvider<AppController, AppState>(AppController.new);
+final appControllerProvider = NotifierProvider<AppController, AppState>(
+  AppController.new,
+);
 
 class AppController extends Notifier<AppState> {
   late AppDeps _deps;
@@ -29,6 +33,7 @@ class AppController extends Notifier<AppState> {
   ResolvedShift? _prompt;
   LiveCall? _live;
   var _camouflage = false;
+  ChickMood? _mood;
   var _offline = false;
   var _burstCount = 0;
   var _burstNonce = 0;
@@ -119,7 +124,10 @@ class AppController extends Notifier<AppState> {
         celebrateElapsed: false,
       ),
     );
-    _db.settings = _db.settings.copyWith(lastIntervalMinutes: interval, updatedAt: now);
+    _db.settings = _db.settings.copyWith(
+      lastIntervalMinutes: interval,
+      updatedAt: now,
+    );
     _db.pendingFreedom = false;
     _db.bumpRuntime(now);
     _prompt = null;
@@ -139,6 +147,24 @@ class AppController extends Notifier<AppState> {
     _prompt = null;
     _db.dismissedShiftKey = shift.key;
     _db.bumpRuntime(_deps.clock.now());
+    _commit();
+  }
+
+  void setInterval(int minutes) {
+    final interval = minutes.clamp(1, 240);
+    final session = _db.session;
+    if (session?.intervalMinutes == interval &&
+        _db.settings.lastIntervalMinutes == interval)
+      return;
+    final now = _deps.clock.now();
+    if (session != null && session.intervalMinutes != interval) {
+      _db.session = changeInterval(session, interval, now);
+      _db.bumpRuntime(now);
+    }
+    _db.settings = _db.settings.copyWith(
+      lastIntervalMinutes: interval,
+      updatedAt: now,
+    );
     _commit();
   }
 
@@ -181,21 +207,32 @@ class AppController extends Notifier<AppState> {
     }
     final index = _db.history.indexWhere((item) => item.id == recordId);
     if (index >= 0) {
-      _db.history[index] = _db.history[index].copyWith(memo: memo, updatedAt: now);
+      _db.history[index] = _db.history[index].copyWith(
+        memo: memo,
+        updatedAt: now,
+      );
     }
     _commit();
   }
 
   void addSessionBreak() => _addBreak(onSession: true, recordId: null);
 
-  void updateSessionBreak(String breakId, {DateTime? start, DateTime? end, Duration? duration}) {
+  void updateSessionBreak(
+    String breakId, {
+    DateTime? start,
+    DateTime? end,
+    Duration? duration,
+  }) {
     final session = _db.session;
     if (session == null) return;
     final now = _deps.clock.now();
     _db.session = session.copyWith(
       breaks: [
         for (final span in session.breaks)
-          if (span.id == breakId) _editSpan(span, start: start, end: end, duration: duration) else span,
+          if (span.id == breakId)
+            _editSpan(span, start: start, end: end, duration: duration)
+          else
+            span,
       ],
       updatedAt: now,
     );
@@ -208,14 +245,18 @@ class AppController extends Notifier<AppState> {
     if (session == null) return;
     final now = _deps.clock.now();
     _db.session = session.copyWith(
-      breaks: [for (final span in session.breaks) if (span.id != breakId) span],
+      breaks: [
+        for (final span in session.breaks)
+          if (span.id != breakId) span,
+      ],
       updatedAt: now,
     );
     _db.bumpRuntime(now);
     _commit();
   }
 
-  void addHistoryBreak(String recordId) => _addBreak(onSession: false, recordId: recordId);
+  void addHistoryBreak(String recordId) =>
+      _addBreak(onSession: false, recordId: recordId);
 
   void updateHistoryBreak(
     String recordId,
@@ -230,7 +271,10 @@ class AppController extends Notifier<AppState> {
     _db.history[index] = record.copyWith(
       breaks: [
         for (final span in record.breaks)
-          if (span.id == breakId) _editSpan(span, start: start, end: end, duration: duration) else span,
+          if (span.id == breakId)
+            _editSpan(span, start: start, end: end, duration: duration)
+          else
+            span,
       ],
       updatedAt: _deps.clock.now(),
     );
@@ -242,10 +286,18 @@ class AppController extends Notifier<AppState> {
     if (index < 0) return;
     final record = _db.history[index];
     _db.history[index] = record.copyWith(
-      breaks: [for (final span in record.breaks) if (span.id != breakId) span],
+      breaks: [
+        for (final span in record.breaks)
+          if (span.id != breakId) span,
+      ],
       updatedAt: _deps.clock.now(),
     );
     _commit();
+  }
+
+  void completeTutorial() {
+    if (_db.settings.tutorialSeen) return;
+    updateSettings(_db.settings.copyWith(tutorialSeen: true));
   }
 
   void updateSettings(AppSettings settings) {
@@ -258,6 +310,58 @@ class AppController extends Notifier<AppState> {
     _emit();
   }
 
+  void setMood(ChickMood mood) {
+    _mood = mood;
+    if (_db.settings.notifyVibration) HapticFeedback.lightImpact();
+    _emit();
+  }
+
+  void callFromMood() {
+    slackCall();
+  }
+
+  void slackCall() {
+    Caller? caller;
+    for (final item in _db.callers) {
+      if (_premium || !item.custom) {
+        caller = item;
+        break;
+      }
+    }
+    if (caller == null) {
+      if (_db.callers.isNotEmpty) _flashCode('premium');
+      return;
+    }
+    startFakeCall(caller.id);
+  }
+
+  void scheduleBeforeEnd(String callerId) {
+    if (!_premium) {
+      _flashCode('premium');
+      return;
+    }
+    final end = _callAnchor();
+    if (end == null) return;
+    final when = end.subtract(const Duration(minutes: 10));
+    if (!when.isAfter(_deps.clock.now())) {
+      _flashCode('passed');
+      return;
+    }
+    scheduleFakeCall(callerId, when);
+  }
+
+  DateTime? _callAnchor() {
+    final session = _db.session;
+    if (session != null) return session.originalPlannedEnd;
+    final now = _deps.clock.now();
+    final calendar = ScheduleCalendar(
+      patterns: _db.patterns,
+      week: _db.week,
+      overrides: _db.overrides,
+    );
+    return (calendar.shiftCovering(now) ?? calendar.upcomingOn(now))?.end;
+  }
+
   void upsertPattern(WorkPattern pattern) {
     final now = _deps.clock.now();
     final next = pattern.copyWith(updatedAt: now);
@@ -267,13 +371,15 @@ class AppController extends Notifier<AppState> {
     } else {
       _db.patterns = [..._db.patterns, next];
     }
+    _resyncLiveShift(now);
     _commit();
   }
 
   void deletePattern(String id) {
     final now = _deps.clock.now();
     _db.removeWhere('patterns', id, now);
-    final days = Map<int, String?>.from(_db.week.days)..removeWhere((_, value) => value == id);
+    final days = Map<int, String?>.from(_db.week.days)
+      ..removeWhere((_, value) => value == id);
     _db.week = _db.week.copyWith(days: days, updatedAt: now);
     _commit();
   }
@@ -323,7 +429,11 @@ class AppController extends Notifier<AppState> {
       return;
     }
     final now = _deps.clock.now();
-    if (!FakeCallPolicy.canConsume(premium: _premium, credits: _db.credits, when: now)) {
+    if (!FakeCallPolicy.canConsume(
+      premium: _premium,
+      credits: _db.credits,
+      when: now,
+    )) {
       _flashCode('limit');
       return;
     }
@@ -344,14 +454,24 @@ class AppController extends Notifier<AppState> {
       startFakeCall(callerId);
       return;
     }
-    if (!FakeCallPolicy.canConsume(premium: _premium, credits: _db.credits, when: when)) {
+    if (!FakeCallPolicy.canConsume(
+      premium: _premium,
+      credits: _db.credits,
+      when: when,
+    )) {
       _flashCode('limit');
       return;
     }
     final id = _deps.newId();
     _db.scheduledCalls = [
       ..._db.scheduledCalls,
-      ScheduledFakeCall(id: id, callerId: callerId, fireAt: when, fired: false, updatedAt: now),
+      ScheduledFakeCall(
+        id: id,
+        callerId: callerId,
+        fireAt: when,
+        fired: false,
+        updatedAt: now,
+      ),
     ];
     _db.credits = [
       ..._db.credits,
@@ -371,7 +491,10 @@ class AppController extends Notifier<AppState> {
     _db.removeWhere('calls', id, now);
     _db.credits = [
       for (final credit in _db.credits)
-        if (credit.id == id) credit.copyWith(canceled: true, updatedAt: now) else credit,
+        if (credit.id == id)
+          credit.copyWith(canceled: true, updatedAt: now)
+        else
+          credit,
     ];
     _commit();
   }
@@ -432,7 +555,10 @@ class AppController extends Notifier<AppState> {
     final now = _deps.clock.now();
     _db.callers = [
       for (final caller in _db.callers)
-        if (caller.id == id) caller.copyWith(photoPath: saved, updatedAt: now) else caller,
+        if (caller.id == id)
+          caller.copyWith(photoPath: saved, updatedAt: now)
+        else
+          caller,
     ];
     _commit();
   }
@@ -445,11 +571,15 @@ class AppController extends Notifier<AppState> {
   }
 
   Future<String?> registerEmail(String email, String password) {
-    return _authCall(() => _deps.auth.registerEmail(email: email, password: password));
+    return _authCall(
+      () => _deps.auth.registerEmail(email: email, password: password),
+    );
   }
 
   Future<String?> signInEmail(String email, String password) {
-    return _authCall(() => _deps.auth.signInEmail(email: email, password: password));
+    return _authCall(
+      () => _deps.auth.signInEmail(email: email, password: password),
+    );
   }
 
   Future<String?> registerGoogle() => _authCall(_deps.auth.registerGoogle);
@@ -524,6 +654,33 @@ class AppController extends Notifier<AppState> {
 
   bool get premium => _db.entitlement.premium;
 
+  void _resyncLiveShift(DateTime now) {
+    final session = _db.session;
+    final patternId = session?.patternId;
+    if (session == null || patternId == null) return;
+    final shift = ScheduleCalendar(
+      patterns: _db.patterns,
+      week: _db.week,
+      overrides: _db.overrides,
+    ).shiftStartingOn(session.workDate);
+    if (shift == null || shift.patternId != patternId) return;
+    final aligned = realignSession(session, shift, now);
+    final sameBreaks =
+        aligned.breaks.length == session.breaks.length &&
+        [
+          for (var i = 0; i < aligned.breaks.length; i++)
+            aligned.breaks[i].start == session.breaks[i].start &&
+                aligned.breaks[i].end == session.breaks[i].end,
+        ].every((same) => same);
+    if (aligned.actualStart == session.actualStart &&
+        aligned.plannedEnd == session.plannedEnd &&
+        aligned.originalPlannedEnd == session.originalPlannedEnd &&
+        sameBreaks)
+      return;
+    _db.session = aligned;
+    _db.bumpRuntime(now);
+  }
+
   void _startShift(ResolvedShift shift) {
     final now = _deps.clock.now();
     _db.session = buildSession(
@@ -553,7 +710,11 @@ class AppController extends Notifier<AppState> {
       foreground: _foreground,
       lastForegroundTick: _lastForegroundTick,
       session: _db.session,
-      calendar: ScheduleCalendar(patterns: _db.patterns, week: _db.week, overrides: _db.overrides),
+      calendar: ScheduleCalendar(
+        patterns: _db.patterns,
+        week: _db.week,
+        overrides: _db.overrides,
+      ),
       autoStart: _db.settings.autoStart,
       dismissedShiftKey: _db.dismissedShiftKey,
       history: _db.history,
@@ -583,7 +744,10 @@ class AppController extends Notifier<AppState> {
         final session = _db.session;
         if (session == null) return;
         final gained = completed - session.celebratedCount;
-        _db.session = session.copyWith(celebratedCount: completed, updatedAt: now);
+        _db.session = session.copyWith(
+          celebratedCount: completed,
+          updatedAt: now,
+        );
         _db.bumpRuntime(now);
         if (gained > 0) {
           _burstCount = gained;
@@ -599,6 +763,7 @@ class AppController extends Notifier<AppState> {
   }
 
   void _closeSession(DateTime now, {required bool freedom, String? historyId}) {
+    _mood = null;
     _db.session = null;
     _db.sessionClearedAt = now;
     _db.pendingFreedom = freedom;
@@ -618,10 +783,22 @@ class AppController extends Notifier<AppState> {
   }
 
   void _beginRing(Caller caller, DateTime now) {
-    _live = LiveCall(caller: caller, startedAt: now, answered: false, answeredAt: null, muted: false);
+    _live = LiveCall(
+      caller: caller,
+      startedAt: now,
+      answered: false,
+      answeredAt: null,
+      muted: false,
+    );
     _db.ringingCallerId = caller.id;
     _camouflage = false;
-    if (_db.settings.notifySound) unawaited(_deps.ringtone.start());
+    if (_db.settings.notifySound) {
+      unawaited(
+        _deps.ringtone.start(
+          sound: shownSound(_premium, _db.settings.callSound).name,
+        ),
+      );
+    }
     if (_db.settings.notifyVibration) HapticFeedback.mediumImpact();
   }
 
@@ -644,7 +821,12 @@ class AppController extends Notifier<AppState> {
   void _consumeCredit(DateTime when) {
     _db.credits = [
       ..._db.credits,
-      CallCredit(id: _deps.newId(), when: when, canceled: false, updatedAt: when),
+      CallCredit(
+        id: _deps.newId(),
+        when: when,
+        canceled: false,
+        updatedAt: when,
+      ),
     ];
   }
 
@@ -659,25 +841,42 @@ class AppController extends Notifier<AppState> {
     if (onSession) {
       final session = _db.session;
       if (session == null) return;
-      _db.session = session.copyWith(breaks: [...session.breaks, span], updatedAt: now);
+      _db.session = session.copyWith(
+        breaks: [...session.breaks, span],
+        updatedAt: now,
+      );
       _db.bumpRuntime(now);
     } else if (recordId != null) {
       final index = _db.history.indexWhere((item) => item.id == recordId);
       if (index < 0) return;
       final record = _db.history[index];
-      _db.history[index] = record.copyWith(breaks: [...record.breaks, span], updatedAt: now);
+      _db.history[index] = record.copyWith(
+        breaks: [...record.breaks, span],
+        updatedAt: now,
+      );
     }
     _commit();
   }
 
-  BreakSpan _editSpan(BreakSpan span, {DateTime? start, DateTime? end, Duration? duration}) {
+  BreakSpan _editSpan(
+    BreakSpan span, {
+    DateTime? start,
+    DateTime? end,
+    Duration? duration,
+  }) {
     final now = _deps.clock.now();
     if (duration != null) {
-      return withDuration(span.copyWith(start: start ?? span.start), duration, now);
+      return withDuration(
+        span.copyWith(start: start ?? span.start),
+        duration,
+        now,
+      );
     }
     final nextStart = start ?? span.start;
     final nextEnd = end ?? span.end;
-    final safeEnd = nextEnd.isAfter(nextStart) ? nextEnd : nextStart.add(const Duration(minutes: 1));
+    final safeEnd = nextEnd.isAfter(nextStart)
+        ? nextEnd
+        : nextStart.add(const Duration(minutes: 1));
     return span.copyWith(start: nextStart, end: safeEnd, updatedAt: now);
   }
 
@@ -757,7 +956,11 @@ class AppController extends Notifier<AppState> {
 
   void _markPremium() {
     if (!ref.mounted || _db.entitlement.premium) return;
-    _db.entitlement = Entitlement(premium: true, updatedAt: _deps.clock.now(), source: 'store');
+    _db.entitlement = Entitlement(
+      premium: true,
+      updatedAt: _deps.clock.now(),
+      source: 'store',
+    );
     _commit();
   }
 
@@ -836,6 +1039,7 @@ class AppController extends Notifier<AppState> {
       encouragementNonce: _encourageNonce,
       flash: _flash,
       offline: _offline,
+      mood: _mood,
     );
   }
 

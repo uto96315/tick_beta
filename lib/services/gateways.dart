@@ -1,5 +1,6 @@
 import 'package:tick/data/local_store.dart';
 import 'package:tick/data/persisted_state.dart';
+import 'package:tick/domain/app_update.dart';
 
 class AuthUser {
   const AuthUser({
@@ -130,16 +131,27 @@ class UnavailablePurchases implements PurchaseGateway {
 }
 
 abstract class Ringtone {
-  Future<void> start();
+  Future<void> start({String sound = 'classic'});
   Future<void> stop();
 }
 
 class NoopRingtone implements Ringtone {
   @override
-  Future<void> start() async {}
+  Future<void> start({String sound = 'classic'}) async {}
 
   @override
   Future<void> stop() async {}
+}
+
+abstract class UpdatePolicySource {
+  Future<UpdatePolicy?> load();
+}
+
+class UnavailableUpdates implements UpdatePolicySource {
+  const UnavailableUpdates();
+
+  @override
+  Future<UpdatePolicy?> load() async => null;
 }
 
 abstract class Clock {
@@ -164,6 +176,8 @@ class AppDeps {
     required this.newId,
     required this.languageCode,
     required this.savePhoto,
+    required this.installedBuild,
+    required this.updates,
   });
 
   final LocalStore store;
@@ -177,4 +191,6 @@ class AppDeps {
   final String Function() newId;
   final String Function() languageCode;
   final Future<String?> Function(String callerId, String sourcePath) savePhoto;
+  final int installedBuild;
+  final UpdatePolicySource updates;
 }

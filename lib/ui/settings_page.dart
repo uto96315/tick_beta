@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
+import 'package:tick/state/app_state.dart';
 import 'package:tick/ui/theme.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -20,9 +21,16 @@ class SettingsPage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(l10n.settings, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Text(l10n.languageFollows),
+            Text(l10n.settings, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.schedule, style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(_scheduleLine(app), style: const TextStyle(color: TickColors.muted)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/schedule'),
+            ),
+            Text(l10n.languageFollows, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
             const SizedBox(height: 12),
             PopCard(
               child: Column(
@@ -98,20 +106,78 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
             if (!app.premium) Text(l10n.premiumCamouflage, style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final look in CamouflageLook.values)
+                  ChoiceChip(
+                    label: Text(_lookLabel(l10n, look)),
+                    selected: settings.camouflageLook == look,
+                    onSelected: (_) {
+                      if (!app.premium && look != CamouflageLook.home) {
+                        context.push('/settings/premium');
+                        return;
+                      }
+                      controller.updateSettings(settings.copyWith(camouflageLook: look));
+                    },
+                  ),
+              ],
+            ),
+            if (!app.premium) Text(l10n.premiumLooks, style: const TextStyle(fontSize: 13)),
             const SizedBox(height: 16),
-            ListTile(title: Text(l10n.schedule), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/schedule')),
-            ListTile(title: Text(l10n.account), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/account')),
+            Text(l10n.chickVoiceTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final voice in ChickVoice.values)
+                  ChoiceChip(
+                    label: Text(_voiceLabel(l10n, voice)),
+                    selected: settings.chickVoice == voice,
+                    onSelected: (_) {
+                      if (!app.premium && voice != ChickVoice.plain) {
+                        context.push('/settings/premium');
+                        return;
+                      }
+                      controller.updateSettings(settings.copyWith(chickVoice: voice));
+                    },
+                  ),
+              ],
+            ),
+            if (!app.premium) Text(l10n.premiumVoice, style: const TextStyle(fontSize: 13)),
+            if (app.premium && settings.chickVoice == ChickVoice.custom) ...[
+              const SizedBox(height: 8),
+              _CustomLineField(initial: settings.customChickLine, hint: l10n.customLine, onSave: (value) => controller.updateSettings(settings.copyWith(customChickLine: value))),
+            ],
+            const SizedBox(height: 16),
+            ListTile(contentPadding: EdgeInsets.zero, title: Text(l10n.account), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/account')),
             ListTile(
+              contentPadding: EdgeInsets.zero,
               title: Text(l10n.premium),
               subtitle: Text(app.premium ? l10n.premiumOwned : l10n.freeTier),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/settings/premium'),
+            ),
+            ListTile(contentPadding: EdgeInsets.zero, title: Text(l10n.fakeCall), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/call')),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.camouflage),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => ref.read(appControllerProvider.notifier).setCamouflage(true),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+String _scheduleLine(AppState app) {
+  if (app.patterns.isEmpty) return '';
+  final pattern = app.patterns.first;
+  return '${pattern.start.label} – ${pattern.end.label}';
 }
 
 String _visualLabel(AppLocalizations l10n, TimerVisual visual) {
@@ -128,6 +194,63 @@ String _endLabel(AppLocalizations l10n, EndAction action) {
     EndAction.celebration => l10n.actionCelebration,
     EndAction.home => l10n.actionHome,
     EndAction.history => l10n.actionHistory,
+  };
+}
+
+class _CustomLineField extends StatefulWidget {
+  const _CustomLineField({required this.initial, required this.hint, required this.onSave});
+
+  final String initial;
+  final String hint;
+  final ValueChanged<String> onSave;
+
+  @override
+  State<_CustomLineField> createState() => _CustomLineFieldState();
+}
+
+class _CustomLineFieldState extends State<_CustomLineField> {
+  late final TextEditingController _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void didUpdateWidget(_CustomLineField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initial != widget.initial && _controller.text != widget.initial) {
+      _controller.text = widget.initial;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      maxLength: 40,
+      decoration: InputDecoration(hintText: widget.hint),
+      onSubmitted: widget.onSave,
+      onEditingComplete: () => widget.onSave(_controller.text),
+    );
+  }
+}
+
+String _lookLabel(AppLocalizations l10n, CamouflageLook look) {
+  return switch (look) {
+    CamouflageLook.home => l10n.lookHome,
+    CamouflageLook.notes => l10n.lookNotes,
+    CamouflageLook.calendar => l10n.lookCalendar,
+  };
+}
+
+String _voiceLabel(AppLocalizations l10n, ChickVoice voice) {
+  return switch (voice) {
+    ChickVoice.plain => l10n.voicePlain,
+    ChickVoice.lazy => l10n.voiceLazy,
+    ChickVoice.kansai => l10n.voiceKansai,
+    ChickVoice.custom => l10n.voiceCustom,
   };
 }
 

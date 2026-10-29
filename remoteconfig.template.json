@@ -1,0 +1,25 @@
+{
+  "parameters": {
+    "ios_min_build": {
+      "defaultValue": {
+        "value": "0"
+      },
+      "description": "iOS build number (the +N in pubspec) below which Tick cannot continue. 0 disables the forced update.",
+      "valueType": "NUMBER"
+    },
+    "ios_latest_build": {
+      "defaultValue": {
+        "value": "0"
+      },
+      "description": "iOS build number below which Tick offers an optional update. 0 disables it. Needs ios_update_url.",
+      "valueType": "NUMBER"
+    },
+    "ios_update_url": {
+      "defaultValue": {
+        "value": ""
+      },
+      "description": "https link opened by the update button. App Distribution release page or the App Store.",
+      "valueType": "STRING"
+    }
+  }
+}

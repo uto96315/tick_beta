@@ -219,6 +219,7 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
     freedomHistoryId: runtime.freedomHistoryId,
     dismissedShiftKey: runtime.dismissedShiftKey,
     ringingCallerId: local.ringingCallerId,
+    dismissedUpdateBuild: local.dismissedUpdateBuild,
     history: history.entities,
     patterns: patterns.entities,
     week: week,
