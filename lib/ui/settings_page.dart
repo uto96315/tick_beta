@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
+import 'package:tick/lab/logic.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/state/app_state.dart';
+import 'package:tick/ui/premium_offer.dart';
 import 'package:tick/ui/theme.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -24,26 +26,57 @@ class SettingsPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                IconButton(onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back, color: TickColors.ink)),
-                Text(l10n.settings, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: TickColors.ink)),
+                IconButton(
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back, color: TickColors.ink),
+                ),
+                Text(
+                  l10n.settings,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: TickColors.ink,
+                  ),
+                ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 12, bottom: 12),
-              child: Text(l10n.languageFollows, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
-            ),
+            if (_anonymous(app)) ...[
+              PopCard(
+                color: TickColors.yellow,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: ListTile(
+                  title: Text(
+                    l10n.registerAccount,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  subtitle: Text(l10n.registerAccountHelp),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/settings/account'),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             PopCard(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
                 children: [
                   ListTile(
-                    title: Text(l10n.schedule, style: const TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(_scheduleLine(app), style: const TextStyle(color: TickColors.muted)),
+                    title: Text(
+                      l10n.schedule,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    subtitle: Text(
+                      _scheduleLine(app),
+                      style: const TextStyle(color: TickColors.muted),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/settings/schedule'),
                   ),
                   ListTile(
-                    title: Text(l10n.history, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    title: Text(
+                      l10n.history,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/history'),
                   ),
@@ -55,10 +88,35 @@ class SettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
                 children: [
-                  SwitchListTile(title: Text(l10n.notifyChunk), value: settings.notifySegment, onChanged: (value) => controller.updateSettings(settings.copyWith(notifySegment: value))),
-                  SwitchListTile(title: Text(l10n.notifyEnd), value: settings.notifyEnd, onChanged: (value) => controller.updateSettings(settings.copyWith(notifyEnd: value))),
-                  SwitchListTile(title: Text(l10n.sound), value: settings.notifySound, onChanged: (value) => controller.updateSettings(settings.copyWith(notifySound: value))),
-                  SwitchListTile(title: Text(l10n.vibration), subtitle: Text(l10n.vibrationHelp), value: settings.notifyVibration, onChanged: (value) => controller.updateSettings(settings.copyWith(notifyVibration: value))),
+                  SwitchListTile(
+                    title: Text(l10n.notifyChunk),
+                    value: settings.notifySegment,
+                    onChanged: (value) => controller.updateSettings(
+                      settings.copyWith(notifySegment: value),
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.notifyEnd),
+                    value: settings.notifyEnd,
+                    onChanged: (value) => controller.updateSettings(
+                      settings.copyWith(notifyEnd: value),
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.sound),
+                    value: settings.notifySound,
+                    onChanged: (value) => controller.updateSettings(
+                      settings.copyWith(notifySound: value),
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.vibration),
+                    subtitle: Text(l10n.vibrationHelp),
+                    value: settings.notifyVibration,
+                    onChanged: (value) => controller.updateSettings(
+                      settings.copyWith(notifyVibration: value),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -67,7 +125,10 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.endAction, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  Text(
+                    l10n.endAction,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -77,7 +138,9 @@ class SettingsPage extends ConsumerWidget {
                         ChoiceChip(
                           label: Text(_endLabel(l10n, action)),
                           selected: settings.endAction == action,
-                          onSelected: (_) => controller.updateSettings(settings.copyWith(endAction: action)),
+                          onSelected: (_) => controller.updateSettings(
+                            settings.copyWith(endAction: action),
+                          ),
                         ),
                     ],
                   ),
@@ -91,7 +154,9 @@ class SettingsPage extends ConsumerWidget {
                 title: Text(l10n.autoStart),
                 subtitle: Text(l10n.autoStartHelp),
                 value: settings.autoStart,
-                onChanged: (value) => controller.updateSettings(settings.copyWith(autoStart: value)),
+                onChanged: (value) => controller.updateSettings(
+                  settings.copyWith(autoStart: value),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -99,9 +164,18 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.trigger, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  Text(
+                    l10n.trigger,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 4),
-                  Text(l10n.camouflageHint, style: const TextStyle(color: TickColors.muted, fontSize: 13)),
+                  Text(
+                    l10n.camouflageHint,
+                    style: const TextStyle(
+                      color: TickColors.muted,
+                      fontSize: 13,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -109,14 +183,22 @@ class SettingsPage extends ConsumerWidget {
                     children: [
                       for (final trigger in CamouflageTrigger.values)
                         ChoiceChip(
-                          label: premiumLabel(_triggerLabel(l10n, trigger), locked: !app.premium && trigger != CamouflageTrigger.corner),
+                          label: premiumLabel(
+                            _triggerLabel(l10n, trigger),
+                            locked:
+                                !app.premium &&
+                                trigger != CamouflageTrigger.corner,
+                          ),
                           selected: settings.camouflageTrigger == trigger,
                           onSelected: (_) {
-                            if (!app.premium && trigger != CamouflageTrigger.corner) {
-                              context.push('/settings/premium');
+                            if (!app.premium &&
+                                trigger != CamouflageTrigger.corner) {
+                              showPremiumOffer(context, ref);
                               return;
                             }
-                            controller.updateSettings(settings.copyWith(camouflageTrigger: trigger));
+                            controller.updateSettings(
+                              settings.copyWith(camouflageTrigger: trigger),
+                            );
                           },
                         ),
                     ],
@@ -128,14 +210,19 @@ class SettingsPage extends ConsumerWidget {
                     children: [
                       for (final look in CamouflageLook.values)
                         ChoiceChip(
-                          label: premiumLabel(_lookLabel(l10n, look), locked: !app.premium && look != CamouflageLook.home),
+                          label: premiumLabel(
+                            _lookLabel(l10n, look),
+                            locked: !app.premium && look != CamouflageLook.home,
+                          ),
                           selected: settings.camouflageLook == look,
                           onSelected: (_) {
                             if (!app.premium && look != CamouflageLook.home) {
-                              context.push('/settings/premium');
+                              showPremiumOffer(context, ref);
                               return;
                             }
-                            controller.updateSettings(settings.copyWith(camouflageLook: look));
+                            controller.updateSettings(
+                              settings.copyWith(camouflageLook: look),
+                            );
                           },
                         ),
                     ],
@@ -148,7 +235,10 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.chickVoiceTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  Text(
+                    l10n.chickVoiceTitle,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -156,21 +246,33 @@ class SettingsPage extends ConsumerWidget {
                     children: [
                       for (final voice in ChickVoice.values)
                         ChoiceChip(
-                          label: premiumLabel(_voiceLabel(l10n, voice), locked: !app.premium && voice != ChickVoice.plain),
+                          label: premiumLabel(
+                            _voiceLabel(l10n, voice),
+                            locked: !app.premium && voice != ChickVoice.plain,
+                          ),
                           selected: settings.chickVoice == voice,
                           onSelected: (_) {
                             if (!app.premium && voice != ChickVoice.plain) {
-                              context.push('/settings/premium');
+                              showPremiumOffer(context, ref);
                               return;
                             }
-                            controller.updateSettings(settings.copyWith(chickVoice: voice));
+                            controller.updateSettings(
+                              settings.copyWith(chickVoice: voice),
+                            );
                           },
                         ),
                     ],
                   ),
-                  if (app.premium && settings.chickVoice == ChickVoice.custom) ...[
+                  if (app.premium &&
+                      settings.chickVoice == ChickVoice.custom) ...[
                     const SizedBox(height: 8),
-                    _CustomLineField(initial: settings.customChickLine, hint: l10n.customLine, onSave: (value) => controller.updateSettings(settings.copyWith(customChickLine: value))),
+                    _CustomLineField(
+                      initial: settings.customChickLine,
+                      hint: l10n.customLine,
+                      onSave: (value) => controller.updateSettings(
+                        settings.copyWith(customChickLine: value),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -180,20 +282,54 @@ class SettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
                 children: [
-                  ListTile(title: Text(l10n.account, style: const TextStyle(fontWeight: FontWeight.w800)), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/settings/account')),
+                  if (!_anonymous(app))
+                    ListTile(
+                      title: Text(
+                        l10n.account,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/settings/account'),
+                    ),
                   ListTile(
                     leading: const PremiumMark(size: 32),
-                    title: Text(l10n.premium, style: const TextStyle(fontWeight: FontWeight.w800)),
-                    subtitle: Text(app.premium ? l10n.premiumOwned : l10n.freeTier),
+                    title: Text(
+                      l10n.premium,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    subtitle: Text(
+                      app.premium ? l10n.premiumOwned : l10n.freeTier,
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/settings/premium'),
                   ),
-                  ListTile(title: Text(l10n.fakeCall, style: const TextStyle(fontWeight: FontWeight.w800)), trailing: const Icon(Icons.chevron_right), onTap: () => context.push('/call')),
                   ListTile(
-                    title: Text(l10n.camouflage, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    title: Text(
+                      l10n.fakeCall,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ref.read(appControllerProvider.notifier).setCamouflage(true),
+                    onTap: () => context.push('/call'),
                   ),
+                  ListTile(
+                    title: Text(
+                      l10n.camouflage,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => ref
+                        .read(appControllerProvider.notifier)
+                        .setCamouflage(true),
+                  ),
+                  if (labCanReview(app.auth?.email))
+                    ListTile(
+                      title: Text(
+                        l10n.labReview,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/lab/review'),
+                    ),
                 ],
               ),
             ),
@@ -210,6 +346,11 @@ String _scheduleLine(AppState app) {
   return '${pattern.start.label} – ${pattern.end.label}';
 }
 
+bool _anonymous(AppState app) {
+  final auth = app.auth;
+  return auth == null || auth.anonymous || auth.provider == 'local';
+}
+
 String _endLabel(AppLocalizations l10n, EndAction action) {
   return switch (action) {
     EndAction.celebration => l10n.actionCelebration,
@@ -219,7 +360,11 @@ String _endLabel(AppLocalizations l10n, EndAction action) {
 }
 
 class _CustomLineField extends StatefulWidget {
-  const _CustomLineField({required this.initial, required this.hint, required this.onSave});
+  const _CustomLineField({
+    required this.initial,
+    required this.hint,
+    required this.onSave,
+  });
 
   final String initial;
   final String hint;
@@ -230,12 +375,15 @@ class _CustomLineField extends StatefulWidget {
 }
 
 class _CustomLineFieldState extends State<_CustomLineField> {
-  late final TextEditingController _controller = TextEditingController(text: widget.initial);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial,
+  );
 
   @override
   void didUpdateWidget(_CustomLineField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initial != widget.initial && _controller.text != widget.initial) {
+    if (oldWidget.initial != widget.initial &&
+        _controller.text != widget.initial) {
       _controller.text = widget.initial;
     }
   }

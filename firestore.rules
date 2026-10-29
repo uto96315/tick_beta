@@ -4,5 +4,114 @@ service cloud.firestore {
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.email == 'yuto.mabe@gmail.com';
+    }
+
+    function isSeed(promptId) {
+      return promptId.matches('^seed-[a-z0-9-]{1,40}$');
+    }
+
+    function promptPath(promptId) {
+      return /databases/$(database)/documents/labPrompts/$(promptId);
+    }
+
+    function acceptsPosts(promptId) {
+      return exists(promptPath(promptId))
+        ? get(promptPath(promptId)).data.phase == 'open'
+          && (
+            !('closesAt' in get(promptPath(promptId)).data)
+            || get(promptPath(promptId)).data.closesAt == null
+            || get(promptPath(promptId)).data.closesAt > request.time
+          )
+        : isSeed(promptId);
+    }
+
+    match /labPrompts/{promptId} {
+      allow read: if signedIn() && (
+        resource.data.phase == 'open' || resource.data.phase == 'closed' || isAdmin()
+      );
+      allow create, update: if isAdmin()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 40
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 200
+        && request.resource.data.phase in ['open', 'closed']
+        && request.resource.data.category in ['sit', 'stand', 'quiet']
+        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw']
+        && request.resource.data.choices is list
+        && request.resource.data.choices.size() <= 4;
+      allow delete: if false;
+
+      match /entries/{entryId} {
+        allow read: if signedIn() && (resource.data.hidden == false || isAdmin());
+        allow create: if signedIn()
+          && entryId == request.auth.uid
+          && acceptsPosts(promptId)
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.hidden == false
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 24
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 80
+          && request.resource.data.createdAt is timestamp
+          && (!('choiceIndex' in request.resource.data) || request.resource.data.choiceIndex is int);
+        allow update: if isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
+          && request.resource.data.hidden is bool;
+        allow delete: if false;
+      }
+
+      match /ballots/{ballotId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.voterUid == request.auth.uid
+          && request.resource.data.entryUid is string
+          && request.resource.data.entryUid != request.auth.uid
+          && ballotId == request.auth.uid + '_' + request.resource.data.entryUid
+          && exists(/databases/$(database)/documents/labPrompts/$(promptId)/entries/$(request.resource.data.entryUid))
+          && get(/databases/$(database)/documents/labPrompts/$(promptId)/entries/$(request.resource.data.entryUid)).data.hidden == false;
+        allow delete: if signedIn() && resource.data.voterUid == request.auth.uid;
+        allow update: if false;
+      }
+    }
+
+    match /labProposals/{proposalId} {
+      allow create: if signedIn()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 40
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 200
+        && request.resource.data.category in ['sit', 'stand', 'quiet']
+        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw']
+        && request.resource.data.choices is list
+        && request.resource.data.choices.size() <= 4;
+      allow read: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /labReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.promptId is string
+        && request.resource.data.entryUid is string
+        && reportId == request.resource.data.promptId + '_' + request.resource.data.entryUid + '_' + request.auth.uid;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
   }
 }

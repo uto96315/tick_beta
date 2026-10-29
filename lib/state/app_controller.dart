@@ -9,12 +9,17 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/session_ops.dart';
+import 'package:tick/lab/lab_store.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/services/notification_copy.dart';
 import 'package:tick/state/app_state.dart';
 
 final depsProvider = Provider<AppDeps>(
   (ref) => throw StateError('AppDeps is not installed'),
+);
+
+final labStoreProvider = Provider<LabStore>(
+  (ref) => ref.watch(depsProvider).lab,
 );
 
 final appControllerProvider = NotifierProvider<AppController, AppState>(

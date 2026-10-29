@@ -81,7 +81,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sounds/ring.wav
-    - assets/images/character/
+    - assets/images/character/main/
     - assets/images/tutorial/
     - assets/images/icon/premium_icon.png
   fonts:

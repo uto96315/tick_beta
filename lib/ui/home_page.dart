@@ -180,6 +180,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                             .setCamouflage(true),
                       ),
                       const SizedBox(height: 12),
+                      _LabEntry(key: const ValueKey('lab-entry'), onTap: () => context.push('/lab')),
+                      const SizedBox(height: 12),
                       _MoodCard(
                         l10n: l10n,
                         mood: app.mood,
@@ -831,6 +833,56 @@ class _Tool extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LabEntry extends StatelessWidget {
+  const _LabEntry({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return PopCard(
+      color: TickColors.yellow,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/images/character/main/happy.png',
+              width: 48,
+              height: 48,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.labTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    l10n.labSubtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: TickColors.muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: TickColors.ink),
+          ],
         ),
       ),
     );

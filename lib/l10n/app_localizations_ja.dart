@@ -341,6 +341,44 @@ class AppLocalizationsJa extends AppLocalizations {
       '買い切りです。偽着信が無制限になり、発信者、カモフラージュの画面、着信音、ひよこの口調が増えます。';
 
   @override
+  String get registerAccount => 'アカウントを登録';
+
+  @override
+  String get registerAccountHelp => 'メールを残すと、入れ直しても戻る。';
+
+  @override
+  String get premiumOfferTitle => 'プレミアム';
+
+  @override
+  String get premiumOfferLead => '買い切りです。仕事のふりが、もう少し自由になります。';
+
+  @override
+  String get premiumOfferCalls => '偽着信は、何回でも';
+
+  @override
+  String get premiumOfferCallers => '発信者を、自分で足せる';
+
+  @override
+  String get premiumOfferSounds => '着信音を選べる';
+
+  @override
+  String get premiumOfferLooks => '画面を、メモやカレンダーに';
+
+  @override
+  String get premiumOfferVoice => 'ひよこの口調が増える';
+
+  @override
+  String get premiumOfferBefore => '定時の10分前に、電話が来る';
+
+  @override
+  String get premiumOfferLater => '今はいい';
+
+  @override
+  String premiumOfferBuy(String price) {
+    return '$price ではじめる';
+  }
+
+  @override
   String get premiumOwned => 'プレミアムは有効';
 
   @override
@@ -1018,4 +1056,239 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get excuse5 => '充電器を取ってきます。';
+
+  @override
+  String get labTitle => '暇つぶしLAB';
+
+  @override
+  String get labSubtitle => 'みんなのお題';
+
+  @override
+  String get labToday => '今日のお題';
+
+  @override
+  String get labTodayEmpty => '今日のお題は、まだない。';
+
+  @override
+  String get labSeeAll => 'お題を見る';
+
+  @override
+  String get labSit => '座り仕事';
+
+  @override
+  String get labStand => '立ち仕事';
+
+  @override
+  String get labQuiet => 'こっそり';
+
+  @override
+  String get labSitHelp => '手を動かして遊ぶ';
+
+  @override
+  String get labStandHelp => '頭で遊ぶ';
+
+  @override
+  String get labQuietHelp => '短く、目立たず';
+
+  @override
+  String get labSafety => '運転中や、危ない作業の途中では開かない。';
+
+  @override
+  String get labPropose => 'お題を提案';
+
+  @override
+  String get labEntries => 'みんなの回答';
+
+  @override
+  String get labEmptyEntries => 'まだない。最初のひとりになれる。';
+
+  @override
+  String get labEmptyList => 'この条件のお題は、まだない。';
+
+  @override
+  String get labAnswer => '回答する';
+
+  @override
+  String get labAnswerHint => '短く一つ';
+
+  @override
+  String get labConfirmPost => 'この内容で出す？';
+
+  @override
+  String get labSend => '出す';
+
+  @override
+  String get labPosted => '出した';
+
+  @override
+  String get labDrawLater => 'お絵描きは、次に作る。';
+
+  @override
+  String get labLike => 'いいね';
+
+  @override
+  String get labReport => '通報';
+
+  @override
+  String get labReported => '受け取った';
+
+  @override
+  String get labLocalOnly => 'このiPhoneの中だけ。ほかの人には届かない。';
+
+  @override
+  String get labLoadError => '最新を読めなかった。手元にあるものだけ出している。';
+
+  @override
+  String get labOpen => '開催中';
+
+  @override
+  String get labClosed => '終了';
+
+  @override
+  String labCount(int count) {
+    return '$count件';
+  }
+
+  @override
+  String labUntil(String time) {
+    return '〜 $time';
+  }
+
+  @override
+  String get labChoiceResult => '回答の割合';
+
+  @override
+  String get labCorrect => '当たり';
+
+  @override
+  String get labWrong => 'はずれ';
+
+  @override
+  String get labYourAnswer => 'あなたの回答';
+
+  @override
+  String get labProposeTitle => 'お題のタイトル';
+
+  @override
+  String get labProposeBody => 'どんな遊び？';
+
+  @override
+  String get labCategory => 'どこ向け';
+
+  @override
+  String get labProposeFormat => '回答のしかた';
+
+  @override
+  String get labFormatOgiri => '大喜利';
+
+  @override
+  String get labFormatQuiz => 'クイズ';
+
+  @override
+  String get labFormatChoice => '二択';
+
+  @override
+  String get labFormatDraw => 'お絵描き';
+
+  @override
+  String get labChoicesHint => '選択肢。1行に1つ';
+
+  @override
+  String get labCorrectOptional => '正解は空でも送れる。運営が決めてもいい。';
+
+  @override
+  String get labProposeSend => '提案を送る';
+
+  @override
+  String get labProposeDone => '送った。運営が見てから公開する。';
+
+  @override
+  String get labReview => 'お題の審査';
+
+  @override
+  String get labReviewLocked => '審査は、運営のアカウントでログインしたときだけ開く。';
+
+  @override
+  String get labPending => '審査待ち';
+
+  @override
+  String get labAccepted => '採用';
+
+  @override
+  String get labRejected => '不採用';
+
+  @override
+  String get labAccept => '採用する';
+
+  @override
+  String get labReject => '不採用にする';
+
+  @override
+  String get labPublish => '公開する';
+
+  @override
+  String get labPublished => '公開した';
+
+  @override
+  String get labHide => '隠す';
+
+  @override
+  String get labHidden => '隠した';
+
+  @override
+  String get labReports => '通報';
+
+  @override
+  String get labNoReports => '通報はない';
+
+  @override
+  String get labNoProposals => '提案はまだない';
+
+  @override
+  String get labOfficial => '運営のお題を書く';
+
+  @override
+  String get labFeatured => '今日のお題にする';
+
+  @override
+  String get labNotFound => 'そのお題は、ここにない。';
+
+  @override
+  String get labAll => 'すべて';
+
+  @override
+  String get labSortCount => '投稿が多い';
+
+  @override
+  String get labRank => '人気';
+
+  @override
+  String get labRankEmpty => 'まだ票はない。読むだけでもいい。';
+
+  @override
+  String get labFailEmpty => '何か書いてから。';
+
+  @override
+  String get labFailLong => '少し長い。';
+
+  @override
+  String get labFailAlready => 'これはもう出している。';
+
+  @override
+  String get labFailClosed => 'このお題は終わっている。';
+
+  @override
+  String get labFailSelf => '自分のには押せない。';
+
+  @override
+  String get labFailForbidden => 'これは運営だけ。';
+
+  @override
+  String get labFailOffline => '届かなかった。';
+
+  @override
+  String get labFailInvalid => 'このお題には合わない。';
+
+  @override
+  String get labFailContact => '電話番号やメールアドレスは入れない。';
 }

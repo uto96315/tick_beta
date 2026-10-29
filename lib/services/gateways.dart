@@ -1,4 +1,5 @@
 import 'package:tick/data/local_store.dart';
+import 'package:tick/lab/lab_store.dart';
 import 'package:tick/data/persisted_state.dart';
 import 'package:tick/domain/app_update.dart';
 
@@ -24,8 +25,14 @@ class AuthFlowException implements Exception {
 abstract class AuthGateway {
   AuthUser? get current;
   Future<AuthUser> ensureSignedIn();
-  Future<AuthUser> registerEmail({required String email, required String password});
-  Future<AuthUser> signInEmail({required String email, required String password});
+  Future<AuthUser> registerEmail({
+    required String email,
+    required String password,
+  });
+  Future<AuthUser> signInEmail({
+    required String email,
+    required String password,
+  });
   Future<AuthUser> registerGoogle();
   Future<AuthUser> signInGoogle();
   Future<void> signOut();
@@ -47,7 +54,10 @@ class LocalAuthGateway implements AuthGateway {
   Future<void> deleteAccount() async {}
 
   @override
-  Future<AuthUser> registerEmail({required String email, required String password}) {
+  Future<AuthUser> registerEmail({
+    required String email,
+    required String password,
+  }) {
     throw AuthFlowException('unavailable');
   }
 
@@ -55,7 +65,10 @@ class LocalAuthGateway implements AuthGateway {
   Future<AuthUser> registerGoogle() => throw AuthFlowException('unavailable');
 
   @override
-  Future<AuthUser> signInEmail({required String email, required String password}) {
+  Future<AuthUser> signInEmail({
+    required String email,
+    required String password,
+  }) {
     throw AuthFlowException('unavailable');
   }
 
@@ -178,6 +191,7 @@ class AppDeps {
     required this.savePhoto,
     required this.installedBuild,
     required this.updates,
+    required this.lab,
   });
 
   final LocalStore store;
@@ -193,4 +207,5 @@ class AppDeps {
   final Future<String?> Function(String callerId, String sourcePath) savePhoto;
   final int installedBuild;
   final UpdatePolicySource updates;
+  final LabStore lab;
 }
