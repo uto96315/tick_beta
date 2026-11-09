@@ -98,6 +98,61 @@ SegmentProgress evaluateSegments({
   );
 }
 
+/// Groups segment indexes by [Segment.start] hour (preserving order).
+List<List<int>> segmentIndexesByHour(List<Segment> segments) {
+  if (segments.isEmpty) return [];
+  final groups = <List<int>>[];
+  var hour = -1;
+  var bucket = <int>[];
+  for (var i = 0; i < segments.length; i++) {
+    final h = segments[i].start.hour;
+    if (bucket.isEmpty || h == hour) {
+      hour = h;
+      bucket.add(i);
+    } else {
+      groups.add(bucket);
+      bucket = [i];
+      hour = h;
+    }
+  }
+  if (bucket.isNotEmpty) groups.add(bucket);
+  return groups;
+}
+
+/// Segment indexes for the same clock hour as [now], or the current segment's hour.
+List<int> hourSegmentIndexes(
+  List<Segment> segments,
+  DateTime now,
+  int? currentIndex,
+) {
+  bool sameClockHour(Segment segment) {
+    return segment.start.year == now.year &&
+        segment.start.month == now.month &&
+        segment.start.day == now.day &&
+        segment.start.hour == now.hour;
+  }
+
+  final inHour = <int>[
+    for (var i = 0; i < segments.length; i++)
+      if (sameClockHour(segments[i])) i,
+  ];
+  if (inHour.isNotEmpty) return inHour;
+  if (currentIndex == null ||
+      currentIndex < 0 ||
+      currentIndex >= segments.length) {
+    return inHour;
+  }
+  final anchor = segments[currentIndex].start;
+  return [
+    for (var i = 0; i < segments.length; i++)
+      if (segments[i].start.year == anchor.year &&
+          segments[i].start.month == anchor.month &&
+          segments[i].start.day == anchor.day &&
+          segments[i].start.hour == anchor.hour)
+        i,
+  ];
+}
+
 List<SegmentView> segmentViews(List<Segment> segments, SegmentProgress progress) {
   return [
     for (var i = 0; i < segments.length; i++)

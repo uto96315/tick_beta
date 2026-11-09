@@ -1,0 +1,22 @@
+[
+  { "id": "seed-pen-01", "title": "龍", "category": "stand", "featured": false },
+  { "id": "seed-pen-02", "title": "鳳凰", "category": "quiet", "featured": false },
+  { "id": "seed-pen-03", "title": "天下無双", "category": "stand", "featured": false },
+  { "id": "seed-pen-04", "title": "疾風迅雷", "category": "stand", "featured": false },
+  { "id": "seed-pen-05", "title": "花鳥風月", "category": "quiet", "featured": false },
+  { "id": "seed-pen-06", "title": "森羅万象", "category": "stand", "featured": false },
+  { "id": "seed-pen-07", "title": "桜花爛漫", "category": "quiet", "featured": false },
+  { "id": "seed-pen-08", "title": "明鏡止水", "category": "quiet", "featured": false },
+  { "id": "seed-pen-09", "title": "百花繚乱", "category": "stand", "featured": false },
+  { "id": "seed-pen-10", "title": "風林火山", "category": "stand", "featured": false },
+  { "id": "seed-pen-11", "title": "天翔", "category": "stand", "featured": false },
+  { "id": "seed-pen-12", "title": "覇道", "category": "stand", "featured": false },
+  { "id": "seed-pen-13", "title": "無限", "category": "quiet", "featured": false },
+  { "id": "seed-pen-14", "title": "絶影", "category": "stand", "featured": false },
+  { "id": "seed-pen-15", "title": "神威", "category": "stand", "featured": false },
+  { "id": "seed-pen-16", "title": "幽玄", "category": "quiet", "featured": false },
+  { "id": "seed-pen-17", "title": "煉獄", "category": "stand", "featured": false },
+  { "id": "seed-pen-18", "title": "迅雷", "category": "stand", "featured": false },
+  { "id": "seed-pen-19", "title": "不撓不屈", "category": "stand", "featured": false },
+  { "id": "seed-pen-20", "title": "天下泰平", "category": "quiet", "featured": false }
+]

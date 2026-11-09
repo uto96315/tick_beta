@@ -81,6 +81,10 @@ class TickTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: TickColors.card,
+        hintStyle: TextStyle(
+          color: TickColors.muted.withValues(alpha: 0.55),
+          fontWeight: FontWeight.w500,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: TickColors.line)),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: TickColors.line)),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: ink, width: 1.4)),

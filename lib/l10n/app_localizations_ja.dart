@@ -145,7 +145,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get account => 'アカウント';
 
   @override
-  String get premium => 'プレミアム';
+  String get premium => '会員ステータス';
 
   @override
   String get camouflage => 'カモフラージュ';
@@ -166,10 +166,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get triggerSwipe => '下にスワイプ';
 
   @override
-  String get camouflageHint => 'アプリ内の静かな画面に切り替わります。iPhoneのホーム画面そのものにはなりません。';
+  String get camouflageHint => 'このアプリを開いているのが分かりにくくなります。戻るときは右上をタップします。';
 
   @override
-  String get backHintCorner => '右上をタップすると戻る';
+  String get camouflageSetup => '登録・設定';
+
+  @override
+  String get camouflagePreview => 'プレビュー';
+
+  @override
+  String get camouflageSettingsLead => '見た目の選択と、画像の登録はここで行います。';
+
+  @override
+  String get camouflageImageUseNote => '登録した画像は、「ホーム」を選んだときに全画面で使われます。';
+
+  @override
+  String get homeShotTitle => '自分のホーム画面（プレミアム）';
+
+  @override
+  String get backHintCorner => '右上で戻る。左上で画像登録。';
 
   @override
   String get backHintLong => '長押しで戻る';
@@ -209,6 +224,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get incoming => '着信中';
+
+  @override
+  String get incomingSendMessage => 'メッセージを送信';
+
+  @override
+  String get incomingVoicemail => '留守番電話';
 
   @override
   String get mobile => 'モバイル';
@@ -307,13 +328,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get anonymous => '匿名で利用中';
 
   @override
-  String get registerEmail => 'メールで登録して引き継ぐ';
+  String get registerEmail => '新規登録';
 
   @override
-  String get registerGoogle => 'Googleで登録して引き継ぐ';
+  String get registerGoogle => 'Googleで登録';
 
   @override
-  String get signInEmail => 'メールでログイン';
+  String get signInEmail => 'ログイン';
 
   @override
   String get signInGoogle => 'Googleでログイン';
@@ -338,44 +359,65 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get premiumPitch =>
-      '買い切りです。偽着信が無制限になり、発信者、カモフラージュの画面、着信音、ひよこの口調が増えます。';
+      '買い切り。偽着信が無制限になり、発信者の追加、着信音、カモフラージュ、定時前の自動着信が使えます。';
 
   @override
-  String get registerAccount => 'アカウントを登録';
+  String get registerAccount => 'アカウント';
 
   @override
-  String get registerAccountHelp => 'メールを残すと、入れ直しても戻る。';
+  String get registerAccountHelp => '';
 
   @override
-  String get premiumOfferTitle => 'プレミアム';
+  String get premiumOfferTitle => 'その場を抜ける保険';
 
   @override
-  String get premiumOfferLead => '買い切りです。仕事のふりが、もう少し自由になります。';
+  String get premiumOfferLead => '買い切り。週1回の制限を外し、本物っぽい着信と画面の切り替えをまとめて使えます。';
 
   @override
-  String get premiumOfferCalls => '偽着信は、何回でも';
+  String get premiumOfferCalls => '偽着信は何度でも';
 
   @override
-  String get premiumOfferCallers => '発信者を、自分で足せる';
+  String get premiumOfferCallsNote => '会議・上司が来たときに、「今は出られない」とすぐ言える';
+
+  @override
+  String get premiumOfferCallers => '発信者を自由に登録';
+
+  @override
+  String get premiumOfferCallersNote => '名前・写真を用意した上司や取引先など';
+
+  @override
+  String get premiumOfferIncoming => 'iPhone風の着信画面';
+
+  @override
+  String get premiumOfferIncomingNote => '着信・拒否・応答まで、実機に近い見た目';
 
   @override
   String get premiumOfferSounds => '着信音を選べる';
 
   @override
-  String get premiumOfferLooks => '画面を、メモやカレンダーに';
+  String get premiumOfferSoundsNote => '周りに本物の着信だと思わせる';
+
+  @override
+  String get premiumOfferLooks => 'カモフラージュ画面';
+
+  @override
+  String get premiumOfferLooksNote => 'メモ・カレンダー、自分のホーム画面スクショに切り替え';
 
   @override
   String get premiumOfferVoice => 'ひよこの口調が増える';
 
   @override
-  String get premiumOfferBefore => '定時の10分前に、電話が来る';
+  String get premiumOfferBefore => '定時10分前の自動着信';
+
+  @override
+  String get premiumOfferBeforeNote => '退勤に合わせて電話が鳴る予約';
 
   @override
   String get premiumOfferLater => '今はいい';
 
   @override
   String premiumOfferBuy(String price) {
-    return '$price ではじめる';
+    return '$price で有効にする';
   }
 
   @override
@@ -624,6 +666,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get notRunning => '未開始';
+
+  @override
+  String get idleAfterShiftStatus => '定時過ぎ';
+
+  @override
+  String get idleAfterShiftBody => '本日の勤務は終了しています。\nお疲れ様でした🎵';
+
+  @override
+  String get idleAfterShiftAction => 'スケジュールを開く';
 
   @override
   String get startTimer => 'タイマーを開始';
@@ -1001,6 +1052,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get moodTitle => '今の気分は？';
 
   @override
+  String get moodAuto => 'おまかせ（進捗に合わせる）';
+
+  @override
   String get todaySoFar => '今日の進捗';
 
   @override
@@ -1013,7 +1067,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toolExcuse => '言い訳\nジェネレーター';
 
   @override
-  String get toolAway => 'ちょっと離席';
+  String get toolAway => 'カモフラージュ';
 
   @override
   String get moodCheer => '頑張る';
@@ -1058,7 +1112,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get excuse5 => '充電器を取ってきます。';
 
   @override
-  String get labTitle => '暇つぶしLAB';
+  String get labTitle => '暇つぶしラボ';
 
   @override
   String get labSubtitle => 'みんなのお題';
@@ -1067,7 +1121,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labToday => '今日のお題';
 
   @override
-  String get labTodayEmpty => '今日のお題は、まだない。';
+  String get labTodayEmpty => '準備中';
+
+  @override
+  String get labTodayPreparingHelp => 'もうすぐ載る。';
 
   @override
   String get labSeeAll => 'お題を見る';
@@ -1124,6 +1181,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labDrawLater => 'お絵描きは、次に作る。';
 
   @override
+  String get labPhotoHint => '写真を1枚選んで投稿。';
+
+  @override
+  String get labPhotoPick => '写真を選ぶ';
+
+  @override
+  String get labPhotoReplace => '別の写真にする';
+
+  @override
+  String get labProfileTitle => 'ラボのプロフィール';
+
+  @override
+  String get labProfileHint => '暇つぶしラボに出る名前とアイコン。';
+
+  @override
+  String get labProfileName => '表示名';
+
+  @override
+  String get labProfilePickIcon => 'アイコンを選ぶ';
+
+  @override
+  String get labProfileSave => '保存';
+
+  @override
+  String get labProfileSaved => 'プロフィールを保存した';
+
+  @override
+  String get labPhotoPolicyWarning =>
+      '著作権やプライバシー、公序良俗に反する画像は禁止です。通報や運営の判断で非表示にし、悪質な場合はアカウントを停止することがあります。';
+
+  @override
+  String get labFailPhotoEmpty => '写真を選んでから出して。';
+
+  @override
+  String get labReportPhoto => '（画像の投稿）';
+
+  @override
   String get labLike => 'いいね';
 
   @override
@@ -1139,6 +1233,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labLoadError => '最新を読めなかった。手元にあるものだけ出している。';
 
   @override
+  String get labLoadFailed => 'お題を読み込めなかった。通信を確認して、もう一度試して。';
+
+  @override
+  String get labReload => 'もう一度読み込む';
+
+  @override
   String get labOpen => '開催中';
 
   @override
@@ -1146,8 +1246,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String labCount(int count) {
-    return '$count件';
+    return '投稿 $count件';
   }
+
+  @override
+  String get labJoined => '参加済み';
+
+  @override
+  String get labNotJoined => '未参加';
 
   @override
   String labUntil(String time) {
@@ -1167,10 +1273,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labYourAnswer => 'あなたの回答';
 
   @override
-  String get labProposeTitle => 'お題のタイトル';
+  String get labProposeTitle => 'お題';
 
   @override
-  String get labProposeBody => 'どんな遊び？';
+  String get labProposeBody => '補足';
+
+  @override
+  String get labProposePickGenre => 'まずジャンルを選ぶ';
+
+  @override
+  String get labProposeChangeGenre => 'ジャンルを変える';
+
+  @override
+  String get labProposeTitleHintOgiri => '例：絶対に嫌な会社のルールは？';
+
+  @override
+  String get labProposeTitleHintChoice => '例：定時退社と給料アップ、どっち？';
+
+  @override
+  String get labProposeTitleHintQuiz => '例：食べられないパンは？';
+
+  @override
+  String get labProposeTitleHintDraw => '例：会議中の落書きにタイトルを';
+
+  @override
+  String get labProposeTitleHintPen => '例：上司への一言を達筆で';
+
+  @override
+  String get labProposeBodyHint => '任意。空なら「自由に答えて。」';
+
+  @override
+  String get labProposeBodyDefault => '自由に答えて。';
 
   @override
   String get labCategory => 'どこ向け';
@@ -1206,6 +1339,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labReview => 'お題の審査';
 
   @override
+  String get labSeedOgiri => '大喜利20本を Firestore に投入';
+
+  @override
+  String labSeedOgiriDone(int count) {
+    return '$count 件の大喜利を投入しました';
+  }
+
+  @override
+  String get labSeedDraw => 'お絵描き20本を Firestore に投入';
+
+  @override
+  String labSeedDrawDone(int count) {
+    return '$count 件のお絵描きお題を投入しました';
+  }
+
+  @override
+  String get labSeedPen => '達筆20本を Firestore に投入';
+
+  @override
+  String labSeedPenDone(int count) {
+    return '$count 件の達筆お題を投入しました';
+  }
+
+  @override
   String get labReviewLocked => '審査は、運営のアカウントでログインしたときだけ開く。';
 
   @override
@@ -1234,6 +1391,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get labHidden => '隠した';
+
+  @override
+  String get labDeleteEntry => '投稿を削除';
+
+  @override
+  String get labDeleteEntryConfirm => 'この投稿を削除する。いいねも消える。';
+
+  @override
+  String get labDeletedEntry => '削除した';
 
   @override
   String get labReports => '通報';
@@ -1291,4 +1457,125 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get labFailContact => '電話番号やメールアドレスは入れない。';
+
+  @override
+  String get homeShotPick => 'スクショを選ぶ';
+
+  @override
+  String get homeShotHelp => '自分のホーム画面のスクショを、カモフラージュに使えます。';
+
+  @override
+  String get homeShotFree => '無料は、用意してあるホーム画面のままです。';
+
+  @override
+  String get premiumOfferHomeShot => '自分のホーム画面を、カモフラージュに使える';
+
+  @override
+  String get shiftFrom => '始まり';
+
+  @override
+  String get shiftTo => '終わり';
+
+  @override
+  String get chunkNow => 'いま';
+
+  @override
+  String get toolLab => '暇つぶしラボ';
+
+  @override
+  String get mascotTitle => 'キャラ';
+
+  @override
+  String get mascotChick => 'ヒヨコ';
+
+  @override
+  String get mascotSloth => 'ナマケモノ';
+
+  @override
+  String get settingsWork => '仕事';
+
+  @override
+  String get settingsNotify => '通知';
+
+  @override
+  String get settingsTimer => 'タイマー';
+
+  @override
+  String get settingsMore => 'その他';
+
+  @override
+  String get camouflageFirst =>
+      'この画面にすると、いまのアプリを開いているのが分かりにくくなります。戻るときは、右上をタップします。';
+
+  @override
+  String get camouflageFirstGo => 'これに替える';
+
+  @override
+  String get labTapToPost => '参加する';
+
+  @override
+  String get labOthers => '他のお題';
+
+  @override
+  String get labOthersHelp => 'ジャンル別の一覧';
+
+  @override
+  String get labFormatPen => '達筆';
+
+  @override
+  String get labTabChoice => '究極の二択';
+
+  @override
+  String get chickNormal4 => 'まだ始めてないなら、今が最初の区切りだよ。';
+
+  @override
+  String get chickNormal5 => '完璧じゃなくていい。座っているだけで合格。';
+
+  @override
+  String get chickTired4 => '重い日は、重いなりに減っていく。';
+
+  @override
+  String get chickTired5 => 'あとでやる気が出ても、出なくてもいい。';
+
+  @override
+  String get chickHappy4 => 'このままの顔でいい。少し楽になってる。';
+
+  @override
+  String get chickHappy5 => '区切りが減ると、肩も少し下がる。';
+
+  @override
+  String get chickCheer4 => '折り返しは過ぎた。あとは流れていく。';
+
+  @override
+  String get chickCheer5 => 'よくここまで座った。それだけでも十分。';
+
+  @override
+  String get chickAttention4 => '出口の手前。立ち上がらなくていい。';
+
+  @override
+  String get chickAttention5 => '残りは少ない。息を吐いていれば終わる。';
+
+  @override
+  String get moodHeavy4 => 'だるいままでいい。時間は勝手に進む。';
+
+  @override
+  String get moodHeavy5 => '今日は軽くしなくていい。';
+
+  @override
+  String get moodHungry4 => 'お腹が空いたままでも、区切りは減る。';
+
+  @override
+  String get moodHungry5 => '何か食べてからでも、この区切りは待ってる。';
+
+  @override
+  String get moodSleepy4 => 'うとうとしてていい。時計は起きている。';
+
+  @override
+  String get moodSleepy5 => '目を開けていなくても、進んではいる。';
+
+  @override
+  String get moodFine4 => 'このくらいの機嫌で、ちょうどいい。';
+
+  @override
+  String get moodFine5 => '無理に上げなくていい。このままで進む。';
 }

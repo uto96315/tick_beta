@@ -26,6 +26,37 @@ void main() {
     expect(segments.single.end, end);
   });
 
+  test('hour indexes follow the clock hour or the active segment', () {
+    final segments = buildSegments(
+      start: DateTime(2026, 10, 28, 9),
+      end: DateTime(2026, 10, 28, 18),
+      intervalMinutes: 30,
+    );
+    final at = DateTime(2026, 10, 28, 14, 20);
+  final progress = evaluateSegments(
+      segments: segments,
+      now: at,
+      sessionEnd: DateTime(2026, 10, 28, 18),
+    );
+    final indexes = hourSegmentIndexes(segments, at, progress.currentIndex);
+    expect(indexes, [10, 11]);
+    expect(segments[indexes.first].start.hour, 14);
+  });
+
+  test('hour groups keep consecutive segments in the same clock hour', () {
+    final segments = buildSegments(
+      start: DateTime(2026, 10, 28, 9, 0),
+      end: DateTime(2026, 10, 28, 10, 30),
+      intervalMinutes: 15,
+    );
+    final groups = segmentIndexesByHour(segments);
+    expect(groups, hasLength(2));
+    expect(groups[0], [0, 1, 2, 3]);
+    expect(groups[1], [4, 5]);
+    expect(segments[groups[0].first].start.hour, 9);
+    expect(segments[groups[1].first].start.hour, 10);
+  });
+
   test('progress counts only finished chunks', () {
     final start = DateTime(2026, 10, 26, 9);
     final end = DateTime(2026, 10, 26, 10);
@@ -181,6 +212,12 @@ void main() {
     final used = [CallCredit(id: 'a', when: monday, canceled: false, updatedAt: monday)];
     expect(FakeCallPolicy.canConsume(premium: false, credits: used, when: monday.add(const Duration(days: 1))), isFalse);
     expect(FakeCallPolicy.canConsume(premium: true, credits: used, when: monday), isTrue);
+    expect(
+      FakeCallPolicy.canConsume(premium: false, owner: true, credits: used, when: monday),
+      isTrue,
+    );
+    expect(FakeCallPolicy.isOwner('Yuto.Mabe@gmail.com'), isTrue);
+    expect(FakeCallPolicy.isOwner('other@example.com'), isFalse);
     expect(FakeCallPolicy.canConsume(premium: false, credits: used, when: DateTime(2026, 11, 2)), isTrue);
   });
 
@@ -262,6 +299,9 @@ void main() {
 
   test('free accounts stay on the plain camouflage, voice, and ringtone', () {
     expect(shownLook(false, CamouflageLook.notes), CamouflageLook.home);
+    expect(showsHomeShot(false, '/tmp/shot.jpg'), isFalse);
+    expect(showsHomeShot(true, '/tmp/shot.jpg'), isTrue);
+    expect(showsHomeShot(true, ''), isFalse);
     expect(shownLook(true, CamouflageLook.calendar), CamouflageLook.calendar);
     expect(shownVoice(false, ChickVoice.kansai), ChickVoice.plain);
     expect(shownVoice(true, ChickVoice.lazy), ChickVoice.lazy);
@@ -272,6 +312,8 @@ void main() {
     expect(settings.callSound, CallSound.classic);
     expect(settings.customChickLine, isEmpty);
     expect(settings.slackIntroSeen, isFalse);
+    expect(settings.homeShot, isEmpty);
+    expect(settings.mascot, MascotKind.chick);
   });
 
   test('build numbers choose a forced update, an optional one, or nothing', () {

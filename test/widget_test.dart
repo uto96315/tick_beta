@@ -7,8 +7,11 @@ import 'package:tick/data/persisted_state.dart';
 import 'package:tick/domain/app_update.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/segments.dart';
+import 'package:tick/domain/session_ops.dart';
 import 'package:tick/l10n/app_localizations.dart';
+import 'package:tick/lab/catalog.dart';
 import 'package:tick/lab/memory_lab.dart';
+import 'package:tick/lab/profile.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/copy.dart';
@@ -46,6 +49,26 @@ void main() {
     expect(
       timerPose(ratio: 0.1, remaining: 20, onBreak: false, pastShift: false),
       ChickPose.tired,
+    );
+    expect(
+      timerPose(
+        ratio: 0.6,
+        remaining: 10,
+        onBreak: false,
+        pastShift: false,
+        slot: 2,
+      ),
+      ChickPose.goodjob,
+    );
+    expect(
+      timerPose(
+        ratio: 0.3,
+        remaining: 10,
+        onBreak: false,
+        pastShift: false,
+        slot: 1,
+      ),
+      ChickPose.normal,
     );
   });
 
@@ -324,7 +347,7 @@ void main() {
     expect(find.text(l10n.chickTired2), findsOneWidget);
 
     for (final pose in ChickPose.values) {
-      expect(chickLines(l10n, pose), hasLength(3));
+      expect(chickLines(l10n, pose).length, greaterThanOrEqualTo(3));
     }
     expect(
       chickLines(l10n, ChickPose.tired, voice: ChickVoice.kansai).first,
@@ -339,7 +362,7 @@ void main() {
       ),
       ['ねむい'],
     );
-    expect(moodLines(l10n, ChickMood.sleepy), hasLength(3));
+    expect(moodLines(l10n, ChickMood.sleepy).length, greaterThanOrEqualTo(3));
     expect(moodPose(ChickMood.sleepy), ChickPose.sleep);
   });
 
@@ -354,9 +377,17 @@ void main() {
     });
     final persisted = PersistedState.seed(languageCode: 'ja');
     persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    final labBox = LabBox();
+    for (final seed in labSeeds('ja')) {
+      labBox.prompts[seed.id] = seed;
+    }
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [depsProvider.overrideWithValue(_testDeps(persisted))],
+        overrides: [
+          depsProvider.overrideWithValue(
+            _testDeps(persisted, labBox: labBox),
+          ),
+        ],
         child: const TickApp(),
       ),
     );
@@ -365,15 +396,43 @@ void main() {
     }
 
     final lab = find.byKey(const ValueKey('lab-entry'));
-    final scrollable = find.byWidgetPredicate(
-      (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
-    );
-    await tester.scrollUntilVisible(lab, 400, scrollable: scrollable);
     await tester.tap(lab);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('こんな会社は嫌だ'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('home idle renders without layout exceptions', (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.localeTestValue = const Locale('ja');
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearLocaleTestValue();
+    });
+    final persisted = PersistedState.seed(languageCode: 'ja');
+    persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    final labBox = LabBox();
+    for (final seed in labSeeds('ja')) {
+      labBox.prompts[seed.id] = seed;
+    }
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          depsProvider.overrideWithValue(
+            _testDeps(persisted, labBox: labBox),
+          ),
+        ],
+        child: const TickApp(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
@@ -413,7 +472,18 @@ class _FixedUpdates implements UpdatePolicySource {
   Future<UpdatePolicy?> load() async => policy;
 }
 
-AppDeps _testDeps(PersistedState persisted, {UpdatePolicySource? updates}) {
+AppDeps _testDeps(
+  PersistedState persisted, {
+  UpdatePolicySource? updates,
+  LabBox? labBox,
+  Clock? clock,
+}) {
+  final labProfileCache = LabProfileCache();
+  labProfileCache.apply(
+    nick: persisted.labNick,
+    avatarPath: persisted.labAvatarPath.isEmpty ? null : persisted.labAvatarPath,
+    avatarUrl: persisted.labAvatarUrl.isEmpty ? null : persisted.labAvatarUrl,
+  );
   return AppDeps(
     store: LocalStore(persisted),
     auth: LocalAuthGateway(
@@ -428,18 +498,30 @@ AppDeps _testDeps(PersistedState persisted, {UpdatePolicySource? updates}) {
     notifications: NoopNotifications(),
     purchases: UnavailablePurchases(),
     ringtone: NoopRingtone(),
-    clock: SystemClock(),
+    clock: clock ?? SystemClock(),
     firebaseConfigured: false,
     newId: () => 'id',
     languageCode: () => 'ja',
     savePhoto: (_, _) async => null,
     installedBuild: 2,
     updates: updates ?? const UnavailableUpdates(),
-    lab: MemoryLabStore.solo(
-      uid: 'local',
-      newId: () => 'id',
-      languageCode: () => 'ja',
-      sharesWithOthers: true,
-    ),
+    lab: labBox == null
+        ? MemoryLabStore.solo(
+            uid: 'local',
+            newId: () => 'id',
+            languageCode: () => 'ja',
+            sharesWithOthers: true,
+            profileCache: labProfileCache,
+          )
+        : MemoryLabStore(
+            uid: 'local',
+            newId: () => 'id',
+            box: labBox,
+            languageCode: () => 'ja',
+            sharesWithOthers: true,
+            profileCache: labProfileCache,
+          ),
+    labProfileCache: labProfileCache,
+    labProfileRemote: null,
   );
 }

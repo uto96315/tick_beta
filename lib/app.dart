@@ -44,11 +44,13 @@ class _EffectsState extends ConsumerState<_Effects>
   int _flashSeen = 0;
   String? _banner;
   ChickPose? _bannerPose;
+  String? _freedomRoutedForHistoryId;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _routeEndAction(force: true));
   }
 
   @override
@@ -62,6 +64,25 @@ class _EffectsState extends ConsumerState<_Effects>
     ref
         .read(appControllerProvider.notifier)
         .setForeground(state == AppLifecycleState.resumed);
+  }
+
+  void _routeEndAction({bool force = false}) {
+    final next = ref.read(appControllerProvider);
+    if (!next.pendingFreedom) return;
+    final id = next.freedomHistoryId;
+    if (!force && id != null && id == _freedomRoutedForHistoryId) return;
+    _freedomRoutedForHistoryId = id;
+    final router = ref.read(routerProvider);
+    switch (next.settings.endAction) {
+      case .celebration:
+        router.go('/free');
+      case .home:
+        ref.read(appControllerProvider.notifier).acknowledgeFreedom();
+        router.go('/');
+      case .history:
+        ref.read(appControllerProvider.notifier).acknowledgeFreedom();
+        if (id != null) router.go('/history/$id');
+    }
   }
 
   @override
@@ -110,21 +131,12 @@ class _EffectsState extends ConsumerState<_Effects>
               .showSnackBar(SnackBar(content: Text(text)));
         });
       }
-      if (previous?.pendingFreedom != true && next.pendingFreedom) {
+      if (previous != null &&
+          !previous.pendingFreedom &&
+          next.pendingFreedom) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          final router = ref.read(routerProvider);
-          final id = next.freedomHistoryId;
-          switch (next.settings.endAction) {
-            case .celebration:
-              router.go('/free');
-            case .home:
-              ref.read(appControllerProvider.notifier).acknowledgeFreedom();
-              router.go('/');
-            case .history:
-              ref.read(appControllerProvider.notifier).acknowledgeFreedom();
-              if (id != null) router.go('/history/$id');
-          }
+          _routeEndAction();
         });
       }
       if (previous?.offline != true && next.offline) {
@@ -144,7 +156,12 @@ class _EffectsState extends ConsumerState<_Effects>
             !state.camouflage,
       ),
     );
-    return Stack(
+    final kind = ref.watch(
+      appControllerProvider.select((state) => state.settings.mascot),
+    );
+    return MascotScope(
+      kind: kind,
+      child: Stack(
       children: [
         widget.child,
         if (tutorial) const TutorialOverlay(),
@@ -185,6 +202,7 @@ class _EffectsState extends ConsumerState<_Effects>
             ),
           ),
       ],
+      ),
     );
   }
 }

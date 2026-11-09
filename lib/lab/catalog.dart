@@ -1,5 +1,8 @@
 import 'package:tick/lab/models.dart';
 
+/// Bundled sample prompts for tests and one-time Firestore bootstrap only.
+/// The app reads prompts from `labPrompts` at runtime — not from here.
+
 final DateTime _seededOn = DateTime.utc(2026, 10, 29);
 
 List<LabPrompt> labSeeds(String languageCode) {
@@ -40,6 +43,13 @@ List<LabPrompt> labSeeds(String languageCode) {
           ? const ['フライパン', '食パン', 'フランスパン']
           : const ['A frying pan', 'A loaf', 'A baguette'],
       correctIndex: 0,
+    ),
+    _seed(
+      id: 'seed-pen',
+      title: ja ? '上司への一言を、達筆で' : 'One line for the boss, in a fine hand',
+      body: ja ? '短く、うまいこと。' : 'Short, and well put.',
+      category: LabCategory.sit,
+      format: LabFormat.pen,
     ),
     _seed(
       id: 'seed-seen',

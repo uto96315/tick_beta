@@ -32,9 +32,37 @@ service cloud.firestore {
         : isSeed(promptId);
     }
 
+    function promptFormat(promptId) {
+      return get(promptPath(promptId)).data.format;
+    }
+
+    function validLabEntry(promptId) {
+      let hasImage = 'imageUrl' in request.resource.data
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.size() > 10
+        && request.resource.data.imageUrl.size() <= 512;
+      let textOk = request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 80;
+      return (hasImage
+          && promptFormat(promptId) in ['draw', 'pen'])
+        || (!hasImage && textOk && promptFormat(promptId) in ['ogiri', 'quiz', 'choice']);
+    }
+
+    // Collection-group queries on `entries` (e.g. joined prompts) require {path=**}.
+    match /{path=**}/entries/{entryId} {
+      allow get: if signedIn() && (
+        entryId == request.auth.uid || isAdmin() || resource.data.hidden == false
+      );
+      allow list: if signedIn() && (
+        isAdmin()
+        || resource.data.hidden == false
+        || resource.data.uid == request.auth.uid
+      );
+    }
+
     match /labPrompts/{promptId} {
       allow read: if signedIn() && (
-        resource.data.phase == 'open' || resource.data.phase == 'closed' || isAdmin()
+        resource.data.phase in ['open', 'closed'] || isAdmin()
       );
       allow create, update: if isAdmin()
         && request.resource.data.title is string
@@ -45,13 +73,21 @@ service cloud.firestore {
         && request.resource.data.body.size() <= 200
         && request.resource.data.phase in ['open', 'closed']
         && request.resource.data.category in ['sit', 'stand', 'quiet']
-        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw']
+        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw', 'pen']
         && request.resource.data.choices is list
         && request.resource.data.choices.size() <= 4;
       allow delete: if false;
 
       match /entries/{entryId} {
-        allow read: if signedIn() && (resource.data.hidden == false || isAdmin());
+        // Own doc: allow get even when missing (joined check). Others: visible only.
+        allow get: if signedIn() && (
+          entryId == request.auth.uid || isAdmin() || resource.data.hidden == false
+        );
+        allow list: if signedIn() && (
+          isAdmin()
+          || resource.data.hidden == false
+          || resource.data.uid == request.auth.uid
+        );
         allow create: if signedIn()
           && entryId == request.auth.uid
           && acceptsPosts(promptId)
@@ -61,14 +97,18 @@ service cloud.firestore {
           && request.resource.data.name.size() > 0
           && request.resource.data.name.size() <= 24
           && request.resource.data.text is string
-          && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 80
           && request.resource.data.createdAt is timestamp
-          && (!('choiceIndex' in request.resource.data) || request.resource.data.choiceIndex is int);
+          && (!('choiceIndex' in request.resource.data) || request.resource.data.choiceIndex is int)
+          && validLabEntry(promptId)
+          && (!('avatarUrl' in request.resource.data)
+            || (request.resource.data.avatarUrl is string
+              && request.resource.data.avatarUrl.size() > 10
+              && request.resource.data.avatarUrl.size() <= 512));
         allow update: if isAdmin()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
           && request.resource.data.hidden is bool;
-        allow delete: if false;
+        allow delete: if isAdmin();
       }
 
       match /ballots/{ballotId} {
@@ -80,7 +120,8 @@ service cloud.firestore {
           && ballotId == request.auth.uid + '_' + request.resource.data.entryUid
           && exists(/databases/$(database)/documents/labPrompts/$(promptId)/entries/$(request.resource.data.entryUid))
           && get(/databases/$(database)/documents/labPrompts/$(promptId)/entries/$(request.resource.data.entryUid)).data.hidden == false;
-        allow delete: if signedIn() && resource.data.voterUid == request.auth.uid;
+        allow delete: if isAdmin()
+          || (signedIn() && resource.data.voterUid == request.auth.uid);
         allow update: if false;
       }
     }
@@ -96,12 +137,26 @@ service cloud.firestore {
         && request.resource.data.body.size() > 0
         && request.resource.data.body.size() <= 200
         && request.resource.data.category in ['sit', 'stand', 'quiet']
-        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw']
+        && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw', 'pen']
         && request.resource.data.choices is list
         && request.resource.data.choices.size() <= 4;
       allow read: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if false;
+    }
+
+    match /labProfiles/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 1
+        && request.resource.data.displayName.size() <= 12
+        && (!('avatarUrl' in request.resource.data)
+          || (request.resource.data.avatarUrl is string
+            && request.resource.data.avatarUrl.size() > 10
+            && request.resource.data.avatarUrl.size() <= 512));
+      allow delete: if signedIn() && request.auth.uid == userId;
     }
 
     match /labReports/{reportId} {

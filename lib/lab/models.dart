@@ -1,6 +1,6 @@
 enum LabCategory { sit, stand, quiet }
 
-enum LabFormat { ogiri, quiz, choice, draw }
+enum LabFormat { ogiri, quiz, choice, draw, pen }
 
 enum LabPhase { open, closed }
 
@@ -17,6 +17,7 @@ enum LabFailure {
   invalid,
   draw,
   contact,
+  photo,
 }
 
 class LabOutcome {
@@ -43,6 +44,7 @@ class LabPrompt {
     this.choices = const [],
     this.correctIndex,
     this.entryCount = 0,
+    this.joined = false,
     this.seeded = false,
   });
 
@@ -58,9 +60,10 @@ class LabPrompt {
   final List<String> choices;
   final int? correctIndex;
   final int entryCount;
+  final bool joined;
   final bool seeded;
 
-  LabPrompt copyWith({int? entryCount, LabPhase? phase}) {
+  LabPrompt copyWith({int? entryCount, LabPhase? phase, bool? joined}) {
     return LabPrompt(
       id: id,
       title: title,
@@ -74,6 +77,7 @@ class LabPrompt {
       choices: choices,
       correctIndex: correctIndex,
       entryCount: entryCount ?? this.entryCount,
+      joined: joined ?? this.joined,
       seeded: seeded,
     );
   }
@@ -90,11 +94,15 @@ class LabEntry {
     required this.mine,
     this.choiceIndex,
     this.hidden = false,
+    this.imageUrl,
+    this.avatarUrl,
   });
 
   final String uid;
   final String name;
   final String text;
+  final String? imageUrl;
+  final String? avatarUrl;
   final int? choiceIndex;
   final DateTime createdAt;
   final int votes;
@@ -104,10 +112,17 @@ class LabEntry {
 }
 
 class LabFeed {
-  const LabFeed({required this.prompts, this.remoteFailed = false});
+  const LabFeed({
+    required this.prompts,
+    this.remoteFailed = false,
+    this.loading = false,
+  });
 
   final List<LabPrompt> prompts;
   final bool remoteFailed;
+
+  /// True until the first Firestore prompt snapshot is parsed.
+  final bool loading;
 }
 
 class PromptBoard {

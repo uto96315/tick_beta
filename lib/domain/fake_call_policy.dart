@@ -1,3 +1,5 @@
+import 'package:tick/config/operators.dart';
+
 import 'format.dart';
 import 'iso_week.dart';
 
@@ -50,6 +52,9 @@ class FakeCallPolicy {
 
   static const freeWeeklyLimit = 1;
 
+  /// Operator accounts skip the weekly fake-call cap and get full Premium in-app.
+  static bool isOwner(String? email) => isOperatorEmail(email);
+
   static int usedInWeek(List<CallCredit> credits, DateTime when) {
     final key = isoWeekKey(when);
     var count = 0;
@@ -64,8 +69,9 @@ class FakeCallPolicy {
     required bool premium,
     required List<CallCredit> credits,
     required DateTime when,
+    bool owner = false,
   }) {
-    if (premium) return true;
+    if (premium || owner) return true;
     return usedInWeek(credits, when) < freeWeeklyLimit;
   }
 }

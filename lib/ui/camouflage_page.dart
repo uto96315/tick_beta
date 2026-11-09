@@ -1,8 +1,53 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
+import 'package:tick/ui/camouflage_setup_sheet.dart';
+import 'package:tick/ui/theme.dart';
+
+Future<void> openCamouflage(BuildContext context, WidgetRef ref) async {
+  final app = ref.read(appControllerProvider);
+  final settings = app.settings;
+  if (!settings.slackIntroSeen) {
+    final l10n = AppLocalizations.of(context);
+    final homeNote = app.premium ? l10n.homeShotHelp : l10n.homeShotFree;
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: TickColors.cream,
+        title: Text(l10n.camouflage),
+        content: Text('${l10n.camouflageFirst}\n\n$homeNote'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'cancel'),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'setup'),
+            child: Text(l10n.camouflageSetup),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'go'),
+            child: Text(l10n.camouflageFirstGo),
+          ),
+        ],
+      ),
+    );
+    if (choice == 'setup') {
+      if (context.mounted) context.push('/settings/camouflage');
+      return;
+    }
+    if (choice != 'go') return;
+    ref
+        .read(appControllerProvider.notifier)
+        .updateSettings(settings.copyWith(slackIntroSeen: true));
+  }
+  ref.read(appControllerProvider.notifier).setCamouflage(true);
+}
 
 class CamouflagePage extends ConsumerWidget {
   const CamouflagePage({super.key});
@@ -12,8 +57,13 @@ class CamouflagePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(appControllerProvider.select((state) => state.settings));
     final premium = ref.watch(appControllerProvider.select((state) => state.premium));
-    final trigger = premium || settings.camouflageTrigger == CamouflageTrigger.corner ? settings.camouflageTrigger : CamouflageTrigger.corner;
+    const trigger = CamouflageTrigger.corner;
     final look = shownLook(premium, settings.camouflageLook);
+    final shot = settings.homeShot;
+    final showShot =
+        look == CamouflageLook.home &&
+        showsHomeShot(premium, shot) &&
+        File(shot).existsSync();
     final hint = switch (trigger) {
       CamouflageTrigger.corner => l10n.backHintCorner,
       CamouflageTrigger.longPress => l10n.backHintLong,
@@ -26,27 +76,48 @@ class CamouflagePage extends ConsumerWidget {
         if ((details.primaryVelocity ?? 0) > 250) exit();
       } : null,
       child: Scaffold(
-        backgroundColor: look == CamouflageLook.home ? const Color(0xFF9FD4F5) : const Color(0xFFF2F2F7),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              switch (look) {
-                CamouflageLook.notes => _NotesCover(l10n: l10n, hint: hint),
-                CamouflageLook.calendar => _CalendarCover(l10n: l10n, hint: hint),
-                CamouflageLook.home => _HomeCover(hint: hint),
-              },
-              if (trigger == CamouflageTrigger.corner)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: exit,
-                    behavior: HitTestBehavior.opaque,
-                    child: const SizedBox(width: 88, height: 88),
+        backgroundColor: showShot
+            ? Colors.black
+            : look == CamouflageLook.home
+            ? const Color(0xFF9FD4F5)
+            : const Color(0xFFF2F2F7),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (showShot)
+              Image.file(File(shot), fit: BoxFit.cover)
+            else
+              SafeArea(
+                child: switch (look) {
+                  CamouflageLook.notes => _NotesCover(l10n: l10n, hint: hint),
+                  CamouflageLook.calendar => _CalendarCover(
+                    l10n: l10n,
+                    hint: hint,
                   ),
+                  CamouflageLook.home => _HomeCover(hint: hint),
+                },
+              ),
+            if (trigger == CamouflageTrigger.corner) ...[
+              Positioned(
+                top: 0,
+                left: 0,
+                child: GestureDetector(
+                  onTap: () => showCamouflageSetupSheet(context, ref),
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(width: 88, height: 88),
                 ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: exit,
+                  behavior: HitTestBehavior.opaque,
+                  child: const SizedBox(width: 88, height: 88),
+                ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -78,6 +149,7 @@ class _HomeCover extends StatelessWidget {
             crossAxisCount: 4,
             mainAxisSpacing: 18,
             crossAxisSpacing: 18,
+            childAspectRatio: 0.72,
             children: const [
               _FakeIcon(icon: Icons.chat_bubble_rounded, label: 'Message'),
               _FakeIcon(icon: Icons.calendar_today_rounded, label: 'Calendar'),
@@ -221,15 +293,26 @@ class _FakeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 58,
-          height: 58,
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(16)),
-          child: Icon(icon, color: const Color(0xFF31425A)),
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, size: 26, color: const Color(0xFF31425A)),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+        if (label.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white, fontSize: 10),
+          ),
+        ],
       ],
     );
   }

@@ -26,6 +26,7 @@ class PremiumPage extends ConsumerWidget {
           Text('· ${l10n.unlimited}'),
           Text('· ${l10n.premiumCallers}'),
           Text('· ${l10n.premiumCamouflage}'),
+          Text('· ${l10n.premiumOfferHomeShot}'),
           Text('· ${l10n.premiumLooks}'),
           Text('· ${l10n.premiumSounds}'),
           Text('· ${l10n.premiumVoice}'),

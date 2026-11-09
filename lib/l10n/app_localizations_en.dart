@@ -147,7 +147,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get account => 'Account';
 
   @override
-  String get premium => 'Premium';
+  String get premium => 'Member status';
 
   @override
   String get camouflage => 'Camouflage';
@@ -169,10 +169,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get camouflageHint =>
-      'A static screen inside Ozio. It does not pretend to be the iPhone Home Screen.';
+      'Makes it harder to tell this app is open. Tap the top right to come back.';
 
   @override
-  String get backHintCorner => 'Tap the top right to go back';
+  String get camouflageSetup => 'Set up';
+
+  @override
+  String get camouflagePreview => 'Preview';
+
+  @override
+  String get camouflageSettingsLead =>
+      'Pick a look and register your camouflage image here.';
+
+  @override
+  String get camouflageImageUseNote =>
+      'Your image is used full screen when the Home look is selected.';
+
+  @override
+  String get homeShotTitle => 'Your home screen (Premium)';
+
+  @override
+  String get backHintCorner => 'Top right: go back. Top left: register image.';
 
   @override
   String get backHintLong => 'Long press to go back';
@@ -212,6 +229,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get incoming => 'Incoming';
+
+  @override
+  String get incomingSendMessage => 'Send Message';
+
+  @override
+  String get incomingVoicemail => 'Voicemail';
 
   @override
   String get mobile => 'mobile';
@@ -311,13 +334,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anonymous => 'Using Ozio anonymously';
 
   @override
-  String get registerEmail => 'Keep this data with email';
+  String get registerEmail => 'Sign up';
 
   @override
-  String get registerGoogle => 'Keep this data with Google';
+  String get registerGoogle => 'Sign up with Google';
 
   @override
-  String get signInEmail => 'Sign in with email';
+  String get signInEmail => 'Sign in';
 
   @override
   String get signInGoogle => 'Sign in with Google';
@@ -344,46 +367,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumPitch =>
-      'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.';
+      'One-time purchase: unlimited fake calls, custom callers, ringtones, camouflage, and an auto call before shift end.';
 
   @override
-  String get registerAccount => 'Register an account';
+  String get registerAccount => 'Account';
 
   @override
-  String get registerAccountHelp =>
-      'An email brings this back after a reinstall.';
+  String get registerAccountHelp => '';
 
   @override
-  String get premiumOfferTitle => 'Premium';
+  String get premiumOfferTitle => 'Your exit plan';
 
   @override
   String get premiumOfferLead =>
-      'One purchase. The work disguise gets a little freer.';
+      'One purchase. No weekly call cap, believable incoming screens, and camouflage when someone is watching.';
 
   @override
-  String get premiumOfferCalls => 'Fake calls, as often as you want';
+  String get premiumOfferCalls => 'Unlimited fake calls';
 
   @override
-  String get premiumOfferCallers => 'Add your own callers';
+  String get premiumOfferCallsNote =>
+      'Say \"I can\'t talk right now\" the moment you need it';
 
   @override
-  String get premiumOfferSounds => 'Choose a ringtone';
+  String get premiumOfferCallers => 'Custom callers';
 
   @override
-  String get premiumOfferLooks => 'Swap the screen for notes or a calendar';
+  String get premiumOfferCallersNote =>
+      'Names and photos for your boss, client, or whoever fits';
+
+  @override
+  String get premiumOfferIncoming => 'iPhone-style incoming screen';
+
+  @override
+  String get premiumOfferIncomingNote =>
+      'Decline and answer buttons that look like the real thing';
+
+  @override
+  String get premiumOfferSounds => 'Pick a ringtone';
+
+  @override
+  String get premiumOfferSoundsNote => 'Sounds like a real phone in the room';
+
+  @override
+  String get premiumOfferLooks => 'Camouflage screens';
+
+  @override
+  String get premiumOfferLooksNote =>
+      'Notes, calendar, or your own home-screen screenshot';
 
   @override
   String get premiumOfferVoice => 'More ways for the chick to talk';
 
   @override
-  String get premiumOfferBefore => 'A call ten minutes before the end';
+  String get premiumOfferBefore => 'Auto call before shift end';
+
+  @override
+  String get premiumOfferBeforeNote =>
+      'Ring ten minutes before you\'re done for the day';
 
   @override
   String get premiumOfferLater => 'Not now';
 
   @override
   String premiumOfferBuy(String price) {
-    return '$price to start';
+    return 'Unlock for $price';
   }
 
   @override
@@ -637,6 +685,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notRunning => 'Not started';
+
+  @override
+  String get idleAfterShiftStatus => 'Past scheduled end';
+
+  @override
+  String get idleAfterShiftBody =>
+      'Today\'s shift is over.\nNice work today 🎵';
+
+  @override
+  String get idleAfterShiftAction => 'Open schedule';
 
   @override
   String get startTimer => 'Start the timer';
@@ -1017,6 +1075,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodTitle => 'Mood right now?';
 
   @override
+  String get moodAuto => 'Auto (follow progress)';
+
+  @override
   String get todaySoFar => 'Today';
 
   @override
@@ -1029,7 +1090,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolExcuse => 'Excuse\ngenerator';
 
   @override
-  String get toolAway => 'Step away';
+  String get toolAway => 'Camouflage';
 
   @override
   String get moodCheer => 'Trying';
@@ -1074,7 +1135,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get excuse5 => 'Grabbing my charger.';
 
   @override
-  String get labTitle => 'Idle LAB';
+  String get labTitle => 'Idle Lab';
 
   @override
   String get labSubtitle => 'Prompts from everyone';
@@ -1083,7 +1144,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labToday => 'Today\'s prompt';
 
   @override
-  String get labTodayEmpty => 'Nothing is featured today.';
+  String get labTodayEmpty => 'In preparation';
+
+  @override
+  String get labTodayPreparingHelp => 'Coming soon.';
 
   @override
   String get labSeeAll => 'All prompts';
@@ -1141,6 +1205,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labDrawLater => 'Drawing comes next.';
 
   @override
+  String get labPhotoHint => 'Pick one photo to post.';
+
+  @override
+  String get labPhotoPick => 'Choose photo';
+
+  @override
+  String get labPhotoReplace => 'Choose another';
+
+  @override
+  String get labProfileTitle => 'Lab profile';
+
+  @override
+  String get labProfileHint => 'Name and icon shown in Boredom Lab.';
+
+  @override
+  String get labProfileName => 'Display name';
+
+  @override
+  String get labProfilePickIcon => 'Choose icon';
+
+  @override
+  String get labProfileSave => 'Save';
+
+  @override
+  String get labProfileSaved => 'Profile saved.';
+
+  @override
+  String get labPhotoPolicyWarning =>
+      'Do not post images that break copyright, privacy, or community rules. We may hide posts and suspend accounts for serious violations.';
+
+  @override
+  String get labFailPhotoEmpty => 'Choose a photo before sending.';
+
+  @override
+  String get labReportPhoto => '(Photo post)';
+
+  @override
   String get labLike => 'Like';
 
   @override
@@ -1158,6 +1259,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t load the latest. Showing what we already have.';
 
   @override
+  String get labLoadFailed =>
+      'Couldn\'t load prompts. Check your connection and try again.';
+
+  @override
+  String get labReload => 'Reload';
+
+  @override
   String get labOpen => 'Open';
 
   @override
@@ -1165,8 +1273,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String labCount(int count) {
-    return '$count';
+    return '$count answers';
   }
+
+  @override
+  String get labJoined => 'You joined';
+
+  @override
+  String get labNotJoined => 'Not yet';
 
   @override
   String labUntil(String time) {
@@ -1186,10 +1300,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labYourAnswer => 'Your answer';
 
   @override
-  String get labProposeTitle => 'Title';
+  String get labProposeTitle => 'Prompt';
 
   @override
-  String get labProposeBody => 'What do people do?';
+  String get labProposeBody => 'Notes';
+
+  @override
+  String get labProposePickGenre => 'Pick a genre first';
+
+  @override
+  String get labProposeChangeGenre => 'Change genre';
+
+  @override
+  String get labProposeTitleHintOgiri => 'e.g. A company rule you\'d hate';
+
+  @override
+  String get labProposeTitleHintChoice => 'e.g. Leave on time or a raise?';
+
+  @override
+  String get labProposeTitleHintQuiz => 'e.g. Which bread can\'t you eat?';
+
+  @override
+  String get labProposeTitleHintDraw => 'e.g. Title this meeting doodle';
+
+  @override
+  String get labProposeTitleHintPen => 'e.g. One line to the boss, fine hand';
+
+  @override
+  String get labProposeBodyHint => 'Optional. Defaults to “Answer freely.”';
+
+  @override
+  String get labProposeBodyDefault => 'Answer freely.';
 
   @override
   String get labCategory => 'Where it fits';
@@ -1226,6 +1367,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labReview => 'Review prompts';
 
   @override
+  String get labSeedOgiri => 'Upload 20 ogiri prompts to Firestore';
+
+  @override
+  String labSeedOgiriDone(int count) {
+    return 'Uploaded $count ogiri prompts.';
+  }
+
+  @override
+  String get labSeedDraw => 'Upload 20 drawing prompts to Firestore';
+
+  @override
+  String labSeedDrawDone(int count) {
+    return 'Uploaded $count drawing prompts.';
+  }
+
+  @override
+  String get labSeedPen => 'Upload 20 penmanship prompts to Firestore';
+
+  @override
+  String labSeedPenDone(int count) {
+    return 'Uploaded $count penmanship prompts.';
+  }
+
+  @override
   String get labReviewLocked =>
       'Review opens only for the signed-in operator account.';
 
@@ -1255,6 +1420,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labHidden => 'Hidden';
+
+  @override
+  String get labDeleteEntry => 'Delete post';
+
+  @override
+  String get labDeleteEntryConfirm =>
+      'Delete this post? Likes on it will be removed too.';
+
+  @override
+  String get labDeletedEntry => 'Deleted';
 
   @override
   String get labReports => 'Reports';
@@ -1312,4 +1487,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get labFailContact => 'Leave out phone numbers and email addresses.';
+
+  @override
+  String get homeShotPick => 'Choose a screenshot';
+
+  @override
+  String get homeShotHelp =>
+      'Use a screenshot of your real home screen for camouflage.';
+
+  @override
+  String get homeShotFree => 'Free accounts use the built-in home screen.';
+
+  @override
+  String get premiumOfferHomeShot => 'Use your own home screen for camouflage';
+
+  @override
+  String get shiftFrom => 'Start';
+
+  @override
+  String get shiftTo => 'End';
+
+  @override
+  String get chunkNow => 'Now';
+
+  @override
+  String get toolLab => 'Idle Lab';
+
+  @override
+  String get mascotTitle => 'Character';
+
+  @override
+  String get mascotChick => 'Chick';
+
+  @override
+  String get mascotSloth => 'Sloth';
+
+  @override
+  String get settingsWork => 'Work';
+
+  @override
+  String get settingsNotify => 'Notices';
+
+  @override
+  String get settingsTimer => 'Timer';
+
+  @override
+  String get settingsMore => 'More';
+
+  @override
+  String get camouflageFirst =>
+      'This screen makes it harder to tell this app is open. Tap the top right to come back.';
+
+  @override
+  String get camouflageFirstGo => 'Use this screen';
+
+  @override
+  String get labTapToPost => 'Join';
+
+  @override
+  String get labOthers => 'Other prompts';
+
+  @override
+  String get labOthersHelp => 'Browse by genre';
+
+  @override
+  String get labFormatPen => 'Fine hand';
+
+  @override
+  String get labTabChoice => 'The hard choice';
+
+  @override
+  String get chickNormal4 =>
+      'If you haven\'t started, this is the first chunk.';
+
+  @override
+  String get chickNormal5 =>
+      'It doesn\'t have to be good. Sitting here counts.';
+
+  @override
+  String get chickTired4 => 'A heavy day still gets smaller.';
+
+  @override
+  String get chickTired5 => 'Motivation can show up later. Or not.';
+
+  @override
+  String get chickHappy4 => 'Stay like this. It\'s a little easier.';
+
+  @override
+  String get chickHappy5 => 'As the chunks drop, so do the shoulders.';
+
+  @override
+  String get chickCheer4 => 'Past the middle. The rest can drift.';
+
+  @override
+  String get chickCheer5 => 'You sat this long. That\'s enough.';
+
+  @override
+  String get chickAttention4 => 'Near the door. No need to stand yet.';
+
+  @override
+  String get chickAttention5 => 'Not much left. Breathing is enough.';
+
+  @override
+  String get moodHeavy4 => 'Stay heavy. Time moves anyway.';
+
+  @override
+  String get moodHeavy5 => 'Today doesn\'t have to feel light.';
+
+  @override
+  String get moodHungry4 => 'Hungry, and the chunks still shrink.';
+
+  @override
+  String get moodHungry5 => 'Eat first if you want. This chunk will wait.';
+
+  @override
+  String get moodSleepy4 => 'Doze. The clock is awake.';
+
+  @override
+  String get moodSleepy5 => 'Eyes closed still counts as moving.';
+
+  @override
+  String get moodFine4 => 'This mood is about right.';
+
+  @override
+  String get moodFine5 => 'No need to cheer it up. This pace is fine.';
 }

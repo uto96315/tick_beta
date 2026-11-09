@@ -27,6 +27,9 @@ class PersistedState {
     required this.entitlement,
     required this.tombstones,
     this.dismissedUpdateBuild = 0,
+    this.labNick = '',
+    this.labAvatarPath = '',
+    this.labAvatarUrl = '',
   });
 
   String? uid;
@@ -49,6 +52,9 @@ class PersistedState {
   List<CallCredit> credits;
   Entitlement entitlement;
   List<Tombstone> tombstones;
+  String labNick;
+  String labAvatarPath;
+  String labAvatarUrl;
 
   factory PersistedState.seed({required String languageCode, String? uid, DateTime? now}) {
     final clock = now ?? DateTime.now();
@@ -167,6 +173,9 @@ class PersistedState {
     'credits': credits.map((item) => item.toJson()).toList(),
     'entitlement': entitlement.toJson(),
     'tombstones': tombstones.map((item) => item.toJson()).toList(),
+    'labNick': labNick,
+    'labAvatarPath': labAvatarPath,
+    'labAvatarUrl': labAvatarUrl,
   };
 
   factory PersistedState.fromJson(Map<String, dynamic> json) {
@@ -200,6 +209,9 @@ class PersistedState {
         json['entitlement'] is Map ? (json['entitlement'] as Map).cast<String, dynamic>() : null,
       ),
       tombstones: _list(json['tombstones'], Tombstone.fromJson),
+      labNick: json['labNick'] as String? ?? '',
+      labAvatarPath: json['labAvatarPath'] as String? ?? '',
+      labAvatarUrl: json['labAvatarUrl'] as String? ?? '',
     );
   }
 

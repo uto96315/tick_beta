@@ -1,0 +1,22 @@
+[
+  { "id": "seed-draw-01", "title": "何も見ずにドラえもんを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-02", "title": "記憶だけでピカチュウを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-03", "title": "人生で一番やる気のない猫を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-04", "title": "史上最弱のヒーローを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-05", "title": "こんなナマケモノは嫌だ、どんな姿？", "category": "stand", "featured": false },
+  { "id": "seed-draw-06", "title": "世界一腹の立つ顔を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-07", "title": "めちゃくちゃ偉そうな犬を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-08", "title": "寝坊した人間を描いて", "category": "sit", "featured": false },
+  { "id": "seed-draw-09", "title": "仕事中に魂が抜けた人を描いて", "category": "sit", "featured": false },
+  { "id": "seed-draw-10", "title": "未来のロボットを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-11", "title": "絶対に乗りたくない乗り物を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-12", "title": "世界一弱そうなラスボスを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-13", "title": "100年後のスマートフォンを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-14", "title": "怒っているのに全然怖くない鬼を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-15", "title": "宇宙人が考えた「人間」の絵を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-16", "title": "史上最も不器用な忍者を描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-17", "title": "絶対に売れないゆるキャラを描いて", "category": "stand", "featured": false },
+  { "id": "seed-draw-18", "title": "月曜日の朝の自分を描いて", "category": "sit", "featured": false },
+  { "id": "seed-draw-19", "title": "世界一幸せそうなゴキブリを描いて", "category": "quiet", "featured": false },
+  { "id": "seed-draw-20", "title": "会社の上司をモンスターにして描いて", "category": "sit", "featured": false }
+]

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
+import 'package:tick/lab/draw_batch.dart';
+import 'package:tick/lab/ogiri_batch.dart';
+import 'package:tick/lab/pen_batch.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/lab/lab_widgets.dart';
@@ -19,8 +22,12 @@ class LabReviewPage extends ConsumerWidget {
     );
     final allowed = store.canReview || labCanReview(email);
     return LabScaffold(
-      children: [
-        LabHeader(title: l10n.labReview),
+      header: LabHeader(title: l10n.labReview),
+      body: SingleChildScrollView(
+        padding: LabScaffold.scrollPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
         if (!allowed)
           Text(
             l10n.labReviewLocked,
@@ -33,6 +40,12 @@ class LabReviewPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           const _OfficialForm(),
+          const SizedBox(height: 8),
+          const _OgiriBatchSeedButton(),
+          const SizedBox(height: 8),
+          const _DrawBatchSeedButton(),
+          const SizedBox(height: 8),
+          const _PenBatchSeedButton(),
           const SizedBox(height: 20),
           Text(
             l10n.labPropose,
@@ -114,7 +127,123 @@ class LabReviewPage extends ConsumerWidget {
             },
           ),
         ],
-      ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OgiriBatchSeedButton extends ConsumerStatefulWidget {
+  const _OgiriBatchSeedButton();
+
+  @override
+  ConsumerState<_OgiriBatchSeedButton> createState() =>
+      _OgiriBatchSeedButtonState();
+}
+
+class _OgiriBatchSeedButtonState extends ConsumerState<_OgiriBatchSeedButton> {
+  var _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return OutlinedButton.icon(
+      onPressed: _busy
+          ? null
+          : () async {
+              setState(() => _busy = true);
+              final count = await seedOgiriBatch(ref.read(labStoreProvider));
+              if (!context.mounted) return;
+              setState(() => _busy = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.labSeedOgiriDone(count))),
+              );
+            },
+      icon: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.cloud_upload_outlined),
+      label: Text(l10n.labSeedOgiri),
+    );
+  }
+}
+
+class _DrawBatchSeedButton extends ConsumerStatefulWidget {
+  const _DrawBatchSeedButton();
+
+  @override
+  ConsumerState<_DrawBatchSeedButton> createState() =>
+      _DrawBatchSeedButtonState();
+}
+
+class _DrawBatchSeedButtonState extends ConsumerState<_DrawBatchSeedButton> {
+  var _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return OutlinedButton.icon(
+      onPressed: _busy
+          ? null
+          : () async {
+              setState(() => _busy = true);
+              final count = await seedDrawBatch(ref.read(labStoreProvider));
+              if (!context.mounted) return;
+              setState(() => _busy = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.labSeedDrawDone(count))),
+              );
+            },
+      icon: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.brush_outlined),
+      label: Text(l10n.labSeedDraw),
+    );
+  }
+}
+
+class _PenBatchSeedButton extends ConsumerStatefulWidget {
+  const _PenBatchSeedButton();
+
+  @override
+  ConsumerState<_PenBatchSeedButton> createState() =>
+      _PenBatchSeedButtonState();
+}
+
+class _PenBatchSeedButtonState extends ConsumerState<_PenBatchSeedButton> {
+  var _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return OutlinedButton.icon(
+      onPressed: _busy
+          ? null
+          : () async {
+              setState(() => _busy = true);
+              final count = await seedPenBatch(ref.read(labStoreProvider));
+              if (!context.mounted) return;
+              setState(() => _busy = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.labSeedPenDone(count))),
+              );
+            },
+      icon: _busy
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.edit_outlined),
+      label: Text(l10n.labSeedPen),
     );
   }
 }
@@ -130,7 +259,6 @@ class _OfficialFormState extends ConsumerState<_OfficialForm> {
   final _title = TextEditingController();
   final _body = TextEditingController();
   final _choices = TextEditingController();
-  var _category = LabCategory.stand;
   var _format = LabFormat.ogiri;
   var _correct = 0;
   var _featured = false;
@@ -160,25 +288,16 @@ class _OfficialFormState extends ConsumerState<_OfficialForm> {
           TextField(
             controller: _body,
             maxLines: 3,
-            decoration: InputDecoration(labelText: l10n.labProposeBody),
+            decoration: InputDecoration(
+              labelText: l10n.labProposeBody,
+              hintText: l10n.labProposeBodyHint,
+            ),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             children: [
-              for (final category in LabCategory.values)
-                ChoiceChip(
-                  label: Text(labCategoryLabel(l10n, category)),
-                  selected: _category == category,
-                  onSelected: (_) => setState(() => _category = category),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final format in LabFormat.values)
+              for (final format in labProposeFormats)
                 ChoiceChip(
                   label: Text(labFormatLabel(l10n, format)),
                   selected: _format == format,
@@ -231,7 +350,7 @@ class _OfficialFormState extends ConsumerState<_OfficialForm> {
           LabDraft(
             title: _title.text,
             body: _body.text,
-            category: _category,
+            category: LabCategory.stand,
             format: _format,
             choices: choices,
             correctIndex: _format == LabFormat.quiz && choices.isNotEmpty
@@ -294,9 +413,7 @@ class _ProposalCardState extends ConsumerState<_ProposalCard> {
               fontWeight: FontWeight.w800,
             ),
           ),
-          Text(
-            '${labCategoryLabel(l10n, proposal.category)} / ${labFormatLabel(l10n, proposal.format)}',
-          ),
+          Text(labFormatLabel(l10n, proposal.format)),
           const SizedBox(height: 8),
           TextField(
             controller: _title,

@@ -371,7 +371,7 @@ abstract class AppLocalizations {
   /// No description provided for @premium.
   ///
   /// In en, this message translates to:
-  /// **'Premium'**
+  /// **'Member status'**
   String get premium;
 
   /// No description provided for @camouflage.
@@ -413,13 +413,43 @@ abstract class AppLocalizations {
   /// No description provided for @camouflageHint.
   ///
   /// In en, this message translates to:
-  /// **'A static screen inside Ozio. It does not pretend to be the iPhone Home Screen.'**
+  /// **'Makes it harder to tell this app is open. Tap the top right to come back.'**
   String get camouflageHint;
+
+  /// No description provided for @camouflageSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get camouflageSetup;
+
+  /// No description provided for @camouflagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get camouflagePreview;
+
+  /// No description provided for @camouflageSettingsLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a look and register your camouflage image here.'**
+  String get camouflageSettingsLead;
+
+  /// No description provided for @camouflageImageUseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your image is used full screen when the Home look is selected.'**
+  String get camouflageImageUseNote;
+
+  /// No description provided for @homeShotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your home screen (Premium)'**
+  String get homeShotTitle;
 
   /// No description provided for @backHintCorner.
   ///
   /// In en, this message translates to:
-  /// **'Tap the top right to go back'**
+  /// **'Top right: go back. Top left: register image.'**
   String get backHintCorner;
 
   /// No description provided for @backHintLong.
@@ -499,6 +529,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incoming'**
   String get incoming;
+
+  /// No description provided for @incomingSendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Message'**
+  String get incomingSendMessage;
+
+  /// No description provided for @incomingVoicemail.
+  ///
+  /// In en, this message translates to:
+  /// **'Voicemail'**
+  String get incomingVoicemail;
 
   /// No description provided for @mobile.
   ///
@@ -695,19 +737,19 @@ abstract class AppLocalizations {
   /// No description provided for @registerEmail.
   ///
   /// In en, this message translates to:
-  /// **'Keep this data with email'**
+  /// **'Sign up'**
   String get registerEmail;
 
   /// No description provided for @registerGoogle.
   ///
   /// In en, this message translates to:
-  /// **'Keep this data with Google'**
+  /// **'Sign up with Google'**
   String get registerGoogle;
 
   /// No description provided for @signInEmail.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with email'**
+  /// **'Sign in'**
   String get signInEmail;
 
   /// No description provided for @signInGoogle.
@@ -755,56 +797,92 @@ abstract class AppLocalizations {
   /// No description provided for @premiumPitch.
   ///
   /// In en, this message translates to:
-  /// **'A one-time purchase. Unlimited fake calls, your own callers, camouflage screens, ringtones, and more ways for the chick to talk.'**
+  /// **'One-time purchase: unlimited fake calls, custom callers, ringtones, camouflage, and an auto call before shift end.'**
   String get premiumPitch;
 
   /// No description provided for @registerAccount.
   ///
   /// In en, this message translates to:
-  /// **'Register an account'**
+  /// **'Account'**
   String get registerAccount;
 
   /// No description provided for @registerAccountHelp.
   ///
   /// In en, this message translates to:
-  /// **'An email brings this back after a reinstall.'**
+  /// **''**
   String get registerAccountHelp;
 
   /// No description provided for @premiumOfferTitle.
   ///
   /// In en, this message translates to:
-  /// **'Premium'**
+  /// **'Your exit plan'**
   String get premiumOfferTitle;
 
   /// No description provided for @premiumOfferLead.
   ///
   /// In en, this message translates to:
-  /// **'One purchase. The work disguise gets a little freer.'**
+  /// **'One purchase. No weekly call cap, believable incoming screens, and camouflage when someone is watching.'**
   String get premiumOfferLead;
 
   /// No description provided for @premiumOfferCalls.
   ///
   /// In en, this message translates to:
-  /// **'Fake calls, as often as you want'**
+  /// **'Unlimited fake calls'**
   String get premiumOfferCalls;
+
+  /// No description provided for @premiumOfferCallsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Say \"I can\'t talk right now\" the moment you need it'**
+  String get premiumOfferCallsNote;
 
   /// No description provided for @premiumOfferCallers.
   ///
   /// In en, this message translates to:
-  /// **'Add your own callers'**
+  /// **'Custom callers'**
   String get premiumOfferCallers;
+
+  /// No description provided for @premiumOfferCallersNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Names and photos for your boss, client, or whoever fits'**
+  String get premiumOfferCallersNote;
+
+  /// No description provided for @premiumOfferIncoming.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone-style incoming screen'**
+  String get premiumOfferIncoming;
+
+  /// No description provided for @premiumOfferIncomingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline and answer buttons that look like the real thing'**
+  String get premiumOfferIncomingNote;
 
   /// No description provided for @premiumOfferSounds.
   ///
   /// In en, this message translates to:
-  /// **'Choose a ringtone'**
+  /// **'Pick a ringtone'**
   String get premiumOfferSounds;
+
+  /// No description provided for @premiumOfferSoundsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Sounds like a real phone in the room'**
+  String get premiumOfferSoundsNote;
 
   /// No description provided for @premiumOfferLooks.
   ///
   /// In en, this message translates to:
-  /// **'Swap the screen for notes or a calendar'**
+  /// **'Camouflage screens'**
   String get premiumOfferLooks;
+
+  /// No description provided for @premiumOfferLooksNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes, calendar, or your own home-screen screenshot'**
+  String get premiumOfferLooksNote;
 
   /// No description provided for @premiumOfferVoice.
   ///
@@ -815,8 +893,14 @@ abstract class AppLocalizations {
   /// No description provided for @premiumOfferBefore.
   ///
   /// In en, this message translates to:
-  /// **'A call ten minutes before the end'**
+  /// **'Auto call before shift end'**
   String get premiumOfferBefore;
+
+  /// No description provided for @premiumOfferBeforeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Ring ten minutes before you\'re done for the day'**
+  String get premiumOfferBeforeNote;
 
   /// No description provided for @premiumOfferLater.
   ///
@@ -827,7 +911,7 @@ abstract class AppLocalizations {
   /// No description provided for @premiumOfferBuy.
   ///
   /// In en, this message translates to:
-  /// **'{price} to start'**
+  /// **'Unlock for {price}'**
   String premiumOfferBuy(String price);
 
   /// No description provided for @premiumOwned.
@@ -1321,6 +1405,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not started'**
   String get notRunning;
+
+  /// No description provided for @idleAfterShiftStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Past scheduled end'**
+  String get idleAfterShiftStatus;
+
+  /// No description provided for @idleAfterShiftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s shift is over.\nNice work today 🎵'**
+  String get idleAfterShiftBody;
+
+  /// No description provided for @idleAfterShiftAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open schedule'**
+  String get idleAfterShiftAction;
 
   /// No description provided for @startTimer.
   ///
@@ -2066,6 +2168,12 @@ abstract class AppLocalizations {
   /// **'Mood right now?'**
   String get moodTitle;
 
+  /// No description provided for @moodAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (follow progress)'**
+  String get moodAuto;
+
   /// No description provided for @todaySoFar.
   ///
   /// In en, this message translates to:
@@ -2093,7 +2201,7 @@ abstract class AppLocalizations {
   /// No description provided for @toolAway.
   ///
   /// In en, this message translates to:
-  /// **'Step away'**
+  /// **'Camouflage'**
   String get toolAway;
 
   /// No description provided for @moodCheer.
@@ -2183,7 +2291,7 @@ abstract class AppLocalizations {
   /// No description provided for @labTitle.
   ///
   /// In en, this message translates to:
-  /// **'Idle LAB'**
+  /// **'Idle Lab'**
   String get labTitle;
 
   /// No description provided for @labSubtitle.
@@ -2201,8 +2309,14 @@ abstract class AppLocalizations {
   /// No description provided for @labTodayEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Nothing is featured today.'**
+  /// **'In preparation'**
   String get labTodayEmpty;
+
+  /// No description provided for @labTodayPreparingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon.'**
+  String get labTodayPreparingHelp;
 
   /// No description provided for @labSeeAll.
   ///
@@ -2312,6 +2426,78 @@ abstract class AppLocalizations {
   /// **'Drawing comes next.'**
   String get labDrawLater;
 
+  /// No description provided for @labPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one photo to post.'**
+  String get labPhotoHint;
+
+  /// No description provided for @labPhotoPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get labPhotoPick;
+
+  /// No description provided for @labPhotoReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another'**
+  String get labPhotoReplace;
+
+  /// No description provided for @labProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab profile'**
+  String get labProfileTitle;
+
+  /// No description provided for @labProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and icon shown in Boredom Lab.'**
+  String get labProfileHint;
+
+  /// No description provided for @labProfileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get labProfileName;
+
+  /// No description provided for @labProfilePickIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose icon'**
+  String get labProfilePickIcon;
+
+  /// No description provided for @labProfileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get labProfileSave;
+
+  /// No description provided for @labProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved.'**
+  String get labProfileSaved;
+
+  /// No description provided for @labPhotoPolicyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not post images that break copyright, privacy, or community rules. We may hide posts and suspend accounts for serious violations.'**
+  String get labPhotoPolicyWarning;
+
+  /// No description provided for @labFailPhotoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a photo before sending.'**
+  String get labFailPhotoEmpty;
+
+  /// No description provided for @labReportPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'(Photo post)'**
+  String get labReportPhoto;
+
   /// No description provided for @labLike.
   ///
   /// In en, this message translates to:
@@ -2342,6 +2528,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load the latest. Showing what we already have.'**
   String get labLoadError;
 
+  /// No description provided for @labLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load prompts. Check your connection and try again.'**
+  String get labLoadFailed;
+
+  /// No description provided for @labReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get labReload;
+
   /// No description provided for @labOpen.
   ///
   /// In en, this message translates to:
@@ -2357,8 +2555,20 @@ abstract class AppLocalizations {
   /// No description provided for @labCount.
   ///
   /// In en, this message translates to:
-  /// **'{count}'**
+  /// **'{count} answers'**
   String labCount(int count);
+
+  /// No description provided for @labJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined'**
+  String get labJoined;
+
+  /// No description provided for @labNotJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get labNotJoined;
 
   /// No description provided for @labUntil.
   ///
@@ -2393,14 +2603,68 @@ abstract class AppLocalizations {
   /// No description provided for @labProposeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Title'**
+  /// **'Prompt'**
   String get labProposeTitle;
 
   /// No description provided for @labProposeBody.
   ///
   /// In en, this message translates to:
-  /// **'What do people do?'**
+  /// **'Notes'**
   String get labProposeBody;
+
+  /// No description provided for @labProposePickGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a genre first'**
+  String get labProposePickGenre;
+
+  /// No description provided for @labProposeChangeGenre.
+  ///
+  /// In en, this message translates to:
+  /// **'Change genre'**
+  String get labProposeChangeGenre;
+
+  /// No description provided for @labProposeTitleHintOgiri.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. A company rule you\'d hate'**
+  String get labProposeTitleHintOgiri;
+
+  /// No description provided for @labProposeTitleHintChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Leave on time or a raise?'**
+  String get labProposeTitleHintChoice;
+
+  /// No description provided for @labProposeTitleHintQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Which bread can\'t you eat?'**
+  String get labProposeTitleHintQuiz;
+
+  /// No description provided for @labProposeTitleHintDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Title this meeting doodle'**
+  String get labProposeTitleHintDraw;
+
+  /// No description provided for @labProposeTitleHintPen.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. One line to the boss, fine hand'**
+  String get labProposeTitleHintPen;
+
+  /// No description provided for @labProposeBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Defaults to “Answer freely.”'**
+  String get labProposeBodyHint;
+
+  /// No description provided for @labProposeBodyDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer freely.'**
+  String get labProposeBodyDefault;
 
   /// No description provided for @labCategory.
   ///
@@ -2468,6 +2732,42 @@ abstract class AppLocalizations {
   /// **'Review prompts'**
   String get labReview;
 
+  /// No description provided for @labSeedOgiri.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload 20 ogiri prompts to Firestore'**
+  String get labSeedOgiri;
+
+  /// No description provided for @labSeedOgiriDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {count} ogiri prompts.'**
+  String labSeedOgiriDone(int count);
+
+  /// No description provided for @labSeedDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload 20 drawing prompts to Firestore'**
+  String get labSeedDraw;
+
+  /// No description provided for @labSeedDrawDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {count} drawing prompts.'**
+  String labSeedDrawDone(int count);
+
+  /// No description provided for @labSeedPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload 20 penmanship prompts to Firestore'**
+  String get labSeedPen;
+
+  /// No description provided for @labSeedPenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {count} penmanship prompts.'**
+  String labSeedPenDone(int count);
+
   /// No description provided for @labReviewLocked.
   ///
   /// In en, this message translates to:
@@ -2527,6 +2827,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hidden'**
   String get labHidden;
+
+  /// No description provided for @labDeleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete post'**
+  String get labDeleteEntry;
+
+  /// No description provided for @labDeleteEntryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this post? Likes on it will be removed too.'**
+  String get labDeleteEntryConfirm;
+
+  /// No description provided for @labDeletedEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get labDeletedEntry;
 
   /// No description provided for @labReports.
   ///
@@ -2641,6 +2959,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave out phone numbers and email addresses.'**
   String get labFailContact;
+
+  /// No description provided for @homeShotPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a screenshot'**
+  String get homeShotPick;
+
+  /// No description provided for @homeShotHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a screenshot of your real home screen for camouflage.'**
+  String get homeShotHelp;
+
+  /// No description provided for @homeShotFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free accounts use the built-in home screen.'**
+  String get homeShotFree;
+
+  /// No description provided for @premiumOfferHomeShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own home screen for camouflage'**
+  String get premiumOfferHomeShot;
+
+  /// No description provided for @shiftFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get shiftFrom;
+
+  /// No description provided for @shiftTo.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get shiftTo;
+
+  /// No description provided for @chunkNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get chunkNow;
+
+  /// No description provided for @toolLab.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle Lab'**
+  String get toolLab;
+
+  /// No description provided for @mascotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Character'**
+  String get mascotTitle;
+
+  /// No description provided for @mascotChick.
+  ///
+  /// In en, this message translates to:
+  /// **'Chick'**
+  String get mascotChick;
+
+  /// No description provided for @mascotSloth.
+  ///
+  /// In en, this message translates to:
+  /// **'Sloth'**
+  String get mascotSloth;
+
+  /// No description provided for @settingsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get settingsWork;
+
+  /// No description provided for @settingsNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'Notices'**
+  String get settingsNotify;
+
+  /// No description provided for @settingsTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get settingsTimer;
+
+  /// No description provided for @settingsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get settingsMore;
+
+  /// No description provided for @camouflageFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'This screen makes it harder to tell this app is open. Tap the top right to come back.'**
+  String get camouflageFirst;
+
+  /// No description provided for @camouflageFirstGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this screen'**
+  String get camouflageFirstGo;
+
+  /// No description provided for @labTapToPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get labTapToPost;
+
+  /// No description provided for @labOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Other prompts'**
+  String get labOthers;
+
+  /// No description provided for @labOthersHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse by genre'**
+  String get labOthersHelp;
+
+  /// No description provided for @labFormatPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine hand'**
+  String get labFormatPen;
+
+  /// No description provided for @labTabChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'The hard choice'**
+  String get labTabChoice;
+
+  /// No description provided for @chickNormal4.
+  ///
+  /// In en, this message translates to:
+  /// **'If you haven\'t started, this is the first chunk.'**
+  String get chickNormal4;
+
+  /// No description provided for @chickNormal5.
+  ///
+  /// In en, this message translates to:
+  /// **'It doesn\'t have to be good. Sitting here counts.'**
+  String get chickNormal5;
+
+  /// No description provided for @chickTired4.
+  ///
+  /// In en, this message translates to:
+  /// **'A heavy day still gets smaller.'**
+  String get chickTired4;
+
+  /// No description provided for @chickTired5.
+  ///
+  /// In en, this message translates to:
+  /// **'Motivation can show up later. Or not.'**
+  String get chickTired5;
+
+  /// No description provided for @chickHappy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay like this. It\'s a little easier.'**
+  String get chickHappy4;
+
+  /// No description provided for @chickHappy5.
+  ///
+  /// In en, this message translates to:
+  /// **'As the chunks drop, so do the shoulders.'**
+  String get chickHappy5;
+
+  /// No description provided for @chickCheer4.
+  ///
+  /// In en, this message translates to:
+  /// **'Past the middle. The rest can drift.'**
+  String get chickCheer4;
+
+  /// No description provided for @chickCheer5.
+  ///
+  /// In en, this message translates to:
+  /// **'You sat this long. That\'s enough.'**
+  String get chickCheer5;
+
+  /// No description provided for @chickAttention4.
+  ///
+  /// In en, this message translates to:
+  /// **'Near the door. No need to stand yet.'**
+  String get chickAttention4;
+
+  /// No description provided for @chickAttention5.
+  ///
+  /// In en, this message translates to:
+  /// **'Not much left. Breathing is enough.'**
+  String get chickAttention5;
+
+  /// No description provided for @moodHeavy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay heavy. Time moves anyway.'**
+  String get moodHeavy4;
+
+  /// No description provided for @moodHeavy5.
+  ///
+  /// In en, this message translates to:
+  /// **'Today doesn\'t have to feel light.'**
+  String get moodHeavy5;
+
+  /// No description provided for @moodHungry4.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungry, and the chunks still shrink.'**
+  String get moodHungry4;
+
+  /// No description provided for @moodHungry5.
+  ///
+  /// In en, this message translates to:
+  /// **'Eat first if you want. This chunk will wait.'**
+  String get moodHungry5;
+
+  /// No description provided for @moodSleepy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Doze. The clock is awake.'**
+  String get moodSleepy4;
+
+  /// No description provided for @moodSleepy5.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyes closed still counts as moving.'**
+  String get moodSleepy5;
+
+  /// No description provided for @moodFine4.
+  ///
+  /// In en, this message translates to:
+  /// **'This mood is about right.'**
+  String get moodFine4;
+
+  /// No description provided for @moodFine5.
+  ///
+  /// In en, this message translates to:
+  /// **'No need to cheer it up. This pace is fine.'**
+  String get moodFine5;
 }
 
 class _AppLocalizationsDelegate

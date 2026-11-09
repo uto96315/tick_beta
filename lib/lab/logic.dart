@@ -1,17 +1,13 @@
 import 'package:tick/lab/models.dart';
 
-/// Same address as `firestore.rules`. Anonymous accounts are not reviewers.
-const labAdminEmails = {'yuto.mabe@gmail.com'};
+import 'package:tick/config/operators.dart';
 
 const labTitleMax = 40;
 const labBodyMax = 200;
 const labAnswerMax = 80;
 const labChoiceMax = 24;
 
-bool labCanReview(String? email) {
-  if (email == null) return false;
-  return labAdminEmails.contains(email.toLowerCase());
-}
+bool labCanReview(String? email) => isOperatorEmail(email);
 
 String labName(String uid) {
   final tail = uid.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
@@ -47,6 +43,7 @@ LabFormat? labFormatFrom(String? raw) => switch (raw) {
   'quiz' => LabFormat.quiz,
   'choice' => LabFormat.choice,
   'draw' => LabFormat.draw,
+  'pen' => LabFormat.pen,
   _ => null,
 };
 
@@ -101,9 +98,13 @@ LabPrompt? parsePrompt(String id, Map<String, Object?> map) {
   );
 }
 
+bool labTakesText(LabFormat format) => format == LabFormat.ogiri;
+
+bool labTakesPhoto(LabFormat format) =>
+    format == LabFormat.draw || format == LabFormat.pen;
+
 bool isAccepting(LabPrompt prompt, DateTime now) {
   if (prompt.phase != LabPhase.open) return false;
-  if (prompt.format == LabFormat.draw) return false;
   final closes = prompt.closesAt;
   if (closes != null && !now.isBefore(closes)) return false;
   return true;
@@ -146,17 +147,21 @@ List<LabPrompt> mergePrompts(List<LabPrompt> seeds, List<LabPrompt> remote) {
   for (final prompt in remote) {
     byId[prompt.id] = prompt;
   }
-  final merged = byId.values
+  return sortLabPrompts(byId.values.toList());
+}
+
+List<LabPrompt> sortLabPrompts(List<LabPrompt> prompts) {
+  final list = prompts
       .where(
         (prompt) =>
             prompt.phase == LabPhase.open || prompt.phase == LabPhase.closed,
       )
       .toList();
-  merged.sort((a, b) {
+  list.sort((a, b) {
     if (a.featured != b.featured) return a.featured ? -1 : 1;
     return b.createdAt.compareTo(a.createdAt);
   });
-  return merged;
+  return list;
 }
 
 LabPrompt? todaysPrompt(List<LabPrompt> prompts) {

@@ -22,20 +22,95 @@ enum ChickPose {
   sleep,
 }
 
+/// Rotates poses within the same progress band so every asset gets air time.
+int poseVarietySlot(DateTime now, {int extra = 0}) {
+  return (now.minute + extra + now.day) % 3;
+}
+
+/// Home screen before the timer starts.
+ChickPose idlePose(DateTime now) {
+  return switch ((now.minute ~/ 4) % 6) {
+    0 => ChickPose.normal,
+    1 => ChickPose.tired,
+    2 => ChickPose.notice,
+    3 => ChickPose.happy,
+    4 => ChickPose.love,
+    _ => ChickPose.goodjob,
+  };
+}
+
 /// Pose for the ring timer. Break and a finished day win over the progress ladder.
 ChickPose timerPose({
   required double ratio,
   required int remaining,
   required bool onBreak,
   required bool pastShift,
+  int slot = 0,
 }) {
+  final v = slot.abs() % 3;
   if (onBreak) return ChickPose.sleep;
   if (ratio >= 1) return ChickPose.done;
-  if (pastShift) return ChickPose.surprise;
-  if (remaining <= 3) return ChickPose.attention;
-  if (ratio >= 0.55) return ChickPose.cheer;
-  if (ratio >= 0.25) return ChickPose.happy;
-  return ChickPose.tired;
+  if (pastShift) {
+    return switch (v) {
+      0 => ChickPose.surprise,
+      1 => ChickPose.notice,
+      _ => ChickPose.back,
+    };
+  }
+  if (remaining <= 1) {
+    return switch (v) {
+      0 => ChickPose.attention,
+      1 => ChickPose.surprise,
+      _ => ChickPose.notice,
+    };
+  }
+  if (remaining <= 3) {
+    return switch (v) {
+      0 => ChickPose.attention,
+      1 => ChickPose.notice,
+      _ => ChickPose.goodjob,
+    };
+  }
+  if (ratio >= 0.75) {
+    return switch (v) {
+      0 => ChickPose.cheer,
+      1 => ChickPose.goodjob,
+      _ => ChickPose.love,
+    };
+  }
+  if (ratio >= 0.55) {
+    return switch (v) {
+      0 => ChickPose.cheer,
+      1 => ChickPose.happy,
+      _ => ChickPose.goodjob,
+    };
+  }
+  if (ratio >= 0.25) {
+    return switch (v) {
+      0 => ChickPose.happy,
+      1 => ChickPose.normal,
+      _ => ChickPose.notice,
+    };
+  }
+  return switch (v) {
+    0 => ChickPose.tired,
+    1 => ChickPose.normal,
+    _ => ChickPose.hungry,
+  };
+}
+
+class MascotScope extends InheritedWidget {
+  const MascotScope({super.key, required this.kind, required super.child});
+
+  final MascotKind kind;
+
+  static MascotKind of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<MascotScope>()?.kind ??
+        MascotKind.chick;
+  }
+
+  @override
+  bool updateShouldNotify(MascotScope oldWidget) => kind != oldWidget.kind;
 }
 
 class TickMascot extends StatelessWidget {
@@ -52,20 +127,20 @@ class TickMascot extends StatelessWidget {
   final bool showFace;
   final ChickPose? pose;
 
-  static const _assets = {
-    ChickPose.normal: 'assets/images/character/main/normal.png',
-    ChickPose.happy: 'assets/images/character/main/happy.png',
-    ChickPose.cheer: 'assets/images/character/main/happy02.png',
-    ChickPose.back: 'assets/images/character/main/back.png',
-    ChickPose.tired: 'assets/images/character/main/tired.png',
-    ChickPose.attention: 'assets/images/character/main/attention.png',
-    ChickPose.notice: 'assets/images/character/main/notice.png',
-    ChickPose.love: 'assets/images/character/main/love.png',
-    ChickPose.hungry: 'assets/images/character/main/hungly.png',
-    ChickPose.done: 'assets/images/character/main/done.png',
-    ChickPose.goodjob: 'assets/images/character/main/goodjob.png',
-    ChickPose.surprise: 'assets/images/character/main/surprise.png',
-    ChickPose.sleep: 'assets/images/character/main/sleep.png',
+  static const _files = {
+    ChickPose.normal: 'normal.png',
+    ChickPose.happy: 'happy.png',
+    ChickPose.cheer: 'happy02.png',
+    ChickPose.back: 'back.png',
+    ChickPose.tired: 'tired.png',
+    ChickPose.attention: 'attention.png',
+    ChickPose.notice: 'notice.png',
+    ChickPose.love: 'love.png',
+    ChickPose.hungry: 'hungly.png',
+    ChickPose.done: 'done.png',
+    ChickPose.goodjob: 'goodjob.png',
+    ChickPose.surprise: 'surprise.png',
+    ChickPose.sleep: 'sleep.png',
   };
 
   ChickPose get _pose {
@@ -80,8 +155,9 @@ class TickMascot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!showFace) return SizedBox(width: size, height: size);
+    final kind = MascotScope.of(context);
     return Image.asset(
-      _assets[_pose]!,
+      'assets/images/character/${kind.folder}/${_files[_pose]}',
       width: size,
       height: size,
       fit: BoxFit.contain,
@@ -188,10 +264,26 @@ Widget _move(ChickPose pose, double t, Widget child) {
 }
 
 class ChickTalk extends StatefulWidget {
-  const ChickTalk({super.key, required this.lines, this.onDark = false});
+  const ChickTalk({
+    super.key,
+    required this.lines,
+    this.onDark = false,
+    this.tight = false,
+    this.width,
+    this.height,
+    this.fontSize,
+    this.cornerRadius,
+  });
 
   final List<String> lines;
   final bool onDark;
+  final bool tight;
+
+  /// When set (e.g. home screen), the bubble spans this width.
+  final double? width;
+  final double? height;
+  final double? fontSize;
+  final double? cornerRadius;
 
   @override
   State<ChickTalk> createState() => _ChickTalkState();
@@ -228,31 +320,42 @@ class _ChickTalkState extends State<ChickTalk> {
     final line = widget.lines[_index % widget.lines.length];
     final background = widget.onDark ? Colors.white : TickColors.navy;
     final foreground = widget.onDark ? TickColors.ink : Colors.white;
+    final custom = widget.width != null;
+    final width = widget.width ?? (widget.tight ? 220.0 : 280.0);
+    final height = widget.height ?? (widget.tight ? 40.0 : 56.0);
+    final fontSize = widget.fontSize ?? (widget.tight ? 12.0 : 14.0);
+    final radius =
+        widget.cornerRadius ?? (custom ? 20.0 : (widget.tight ? 14.0 : 18.0));
+    final tail = custom ? 11.0 : (widget.tight ? 8.0 : 10.0);
+    final hPad = custom ? 16.0 : (widget.tight ? 10.0 : 14.0);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 280),
-          child: ConstrainedBox(
+          child: SizedBox(
             key: ValueKey(line),
-            constraints: const BoxConstraints(maxWidth: 280),
+            width: width,
+            height: height,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: background,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(radius),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                child: Text(
-                  line,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: foreground,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    height: 1.3,
+                padding: EdgeInsets.symmetric(horizontal: hPad),
+                child: Center(
+                  child: Text(
+                    line,
+                    textAlign: TextAlign.center,
+                    maxLines: custom ? 3 : 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foreground,
+                      fontWeight: FontWeight.w800,
+                      fontSize: fontSize,
+                      height: 1.25,
+                    ),
                   ),
                 ),
               ),
@@ -260,12 +363,12 @@ class _ChickTalkState extends State<ChickTalk> {
           ),
         ),
         Transform.translate(
-          offset: const Offset(0, -5),
+          offset: Offset(0, custom ? -4 : (widget.tight ? -3 : -5)),
           child: Transform.rotate(
             angle: math.pi / 4,
             child: ColoredBox(
               color: background,
-              child: const SizedBox(width: 10, height: 10),
+              child: SizedBox(width: tail, height: tail),
             ),
           ),
         ),

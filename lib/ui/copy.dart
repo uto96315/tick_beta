@@ -1,6 +1,102 @@
+import 'package:flutter/material.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
+import 'package:tick/ui/theme.dart';
 import 'package:tick/ui/visuals.dart';
+
+/// Bottom sheet sentinel: clear manual mood and follow timer progress again.
+const chickMoodAuto = Object();
+
+const chickMoodPickOrder = [
+  ChickMood.heavy,
+  ChickMood.sleepy,
+  ChickMood.hungry,
+  ChickMood.cheer,
+  ChickMood.fine,
+  ChickMood.away,
+];
+
+String moodLabel(AppLocalizations l10n, ChickMood mood) {
+  return switch (mood) {
+    ChickMood.heavy => l10n.moodHeavy,
+    ChickMood.sleepy => l10n.moodSleepy,
+    ChickMood.hungry => l10n.moodHungry,
+    ChickMood.cheer => l10n.moodCheer,
+    ChickMood.fine => l10n.moodFine,
+    ChickMood.away => l10n.moodAway,
+  };
+}
+
+Future<void> showChickMoodPicker(
+  BuildContext context, {
+  ChickMood? current,
+  required void Function(ChickMood? mood) onPick,
+}) async {
+  final l10n = AppLocalizations.of(context);
+  final picked = await showModalBottomSheet<Object?>(
+    context: context,
+    backgroundColor: TickColors.cream,
+    showDragHandle: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+              child: Text(
+                l10n.moodTitle,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: TickColors.ink,
+                ),
+              ),
+            ),
+            for (final mood in chickMoodPickOrder)
+              ListTile(
+                title: Text(
+                  moodLabel(l10n, mood),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                trailing: current == mood
+                    ? const Icon(Icons.check_rounded, color: TickColors.ink)
+                    : null,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onTap: () => Navigator.pop(sheetContext, mood),
+              ),
+            const Divider(height: 1),
+            ListTile(
+              title: Text(
+                l10n.moodAuto,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: TickColors.muted,
+                ),
+              ),
+              trailing: current == null
+                  ? const Icon(Icons.check_rounded, color: TickColors.muted)
+                  : null,
+              onTap: () => Navigator.pop(sheetContext, chickMoodAuto),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  if (!context.mounted || picked == null) return;
+  if (picked == chickMoodAuto) {
+    onPick(null);
+    return;
+  }
+  if (picked is ChickMood) onPick(picked);
+}
 
 String flashText(AppLocalizations l10n, String code, String? detail) {
   return switch (code) {
@@ -73,14 +169,36 @@ List<String> chickLines(
       l10n.chickNormal1,
       l10n.chickNormal2,
       l10n.chickNormal3,
+      l10n.chickNormal4,
+      l10n.chickNormal5,
     ],
-    ChickPose.tired => [l10n.chickTired1, l10n.chickTired2, l10n.chickTired3],
-    ChickPose.happy => [l10n.chickHappy1, l10n.chickHappy2, l10n.chickHappy3],
-    ChickPose.cheer => [l10n.chickCheer1, l10n.chickCheer2, l10n.chickCheer3],
+    ChickPose.tired => [
+      l10n.chickTired1,
+      l10n.chickTired2,
+      l10n.chickTired3,
+      l10n.chickTired4,
+      l10n.chickTired5,
+    ],
+    ChickPose.happy => [
+      l10n.chickHappy1,
+      l10n.chickHappy2,
+      l10n.chickHappy3,
+      l10n.chickHappy4,
+      l10n.chickHappy5,
+    ],
+    ChickPose.cheer => [
+      l10n.chickCheer1,
+      l10n.chickCheer2,
+      l10n.chickCheer3,
+      l10n.chickCheer4,
+      l10n.chickCheer5,
+    ],
     ChickPose.attention => [
       l10n.chickAttention1,
       l10n.chickAttention2,
       l10n.chickAttention3,
+      l10n.chickAttention4,
+      l10n.chickAttention5,
     ],
     ChickPose.surprise => [
       l10n.chickSurprise1,
@@ -107,11 +225,35 @@ List<String> chickLines(
 
 List<String> moodLines(AppLocalizations l10n, ChickMood mood) {
   return switch (mood) {
-    ChickMood.heavy => [l10n.moodHeavy1, l10n.moodHeavy2, l10n.moodHeavy3],
-    ChickMood.hungry => [l10n.moodHungry1, l10n.moodHungry2, l10n.moodHungry3],
-    ChickMood.sleepy => [l10n.moodSleepy1, l10n.moodSleepy2, l10n.moodSleepy3],
+    ChickMood.heavy => [
+      l10n.moodHeavy1,
+      l10n.moodHeavy2,
+      l10n.moodHeavy3,
+      l10n.moodHeavy4,
+      l10n.moodHeavy5,
+    ],
+    ChickMood.hungry => [
+      l10n.moodHungry1,
+      l10n.moodHungry2,
+      l10n.moodHungry3,
+      l10n.moodHungry4,
+      l10n.moodHungry5,
+    ],
+    ChickMood.sleepy => [
+      l10n.moodSleepy1,
+      l10n.moodSleepy2,
+      l10n.moodSleepy3,
+      l10n.moodSleepy4,
+      l10n.moodSleepy5,
+    ],
     ChickMood.cheer => [l10n.chickGoodjob1, l10n.chickGoodjob2, l10n.chickGoodjob3],
-    ChickMood.fine => [l10n.moodFine1, l10n.moodFine2, l10n.moodFine3],
+    ChickMood.fine => [
+      l10n.moodFine1,
+      l10n.moodFine2,
+      l10n.moodFine3,
+      l10n.moodFine4,
+      l10n.moodFine5,
+    ],
     ChickMood.away => [l10n.chickBack1, l10n.chickBack2, l10n.chickBack3],
   };
 }

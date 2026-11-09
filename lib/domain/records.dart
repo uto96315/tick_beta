@@ -14,11 +14,25 @@ enum ChickVoice { plain, lazy, kansai, custom }
 
 enum CallSound { classic, soft, bright }
 
+enum MascotKind {
+  chick('main'),
+  sloth('sloth');
+
+  const MascotKind(this.folder);
+
+  final String folder;
+}
+
 enum ChickMood { heavy, hungry, sleepy, cheer, fine, away }
 
 CamouflageLook shownLook(bool premium, CamouflageLook look) {
   if (premium || look == CamouflageLook.home) return look;
   return CamouflageLook.home;
+}
+
+/// Custom home screenshot is premium. Free accounts keep the built-in home.
+bool showsHomeShot(bool premium, String homeShot) {
+  return premium && homeShot.isNotEmpty;
 }
 
 ChickVoice shownVoice(bool premium, ChickVoice voice) {
@@ -327,6 +341,8 @@ class AppSettings {
     required this.lastIntervalMinutes,
     required this.tutorialSeen,
     required this.slackIntroSeen,
+    required this.homeShot,
+    required this.mascot,
     required this.updatedAt,
   });
 
@@ -346,6 +362,8 @@ class AppSettings {
   final int lastIntervalMinutes;
   final bool tutorialSeen;
   final bool slackIntroSeen;
+  final String homeShot;
+  final MascotKind mascot;
   final DateTime updatedAt;
 
   factory AppSettings.initial(DateTime now) {
@@ -366,6 +384,8 @@ class AppSettings {
       lastIntervalMinutes: 15,
       tutorialSeen: false,
       slackIntroSeen: false,
+      homeShot: '',
+      mascot: MascotKind.chick,
       updatedAt: now,
     );
   }
@@ -387,6 +407,8 @@ class AppSettings {
     int? lastIntervalMinutes,
     bool? tutorialSeen,
     bool? slackIntroSeen,
+    String? homeShot,
+    MascotKind? mascot,
     DateTime? updatedAt,
   }) {
     return AppSettings(
@@ -406,6 +428,8 @@ class AppSettings {
       lastIntervalMinutes: lastIntervalMinutes ?? this.lastIntervalMinutes,
       tutorialSeen: tutorialSeen ?? this.tutorialSeen,
       slackIntroSeen: slackIntroSeen ?? this.slackIntroSeen,
+      homeShot: homeShot ?? this.homeShot,
+      mascot: mascot ?? this.mascot,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -427,6 +451,8 @@ class AppSettings {
     'lastIntervalMinutes': lastIntervalMinutes,
     'tutorialSeen': tutorialSeen,
     'slackIntroSeen': slackIntroSeen,
+    'homeShot': homeShot,
+    'mascot': mascot.name,
     'updatedAt': updatedAt.toIso8601String(),
   };
 
@@ -471,6 +497,11 @@ class AppSettings {
       lastIntervalMinutes: (json['lastIntervalMinutes'] as num?)?.toInt() ?? 15,
       tutorialSeen: json['tutorialSeen'] as bool? ?? false,
       slackIntroSeen: json['slackIntroSeen'] as bool? ?? false,
+      homeShot: json['homeShot'] as String? ?? '',
+      mascot: MascotKind.values.byNameOr(
+        json['mascot'] as String?,
+        MascotKind.chick,
+      ),
       updatedAt: initial.updatedAt,
     );
   }

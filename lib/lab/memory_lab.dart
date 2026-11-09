@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:tick/lab/catalog.dart';
 import 'package:tick/lab/lab_store.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
+import 'package:tick/lab/profile.dart';
 
 class LabBox {
   final prompts = <String, LabPrompt>{};
@@ -31,11 +31,15 @@ class _StoredEntry {
     required this.text,
     required this.createdAt,
     this.choiceIndex,
+    this.imageUrl,
+    this.avatarUrl,
   });
 
   final String uid;
   final String name;
   final String text;
+  final String? imageUrl;
+  final String? avatarUrl;
   final int? choiceIndex;
   final DateTime createdAt;
   bool hidden = false;
@@ -50,7 +54,9 @@ class MemoryLabStore implements LabStore {
     DateTime Function()? now,
     this.canReview = false,
     this.sharesWithOthers = false,
+    LabProfileCache? profileCache,
   }) : _box = box,
+       _profileCache = profileCache,
        now = now ?? DateTime.now;
 
   MemoryLabStore.solo({
@@ -60,6 +66,7 @@ class MemoryLabStore implements LabStore {
     DateTime Function()? now,
     bool canReview = false,
     bool sharesWithOthers = false,
+    LabProfileCache? profileCache,
   }) : this(
          uid: uid,
          newId: newId,
@@ -68,6 +75,7 @@ class MemoryLabStore implements LabStore {
          now: now,
          canReview: canReview,
          sharesWithOthers: sharesWithOthers,
+         profileCache: profileCache,
        );
 
   @override
@@ -77,6 +85,7 @@ class MemoryLabStore implements LabStore {
   final String Function() languageCode;
   final DateTime Function() now;
   final LabBox _box;
+  final LabProfileCache? _profileCache;
 
   @override
   final bool canReview;
@@ -84,7 +93,11 @@ class MemoryLabStore implements LabStore {
   @override
   final bool sharesWithOthers;
 
+  LabFeed? _cachedFeed;
   Stream<LabFeed>? _prompts;
+
+  @override
+  LabFeed? get cachedPromptFeed => _cachedFeed;
   final _boards = <String, Stream<PromptBoard>>{};
   Stream<List<LabProposal>>? _proposals;
   Stream<List<LabReport>>? _reports;
@@ -109,16 +122,46 @@ class MemoryLabStore implements LabStore {
   }
 
   @override
+  void refreshPromptFeed() {}
+
+  @override
+  @override
+  Future<Map<String, int>> fetchEntryCounts(Iterable<String> promptIds) async {
+    final counts = <String, int>{};
+    for (final id in promptIds) {
+      counts[id] = _visibleCount(id);
+    }
+    return counts;
+  }
+
+  @override
+  Future<Set<String>> fetchJoinedPromptIds(Iterable<String> promptIds) async {
+    final me = uid;
+    if (me == null) return {};
+    final joined = <String>{};
+    for (final promptId in promptIds) {
+      final entry = _box.entries[promptId]?[me];
+      if (entry != null && !entry.hidden) joined.add(promptId);
+    }
+    return joined;
+  }
+
+  @override
   Stream<LabFeed> watchPrompts() {
     return _prompts ??= _live(() {
-      final remote = _box.prompts.values.map((prompt) {
-        return prompt.copyWith(entryCount: _visibleCount(prompt.id));
-      }).toList();
-      final seeds = [
-        for (final seed in labSeeds(languageCode()))
-          seed.copyWith(entryCount: _visibleCount(seed.id)),
+      final prompts = [
+        for (final prompt in _box.prompts.values)
+          prompt.copyWith(
+            entryCount: _visibleCount(prompt.id),
+            joined: () {
+              final entry = _box.entries[prompt.id]?[uid];
+              return entry != null && !entry.hidden;
+            }(),
+          ),
       ];
-      return LabFeed(prompts: mergePrompts(seeds, remote));
+      final feed = LabFeed(prompts: sortLabPrompts(prompts));
+      _cachedFeed = feed;
+      return feed;
     });
   }
 
@@ -156,7 +199,18 @@ class MemoryLabStore implements LabStore {
   }
 
   LabPrompt? _prompt(String promptId) {
-    return _box.prompts[promptId] ?? labSeedById(languageCode(), promptId);
+    return _box.prompts[promptId];
+  }
+
+  ({String name, String? avatarUrl}) _entryAuthor(String userId) {
+    final cache = _profileCache;
+    if (cache != null && userId == uid) {
+      return (
+        name: cache.displayNameFor(userId),
+        avatarUrl: cache.avatarFor(userId),
+      );
+    }
+    return (name: labName(userId), avatarUrl: null);
   }
 
   PromptBoard _board(String promptId) {
@@ -171,6 +225,8 @@ class MemoryLabStore implements LabStore {
             uid: entry.uid,
             name: entry.name,
             text: entry.text,
+            imageUrl: entry.imageUrl,
+            avatarUrl: entry.avatarUrl,
             choiceIndex: entry.choiceIndex,
             createdAt: entry.createdAt,
             hidden: entry.hidden,
@@ -193,6 +249,37 @@ class MemoryLabStore implements LabStore {
   }
 
   @override
+  Future<LabOutcome> submitPhoto(String promptId, String localImagePath) async {
+    if (localImagePath.trim().isEmpty) {
+      return const LabOutcome.fail(LabFailure.photo);
+    }
+    final prompt = _prompt(promptId);
+    if (prompt == null) return const LabOutcome.fail(LabFailure.invalid);
+    if (!labTakesPhoto(prompt.format)) {
+      return const LabOutcome.fail(LabFailure.invalid);
+    }
+    if (!isAccepting(prompt, now())) {
+      return const LabOutcome.fail(LabFailure.closed);
+    }
+    final existing = _box.entries[promptId];
+    if (existing != null && existing.containsKey(uid)) {
+      return const LabOutcome.fail(LabFailure.already);
+    }
+    final author = _entryAuthor(uid);
+    _box.entries.putIfAbsent(promptId, () => {})[uid] = _StoredEntry(
+      uid: uid,
+      name: author.name,
+      text: '',
+      imageUrl: localImagePath,
+      avatarUrl: author.avatarUrl,
+      choiceIndex: null,
+      createdAt: now(),
+    );
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
   Future<LabOutcome> submitChoice(String promptId, int index) async {
     final prompt = _prompt(promptId);
     if (prompt == null) return const LabOutcome.fail(LabFailure.invalid);
@@ -208,23 +295,27 @@ class MemoryLabStore implements LabStore {
   }) {
     final prompt = _prompt(promptId);
     if (prompt == null) return const LabOutcome.fail(LabFailure.invalid);
-    if (prompt.format == LabFormat.draw)
-      return const LabOutcome.fail(LabFailure.draw);
-    if (!isAccepting(prompt, now()))
-      return const LabOutcome.fail(LabFailure.closed);
-    if (prompt.format == LabFormat.ogiri && choiceIndex != null) {
+    if (labTakesPhoto(prompt.format)) {
       return const LabOutcome.fail(LabFailure.invalid);
     }
-    if (prompt.format != LabFormat.ogiri && choiceIndex == null) {
+    if (!isAccepting(prompt, now()))
+      return const LabOutcome.fail(LabFailure.closed);
+    final writing = labTakesText(prompt.format);
+    if (writing && choiceIndex != null) {
+      return const LabOutcome.fail(LabFailure.invalid);
+    }
+    if (!writing && choiceIndex == null) {
       return const LabOutcome.fail(LabFailure.invalid);
     }
     final existing = _box.entries[promptId];
     if (existing != null && existing.containsKey(uid))
       return const LabOutcome.fail(LabFailure.already);
+    final author = _entryAuthor(uid);
     _box.entries.putIfAbsent(promptId, () => {})[uid] = _StoredEntry(
       uid: uid,
-      name: labName(uid),
+      name: author.name,
       text: text,
+      avatarUrl: author.avatarUrl,
       choiceIndex: choiceIndex,
       createdAt: now(),
     );
@@ -339,6 +430,30 @@ class MemoryLabStore implements LabStore {
   }
 
   @override
+  Future<LabOutcome> upsertPrompt(String id, LabDraft draft) async {
+    if (!canReview) return const LabOutcome.fail(LabFailure.forbidden);
+    final failure = validateDraft(draft, publishing: true);
+    if (failure != null) return LabOutcome.fail(failure);
+    final existing = _box.prompts[id];
+    _box.prompts[id] = LabPrompt(
+      id: id,
+      title: draft.title.trim(),
+      body: draft.body.trim(),
+      category: draft.category,
+      format: draft.format,
+      phase: LabPhase.open,
+      createdAt: existing?.createdAt ?? now(),
+      featured: draft.featured,
+      choices: draft.cleanedChoices,
+      correctIndex: draft.format == LabFormat.quiz ? draft.correctIndex : null,
+      entryCount: existing?.entryCount ?? 0,
+      seeded: id.startsWith('seed-'),
+    );
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
   Future<LabOutcome> setEntryHidden(
     String promptId,
     String entryUid,
@@ -349,6 +464,19 @@ class MemoryLabStore implements LabStore {
     if (entry == null) return const LabOutcome.fail(LabFailure.invalid);
     entry.hidden = hidden;
     if (hidden) _box.votes[promptId]?[entryUid]?.clear();
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<LabOutcome> deleteEntry(String promptId, String entryUid) async {
+    if (!canReview) return const LabOutcome.fail(LabFailure.forbidden);
+    final bucket = _box.entries[promptId];
+    if (bucket == null || !bucket.containsKey(entryUid)) {
+      return const LabOutcome.fail(LabFailure.invalid);
+    }
+    bucket.remove(entryUid);
+    _box.votes[promptId]?.remove(entryUid);
     _box.notify();
     return const LabOutcome.ok();
   }

@@ -46,7 +46,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 ),
                 Expanded(
                   child: Text(
-                    anonymous ? l10n.registerAccount : l10n.account,
+                    l10n.account,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
@@ -57,113 +57,71 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               ],
             ),
             const SizedBox(height: 8),
-            PopCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    anonymous ? l10n.anonymous : l10n.registered,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  if (auth?.email != null) ...[
-                    const SizedBox(height: 4),
-                    Text(auth!.email!),
-                  ],
-                  const SizedBox(height: 8),
-                  Text(l10n.linkKeeps, style: const TextStyle(height: 1.4)),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.anonymousLoss,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.switchHelp,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      height: 1.4,
-                    ),
-                  ),
-                  if (!app.firebaseConfigured) ...[
-                    const SizedBox(height: 8),
+            if (!anonymous) ...[
+              PopCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      l10n.firebaseLocal,
-                      style: const TextStyle(color: TickColors.muted),
+                      l10n.registered,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
+                    if (auth!.email != null) ...[
+                      const SizedBox(height: 4),
+                      Text(auth.email!),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: l10n.email),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _password,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.password,
-                hintText: l10n.passwordHint,
+              const SizedBox(height: 12),
+            ] else if (!app.firebaseConfigured) ...[
+              Text(
+                l10n.firebaseLocal,
+                style: const TextStyle(color: TickColors.muted),
               ),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                      () => ref
-                          .read(appControllerProvider.notifier)
-                          .registerEmail(_email.text, _password.text),
-                    ),
-              child: Text(l10n.registerEmail),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                      () => ref
-                          .read(appControllerProvider.notifier)
-                          .signInEmail(_email.text, _password.text),
-                    ),
-              child: Text(l10n.signInEmail),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.tonal(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                      () => ref
-                          .read(appControllerProvider.notifier)
-                          .registerGoogle(),
-                    ),
-              child: Text(l10n.registerGoogle),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                      () => ref
-                          .read(appControllerProvider.notifier)
-                          .signInGoogle(),
-                    ),
-              child: Text(l10n.signInGoogle),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.googleMissing,
-              style: const TextStyle(fontSize: 13, color: TickColors.muted),
-            ),
+              const SizedBox(height: 12),
+            ],
+            if (anonymous) ...[
+              TextField(
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(labelText: l10n.email),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _password,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: l10n.password,
+                  hintText: l10n.passwordHint,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: _busy
+                    ? null
+                    : () => _run(
+                        () => ref
+                            .read(appControllerProvider.notifier)
+                            .registerEmail(_email.text, _password.text),
+                      ),
+                child: Text(l10n.registerEmail),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: _busy
+                    ? null
+                    : () => _run(
+                        () => ref
+                            .read(appControllerProvider.notifier)
+                            .signInEmail(_email.text, _password.text),
+                      ),
+                child: Text(l10n.signInEmail),
+              ),
+            ],
             if (!anonymous) ...[
               const SizedBox(height: 12),
               TextButton(

@@ -1,5 +1,7 @@
 import 'package:tick/data/local_store.dart';
 import 'package:tick/lab/lab_store.dart';
+import 'package:tick/lab/profile.dart';
+import 'package:tick/services/io/lab_profile_remote.dart';
 import 'package:tick/data/persisted_state.dart';
 import 'package:tick/domain/app_update.dart';
 
@@ -105,6 +107,7 @@ abstract class NotificationGateway {
   Future<void> init({required void Function(String? payload) onTap});
   Future<void> syncSchedules({
     required PersistedState state,
+    required String languageCode,
     required NotificationCopy copy,
     required DateTime now,
   });
@@ -117,6 +120,7 @@ class NoopNotifications implements NotificationGateway {
   @override
   Future<void> syncSchedules({
     required PersistedState state,
+    required String languageCode,
     required NotificationCopy copy,
     required DateTime now,
   }) async {}
@@ -176,6 +180,15 @@ class SystemClock implements Clock {
   DateTime now() => DateTime.now();
 }
 
+class FixedClock implements Clock {
+  FixedClock(this.moment);
+
+  final DateTime moment;
+
+  @override
+  DateTime now() => moment;
+}
+
 class AppDeps {
   AppDeps({
     required this.store,
@@ -192,6 +205,8 @@ class AppDeps {
     required this.installedBuild,
     required this.updates,
     required this.lab,
+    required this.labProfileCache,
+    this.labProfileRemote,
   });
 
   final LocalStore store;
@@ -208,4 +223,6 @@ class AppDeps {
   final int installedBuild;
   final UpdatePolicySource updates;
   final LabStore lab;
+  final LabProfileCache labProfileCache;
+  final LabProfileRemote? labProfileRemote;
 }

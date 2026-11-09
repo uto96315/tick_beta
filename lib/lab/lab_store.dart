@@ -9,6 +9,18 @@ abstract class LabStore {
 
   Stream<LabFeed> watchPrompts();
 
+  /// Last prompt feed event (for new [StreamBuilder]s on the same stream).
+  LabFeed? get cachedPromptFeed;
+
+  /// Drop cached prompt stream so the next [watchPrompts] subscribes fresh.
+  void refreshPromptFeed();
+
+  /// Visible entry counts for list / today card (only requested ids).
+  Future<Map<String, int>> fetchEntryCounts(Iterable<String> promptIds);
+
+  /// Which of [promptIds] the user has posted to (list UI).
+  Future<Set<String>> fetchJoinedPromptIds(Iterable<String> promptIds);
+
   Stream<PromptBoard> watchBoard(String promptId);
 
   Stream<List<LabProposal>> watchProposals();
@@ -16,6 +28,8 @@ abstract class LabStore {
   Stream<List<LabReport>> watchReports();
 
   Future<LabOutcome> submitText(String promptId, String text);
+
+  Future<LabOutcome> submitPhoto(String promptId, String localImagePath);
 
   Future<LabOutcome> submitChoice(String promptId, int index);
 
@@ -31,9 +45,13 @@ abstract class LabStore {
 
   Future<LabOutcome> publishPrompt(LabDraft draft);
 
+  Future<LabOutcome> upsertPrompt(String id, LabDraft draft);
+
   Future<LabOutcome> setEntryHidden(
     String promptId,
     String entryUid,
     bool hidden,
   );
+
+  Future<LabOutcome> deleteEntry(String promptId, String entryUid);
 }

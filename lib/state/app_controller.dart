@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tick/data/persisted_state.dart';
@@ -9,7 +11,13 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/session_ops.dart';
+import 'package:tick/config/operators.dart';
 import 'package:tick/lab/lab_store.dart';
+import 'package:tick/lab/draw_batch.dart';
+import 'package:tick/lab/ogiri_batch.dart';
+import 'package:tick/lab/models.dart';
+import 'package:tick/lab/pen_batch.dart';
+import 'package:tick/lab/profile.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/services/notification_copy.dart';
 import 'package:tick/state/app_state.dart';
@@ -68,6 +76,7 @@ class AppController extends Notifier<AppState> {
       final user = await _deps.auth.ensureSignedIn();
       if (!ref.mounted) return;
       await _bindUser(user);
+      unawaited(_maybeSeedLabOgiri());
     } catch (error) {
       debugPrint('auth skipped: $error');
       _offline = true;
@@ -321,6 +330,12 @@ class AppController extends Notifier<AppState> {
     _emit();
   }
 
+  void clearMood() {
+    _mood = null;
+    if (_db.settings.notifyVibration) HapticFeedback.lightImpact();
+    _emit();
+  }
+
   void callFromMood() {
     slackCall();
   }
@@ -418,6 +433,7 @@ class AppController extends Notifier<AppState> {
     } else {
       _db.overrides = [..._db.overrides, next];
     }
+    _resyncLiveShift(now);
     _commit();
   }
 
@@ -436,6 +452,7 @@ class AppController extends Notifier<AppState> {
     final now = _deps.clock.now();
     if (!FakeCallPolicy.canConsume(
       premium: _premium,
+      owner: FakeCallPolicy.isOwner(_auth?.email),
       credits: _db.credits,
       when: now,
     )) {
@@ -461,6 +478,7 @@ class AppController extends Notifier<AppState> {
     }
     if (!FakeCallPolicy.canConsume(
       premium: _premium,
+      owner: FakeCallPolicy.isOwner(_auth?.email),
       credits: _db.credits,
       when: when,
     )) {
@@ -568,6 +586,20 @@ class AppController extends Notifier<AppState> {
     _commit();
   }
 
+  Future<void> setHomeShot(String sourcePath) async {
+    if (!_premium) {
+      _flashCode('premium');
+      return;
+    }
+    final saved = await _deps.savePhoto('camouflage-home', sourcePath);
+    if (!ref.mounted || saved == null) return;
+    _db.settings = _db.settings.copyWith(
+      homeShot: saved,
+      updatedAt: _deps.clock.now(),
+    );
+    _commit();
+  }
+
   void deleteCaller(String id) {
     final caller = _findCaller(id);
     if (caller == null || !caller.custom) return;
@@ -610,6 +642,7 @@ class AppController extends Notifier<AppState> {
       if (uid != null && _deps.firebaseConfigured) {
         try {
           await _deps.sync.deleteUser(uid);
+          await _deps.labProfileRemote?.deleteUser(uid);
         } catch (error) {
           debugPrint('remote delete failed: $error');
         }
@@ -657,18 +690,24 @@ class AppController extends Notifier<AppState> {
 
   Future<String?> priceLabel() => _deps.purchases.priceLabel();
 
-  bool get premium => _db.entitlement.premium;
+  bool get premium => _premium;
 
   void _resyncLiveShift(DateTime now) {
     final session = _db.session;
-    final patternId = session?.patternId;
-    if (session == null || patternId == null) return;
+    if (session == null) return;
+    final patternId = session.patternId;
     final shift = ScheduleCalendar(
       patterns: _db.patterns,
       week: _db.week,
       overrides: _db.overrides,
     ).shiftStartingOn(session.workDate);
-    if (shift == null || shift.patternId != patternId) return;
+    if (shift == null) return;
+    final samePattern = patternId != null && shift.patternId == patternId;
+    final sameOverride =
+        patternId == null &&
+        shift.patternId == null &&
+        session.shiftKey != null;
+    if (!samePattern && !sameOverride) return;
     final aligned = realignSession(session, shift, now);
     final sameBreaks =
         aligned.breaks.length == session.breaks.length &&
@@ -885,13 +924,95 @@ class AppController extends Notifier<AppState> {
     return span.copyWith(start: nextStart, end: safeEnd, updatedAt: now);
   }
 
+  Future<LabFailure?> updateLabNick(String nick) async {
+    final failure = validateLabNick(nick);
+    if (failure != null) return failure;
+    _db.labNick = nick.trim();
+    _syncProfileCache();
+    await _save();
+    final uid = _db.uid;
+    if (uid != null && _deps.labProfileRemote != null) {
+      try {
+        await _deps.labProfileRemote!.pushNick(uid, _db.labNick);
+      } catch (error) {
+        debugPrint('lab nick push failed: $error');
+        return LabFailure.offline;
+      }
+    }
+    _emit();
+    return null;
+  }
+
+  Future<LabFailure?> updateLabAvatar(String sourcePath) async {
+    final uid = _db.uid;
+    if (uid == null) return LabFailure.offline;
+    try {
+      final path = await _persistLabAvatar(sourcePath);
+      _db.labAvatarPath = path;
+      if (_deps.labProfileRemote != null) {
+        _db.labAvatarUrl = await _deps.labProfileRemote!.uploadAvatar(
+          uid,
+          path,
+        );
+      }
+      _syncProfileCache();
+      await _save();
+      _emit();
+      return null;
+    } catch (error) {
+      debugPrint('lab avatar update failed: $error');
+      return LabFailure.offline;
+    }
+  }
+
+  Future<String> _persistLabAvatar(String sourcePath) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final folder = Directory('${directory.path}/lab_profile');
+    await folder.create(recursive: true);
+    final target = File('${folder.path}/avatar.jpg');
+    await File(sourcePath).copy(target.path);
+    return target.path;
+  }
+
+  void _syncProfileCache() {
+    _deps.labProfileCache.apply(
+      nick: _db.labNick,
+      avatarPath: _db.labAvatarPath.isEmpty ? null : _db.labAvatarPath,
+      avatarUrl: _db.labAvatarUrl.isEmpty ? null : _db.labAvatarUrl,
+    );
+  }
+
+  Future<void> _pullLabProfile() async {
+    final uid = _db.uid;
+    if (uid == null || _deps.labProfileRemote == null) return;
+    try {
+      final remote = await _deps.labProfileRemote!.fetch(uid);
+      if (remote == null) return;
+      if (remote.nick.isNotEmpty &&
+          validateLabNick(remote.nick) == null) {
+        _db.labNick = remote.nick;
+      }
+      if (remote.avatarUrl != null) {
+        _db.labAvatarUrl = remote.avatarUrl!;
+      }
+      _syncProfileCache();
+      await _save();
+      if (ref.mounted) _emit();
+    } catch (error) {
+      debugPrint('lab profile pull failed: $error');
+    }
+  }
+
   Future<void> _bindUser(AuthUser user) async {
     _auth = user;
     if (_db.uid == null || _db.uid == user.uid) {
       _db.uid ??= user.uid;
+      _syncProfileCache();
       _deps.store.state = _db;
       await _save();
       await _syncNow();
+      unawaited(_pullLabProfile());
+      unawaited(_maybeSeedLabOgiri());
       return;
     }
     _db = PersistedState.blank(uid: user.uid);
@@ -901,7 +1022,42 @@ class AppController extends Notifier<AppState> {
     await _deps.ringtone.stop();
     await _save();
     await _syncNow();
+    unawaited(_pullLabProfile());
+    unawaited(_maybeSeedLabOgiri());
     _emit();
+  }
+
+  /// Idempotent upsert of official lab prompts (operator account only).
+  Future<void> _maybeSeedLabOgiri() async {
+    if (!_deps.firebaseConfigured) return;
+    if (!isOperatorEmail(_auth?.email)) return;
+    final store = _deps.lab;
+    if (!store.canReview) return;
+    try {
+      final feed = await store
+          .watchPrompts()
+          .first
+          .timeout(const Duration(seconds: 20));
+      final hasOgiri = feed.prompts.any(
+        (prompt) => prompt.id.startsWith('seed-ogiri-'),
+      );
+      final hasDraw = feed.prompts.any(
+        (prompt) => prompt.id.startsWith('seed-draw-'),
+      );
+      final hasPen = feed.prompts.any(
+        (prompt) => prompt.id.startsWith('seed-pen-'),
+      );
+      if (hasOgiri && hasDraw && hasPen) return;
+      var ogiri = 0;
+      var draw = 0;
+      var pen = 0;
+      if (!hasOgiri) ogiri = await seedOgiriBatch(store);
+      if (!hasDraw) draw = await seedDrawBatch(store);
+      if (!hasPen) pen = await seedPenBatch(store);
+      debugPrint('lab seeded: ogiri=$ogiri draw=$draw pen=$pen');
+    } catch (error) {
+      debugPrint('lab seed skipped: $error');
+    }
   }
 
   Future<String?> _authCall(Future<AuthUser> Function() action) async {
@@ -979,9 +1135,11 @@ class AppController extends Notifier<AppState> {
   }
 
   Future<void> _reschedule() {
+    final languageCode = _deps.languageCode();
     return _deps.notifications.syncSchedules(
       state: _db,
-      copy: notificationCopy(_deps.languageCode()),
+      languageCode: languageCode,
+      copy: notificationCopy(languageCode),
       now: _deps.clock.now(),
     );
   }
@@ -999,7 +1157,8 @@ class AppController extends Notifier<AppState> {
     return null;
   }
 
-  bool get _premium => _db.entitlement.premium;
+  bool get _premium =>
+      _db.entitlement.premium || FakeCallPolicy.isOwner(_auth?.email);
 
   Future<void> _save() {
     _deps.store.state = _db;
@@ -1019,6 +1178,7 @@ class AppController extends Notifier<AppState> {
   }
 
   AppState _view() {
+    final uid = _auth?.uid ?? _db.uid ?? 'local';
     return AppState(
       ready: _booted,
       firebaseConfigured: _deps.firebaseConfigured,
@@ -1045,6 +1205,10 @@ class AppController extends Notifier<AppState> {
       flash: _flash,
       offline: _offline,
       mood: _mood,
+      labDisplayName: resolveLabDisplayName(_db.labNick, uid),
+      labNick: _db.labNick,
+      labAvatarPath: _db.labAvatarPath,
+      labAvatarUrl: _db.labAvatarUrl,
     );
   }
 

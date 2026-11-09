@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tick/domain/format.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
@@ -20,6 +21,7 @@ class LabPromptPage extends ConsumerStatefulWidget {
 class _LabPromptPageState extends ConsumerState<LabPromptPage> {
   final _text = TextEditingController();
   var _busy = false;
+  String? _pickedPhotoPath;
 
   @override
   void dispose() {
@@ -31,22 +33,28 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final store = ref.watch(labStoreProvider);
+    final email = ref.watch(
+      appControllerProvider.select((state) => state.auth?.email),
+    );
+    final canModerate = labCanReview(email) || store.canReview;
     return StreamBuilder<PromptBoard>(
       stream: store.watchBoard(widget.id),
       builder: (context, snapshot) {
         final board = snapshot.data;
         final prompt = board?.prompt;
+        final headerTitle = prompt != null
+            ? labFormatLabel(l10n, prompt.format)
+            : l10n.labTitle;
         return LabScaffold(
-          children: [
-            LabHeader(title: prompt?.title ?? l10n.labTitle),
-            if (board == null)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Center(
-                  child: CircularProgressIndicator(color: TickColors.ink),
-                ),
-              )
-            else if (prompt == null)
+          header: LabHeader(title: headerTitle),
+          body: board == null
+              ? const LabFeedLoading()
+              : SingleChildScrollView(
+                  padding: LabScaffold.scrollPadding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+            if (prompt == null)
               Text(l10n.labNotFound)
             else ...[
               if (board.remoteFailed)
@@ -60,9 +68,31 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
                     ),
                   ),
                 ),
-              Text(
-                prompt.body,
-                style: const TextStyle(fontSize: 16, height: 1.4),
+              PopCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prompt.title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        height: 1.35,
+                      ),
+                    ),
+                    if (prompt.body.trim().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        prompt.body,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: TickColors.muted,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
               const SizedBox(height: 10),
               LabMeta(prompt: prompt),
@@ -77,12 +107,19 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
                 ),
               ],
               const SizedBox(height: 16),
-              if (prompt.format == LabFormat.draw)
-                Text(
-                  l10n.labDrawLater,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+              if (labTakesPhoto(prompt.format))
+                _PhotoBox(
+                  prompt: prompt,
+                  entries: board.entries,
+                  pickedPath: _pickedPhotoPath,
+                  busy: _busy,
+                  onPick: _pickPhoto,
+                  onSubmit: _submitPhoto,
+                  onVote: _vote,
+                  onReport: _report,
+                  onDeleteEntry: canModerate ? _deleteEntry : null,
                 )
-              else if (prompt.format == LabFormat.ogiri)
+              else if (labTakesText(prompt.format))
                 _OgiriBox(
                   prompt: prompt,
                   entries: board.entries,
@@ -91,6 +128,7 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
                   onSubmit: _submitText,
                   onVote: _vote,
                   onReport: _report,
+                  onDeleteEntry: canModerate ? _deleteEntry : null,
                 )
               else
                 _ChoiceBox(
@@ -100,12 +138,50 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
                   onPick: _submitChoice,
                   onVote: _vote,
                   onReport: _report,
+                  onDeleteEntry: canModerate ? _deleteEntry : null,
+                  showAllEntries: canModerate,
                 ),
             ],
-          ],
+                    ],
+                  ),
+                ),
         );
       },
     );
+  }
+
+  Future<void> _pickPhoto() async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 85,
+    );
+    if (image == null || !mounted) return;
+    setState(() => _pickedPhotoPath = image.path);
+  }
+
+  Future<void> _submitPhoto() async {
+    final path = _pickedPhotoPath;
+    if (path == null) {
+      labTell(context, AppLocalizations.of(context).labFailPhotoEmpty);
+      return;
+    }
+    final ok = await labConfirmPhotoPost(context, imagePath: path);
+    if (!ok || !mounted) return;
+    setState(() => _busy = true);
+    final outcome = await ref
+        .read(labStoreProvider)
+        .submitPhoto(widget.id, path);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (outcome.ok) _pickedPhotoPath = null;
+    });
+    if (outcome.ok) {
+      labTell(context, AppLocalizations.of(context).labPosted);
+    } else {
+      labTellOutcome(context, outcome);
+    }
   }
 
   Future<void> _submitText() async {
@@ -161,8 +237,28 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
     final outcome = await ref
         .read(labStoreProvider)
         .toggleVote(widget.id, entryUid);
-    if (!mounted) return;
+    if (!mounted || outcome.ok) return;
     labTellOutcome(context, outcome);
+  }
+
+  Future<void> _deleteEntry(LabEntry entry) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await labConfirm(
+      context,
+      title: l10n.labDeleteEntry,
+      detail: l10n.labDeleteEntryConfirm,
+      confirmLabel: l10n.labDeleteEntry,
+    );
+    if (!ok || !mounted) return;
+    final outcome = await ref
+        .read(labStoreProvider)
+        .deleteEntry(widget.id, entry.uid);
+    if (!mounted) return;
+    if (outcome.ok) {
+      labTell(context, l10n.labDeletedEntry);
+    } else {
+      labTellOutcome(context, outcome);
+    }
   }
 
   Future<void> _report(LabEntry entry) async {
@@ -170,7 +266,7 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
     final ok = await labConfirm(
       context,
       title: l10n.labReport,
-      detail: entry.text,
+      detail: entry.imageUrl != null ? l10n.labReportPhoto : entry.text,
     );
     if (!ok || !mounted) return;
     final outcome = await ref
@@ -185,6 +281,90 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
   }
 }
 
+class _PhotoBox extends StatelessWidget {
+  const _PhotoBox({
+    required this.prompt,
+    required this.entries,
+    required this.pickedPath,
+    required this.busy,
+    required this.onPick,
+    required this.onSubmit,
+    required this.onVote,
+    required this.onReport,
+    this.onDeleteEntry,
+  });
+
+  final LabPrompt prompt;
+  final List<LabEntry> entries;
+  final String? pickedPath;
+  final bool busy;
+  final VoidCallback onPick;
+  final VoidCallback onSubmit;
+  final ValueChanged<String> onVote;
+  final ValueChanged<LabEntry> onReport;
+  final Future<void> Function(LabEntry entry)? onDeleteEntry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final mine = entries.where((entry) => entry.mine).firstOrNull;
+    final open = isAccepting(prompt, DateTime.now());
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (mine != null) ...[
+          Text(
+            l10n.labYourAnswer,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          if (mine.imageUrl != null)
+            LabEntryImage(imageUrl: mine.imageUrl!)
+          else
+            Text(mine.text),
+          const SizedBox(height: 16),
+        ] else if (open) ...[
+          Text(
+            l10n.labPhotoHint,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          if (pickedPath != null) ...[
+            LabEntryImage(imageUrl: pickedPath!),
+            const SizedBox(height: 8),
+          ],
+          OutlinedButton.icon(
+            onPressed: busy ? null : onPick,
+            icon: const Icon(Icons.photo_library_outlined),
+            label: Text(
+              pickedPath == null ? l10n.labPhotoPick : l10n.labPhotoReplace,
+            ),
+          ),
+          const SizedBox(height: 8),
+          FilledButton(
+            onPressed: busy || pickedPath == null ? null : onSubmit,
+            child: Text(l10n.labAnswer),
+          ),
+          const SizedBox(height: 16),
+        ] else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              l10n.labFailClosed,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        LabRankList(
+          entries: entries,
+          onVote: onVote,
+          onReport: onReport,
+          onDeleteEntry: onDeleteEntry,
+        ),
+      ],
+    );
+  }
+}
+
 class _OgiriBox extends StatelessWidget {
   const _OgiriBox({
     required this.prompt,
@@ -194,6 +374,7 @@ class _OgiriBox extends StatelessWidget {
     required this.onSubmit,
     required this.onVote,
     required this.onReport,
+    this.onDeleteEntry,
   });
 
   final LabPrompt prompt;
@@ -203,13 +384,13 @@ class _OgiriBox extends StatelessWidget {
   final VoidCallback onSubmit;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final Future<void> Function(LabEntry entry)? onDeleteEntry;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final mine = entries.where((entry) => entry.mine).firstOrNull;
     final open = isAccepting(prompt, DateTime.now());
-    final voted = entries.any((entry) => entry.votes > 0);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,21 +423,12 @@ class _OgiriBox extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
-        Text(
-          l10n.labRank,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        LabRankList(
+          entries: entries,
+          onVote: onVote,
+          onReport: onReport,
+          onDeleteEntry: onDeleteEntry,
         ),
-        const SizedBox(height: 4),
-        Text(
-          voted ? l10n.labEntries : l10n.labRankEmpty,
-          style: const TextStyle(color: TickColors.muted),
-        ),
-        const SizedBox(height: 8),
-        if (entries.isEmpty)
-          Text(l10n.labEmptyEntries)
-        else
-          for (final entry in entries)
-            _EntryTile(entry: entry, onVote: onVote, onReport: onReport),
       ],
     );
   }
@@ -270,6 +442,8 @@ class _ChoiceBox extends StatelessWidget {
     required this.onPick,
     required this.onVote,
     required this.onReport,
+    this.onDeleteEntry,
+    this.showAllEntries = false,
   });
 
   final LabPrompt prompt;
@@ -278,6 +452,8 @@ class _ChoiceBox extends StatelessWidget {
   final void Function(int index, String label) onPick;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final Future<void> Function(LabEntry entry)? onDeleteEntry;
+  final bool showAllEntries;
 
   @override
   Widget build(BuildContext context) {
@@ -302,12 +478,12 @@ class _ChoiceBox extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ]
-        else if (mine == null)
+        else if (mine == null && !showAllEntries)
           Text(
             l10n.labFailClosed,
             style: const TextStyle(fontWeight: FontWeight.w700),
           )
-        else ...[
+        else if (mine != null) ...[
           Text(
             l10n.labYourAnswer,
             style: const TextStyle(fontWeight: FontWeight.w800),
@@ -345,8 +521,28 @@ class _ChoiceBox extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          for (final entry in entries)
-            _EntryTile(entry: entry, onVote: onVote, onReport: onReport),
+          for (final entry in entries.where((entry) => !entry.hidden))
+            LabEntryTile(
+              entry: entry,
+              onVote: onVote,
+              onReport: onReport,
+              onDeleteEntry: onDeleteEntry,
+            ),
+        ],
+        if (showAllEntries && mine == null && entries.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            l10n.labEntries,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          for (final entry in entries.where((entry) => !entry.hidden))
+            LabEntryTile(
+              entry: entry,
+              onVote: onVote,
+              onReport: onReport,
+              onDeleteEntry: onDeleteEntry,
+            ),
         ],
       ],
     );
@@ -394,82 +590,3 @@ class _ShareBar extends StatelessWidget {
   }
 }
 
-class _EntryTile extends StatelessWidget {
-  const _EntryTile({
-    required this.entry,
-    required this.onVote,
-    required this.onReport,
-  });
-
-  final LabEntry entry;
-  final ValueChanged<String> onVote;
-  final ValueChanged<LabEntry> onReport;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: PopCard(
-        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.name,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    entry.text,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  if (entry.hidden)
-                    Text(
-                      l10n.labHidden,
-                      style: const TextStyle(
-                        color: TickColors.muted,
-                        fontSize: 12,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (!entry.mine)
-              IconButton(
-                tooltip: l10n.labLike,
-                onPressed: () => onVote(entry.uid),
-                icon: Icon(
-                  entry.voted
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  color: TickColors.ink,
-                ),
-              ),
-            if (!entry.mine)
-              IconButton(
-                tooltip: l10n.labReport,
-                onPressed: () => onReport(entry),
-                icon: const Icon(Icons.flag_outlined, color: TickColors.muted),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(top: 12, right: 8),
-              child: Text(
-                '${entry.votes}',
-                style: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

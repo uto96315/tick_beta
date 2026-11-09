@@ -47,20 +47,26 @@ class LocalNotificationGateway implements NotificationGateway {
   @override
   Future<void> syncSchedules({
     required PersistedState state,
+    required String languageCode,
     required NotificationCopy copy,
     required DateTime now,
   }) async {
     if (!_ready) return;
     try {
       await _plugin.cancelAll();
-      await _scheduleSession(state, copy, now);
+      await _scheduleSession(state, languageCode, copy, now);
       await _scheduleCalls(state, copy, now);
     } catch (error) {
       debugPrint('notification schedule failed: $error');
     }
   }
 
-  Future<void> _scheduleSession(PersistedState state, NotificationCopy copy, DateTime now) async {
+  Future<void> _scheduleSession(
+    PersistedState state,
+    String languageCode,
+    NotificationCopy copy,
+    DateTime now,
+  ) async {
     final session = state.session;
     if (session == null) return;
     final details = _details(state.settings.notifySound);
@@ -77,10 +83,11 @@ class LocalNotificationGateway implements NotificationGateway {
       for (var i = 0; i < segments.length && scheduled < 40; i++) {
         final end = segments[i].end;
         if (!end.isAfter(now)) continue;
+        final line = segmentNotification(languageCode, i, segments.length);
         await _plugin.zonedSchedule(
           id: 100 + i,
-          title: copy.segmentTitle,
-          body: fill(copy.segmentBody, {'done': '${i + 1}', 'total': '${segments.length}'}),
+          title: line.title,
+          body: line.body,
           scheduledDate: tz.TZDateTime.from(end, tz.local),
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

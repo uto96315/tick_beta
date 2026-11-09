@@ -38,6 +38,10 @@ class AppState {
     required this.flash,
     required this.offline,
     required this.mood,
+    required this.labDisplayName,
+    required this.labNick,
+    required this.labAvatarPath,
+    required this.labAvatarUrl,
   });
 
   final bool ready;
@@ -65,6 +69,10 @@ class AppState {
   final Flash? flash;
   final bool offline;
   final ChickMood? mood;
+  final String labDisplayName;
+  final String labNick;
+  final String labAvatarPath;
+  final String labAvatarUrl;
 
   factory AppState.initial() {
     final now = DateTime.fromMillisecondsSinceEpoch(0);
@@ -94,6 +102,10 @@ class AppState {
       flash: null,
       offline: false,
       mood: null,
+      labDisplayName: '',
+      labNick: '',
+      labAvatarPath: '',
+      labAvatarUrl: '',
     );
   }
 }

@@ -12,7 +12,9 @@ import 'package:tick/services/gateways.dart';
 import 'package:tick/services/io/asset_ringtone.dart';
 import 'package:tick/services/io/firebase_auth_gateway.dart';
 import 'package:tick/lab/memory_lab.dart';
+import 'package:tick/lab/profile.dart';
 import 'package:tick/services/io/firestore_lab.dart';
+import 'package:tick/services/io/lab_profile_remote.dart';
 import 'package:tick/services/io/firestore_sync.dart';
 import 'package:tick/services/io/local_notifications.dart';
 import 'package:tick/services/io/remote_update.dart';
@@ -59,12 +61,30 @@ Future<AppDeps> loadAppDeps() async {
       debugPrint('Firebase stayed off: $error');
     }
   }
+  final labProfileCache = LabProfileCache();
+  labProfileCache.apply(
+    nick: store.state.labNick,
+    avatarPath: store.state.labAvatarPath.isEmpty
+        ? null
+        : store.state.labAvatarPath,
+    avatarUrl: store.state.labAvatarUrl.isEmpty
+        ? null
+        : store.state.labAvatarUrl,
+  );
+  final labProfileRemote = firebaseReady ? LabProfileRemote() : null;
   final lab = firebaseReady
-      ? FirestoreLabStore(auth: auth, newId: ids.v4, languageCode: language)
+      ? FirestoreLabStore(
+          auth: auth,
+          newId: ids.v4,
+          languageCode: language,
+          profileCache: labProfileCache,
+          profileRemote: labProfileRemote,
+        )
       : MemoryLabStore.solo(
           uid: store.state.uid ?? 'local',
           newId: ids.v4,
           languageCode: language,
+          profileCache: labProfileCache,
         );
   return AppDeps(
     store: store,
@@ -80,6 +100,8 @@ Future<AppDeps> loadAppDeps() async {
     installedBuild: installedBuild,
     updates: updates,
     lab: lab,
+    labProfileCache: labProfileCache,
+    labProfileRemote: labProfileRemote,
     savePhoto: (callerId, sourcePath) async {
       final directory = await getApplicationDocumentsDirectory();
       final folder = Directory('${directory.path}/callers');

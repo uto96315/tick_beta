@@ -1,5 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tick/lab/catalog.dart';
+import 'package:tick/lab/draw_batch.dart';
+import 'package:tick/lab/ogiri_batch.dart';
+import 'package:tick/lab/pen_batch.dart';
 import 'package:tick/lab/logic.dart';
+import 'package:tick/lab/profile.dart';
 import 'package:tick/lab/memory_lab.dart';
 import 'package:tick/lab/models.dart';
 
@@ -8,6 +13,9 @@ void main() {
     'answers, votes, quizzes, and review stay within the lab rules',
     () async {
       final box = LabBox();
+      for (final seed in labSeeds('ja')) {
+        box.prompts[seed.id] = seed;
+      }
       var next = 0;
       String id() => 'made-${next++}';
       final now = DateTime.utc(2026, 10, 29, 1);
@@ -146,4 +154,81 @@ void main() {
       expect((await a.submitText('shut', 'まだ')).failure, LabFailure.closed);
     },
   );
+
+  test('ogiri batch upserts twenty prompts', () async {
+    final box = LabBox();
+    final admin = MemoryLabStore(
+      uid: 'operator',
+      newId: () => 'x',
+      box: box,
+      languageCode: () => 'ja',
+      canReview: true,
+    );
+    expect(ogiriBatchDrafts(), hasLength(20));
+    expect(await seedOgiriBatch(admin), 20);
+    expect(box.prompts['seed-ogiri-01']?.featured, isTrue);
+    expect(box.prompts['seed-ogiri-20']?.format, LabFormat.ogiri);
+  });
+
+  test('draw batch upserts twenty prompts', () async {
+    final box = LabBox();
+    final admin = MemoryLabStore(
+      uid: 'operator',
+      newId: () => 'x',
+      box: box,
+      languageCode: () => 'ja',
+      canReview: true,
+    );
+    expect(drawBatchDrafts(), hasLength(20));
+    expect(await seedDrawBatch(admin), 20);
+    expect(box.prompts['seed-draw-01']?.format, LabFormat.draw);
+    expect(box.prompts['seed-draw-09']?.category, LabCategory.sit);
+    expect(box.prompts['seed-draw-19']?.category, LabCategory.quiet);
+  });
+
+  test('pen batch upserts twenty prompts', () async {
+    final box = LabBox();
+    final admin = MemoryLabStore(
+      uid: 'operator',
+      newId: () => 'x',
+      box: box,
+      languageCode: () => 'ja',
+      canReview: true,
+    );
+    expect(penBatchDrafts(), hasLength(20));
+    expect(await seedPenBatch(admin), 20);
+    expect(box.prompts['seed-pen-01']?.format, LabFormat.pen);
+    expect(box.prompts['seed-pen-20']?.title, '天下泰平');
+  });
+
+  test('lab nick validation rejects contact info', () {
+    expect(validateLabNick(''), LabFailure.empty);
+    expect(validateLabNick('a@b.co'), LabFailure.contact);
+    expect(validateLabNick('たろう'), isNull);
+  });
+
+  test('draw prompt accepts a photo entry in memory store', () async {
+    final box = LabBox();
+    box.prompts['seed-draw-01'] = LabPrompt(
+      id: 'seed-draw-01',
+      title: '描いて',
+      body: '自由に描いて。',
+      category: LabCategory.stand,
+      format: LabFormat.draw,
+      phase: LabPhase.open,
+      createdAt: DateTime.utc(2026, 10, 29),
+    );
+    final user = MemoryLabStore(
+      uid: 'user-a',
+      newId: () => 'x',
+      box: box,
+      languageCode: () => 'ja',
+    );
+    expect(
+      (await user.submitPhoto('seed-draw-01', '/tmp/sketch.jpg')).ok,
+      isTrue,
+    );
+    final board = await user.watchBoard('seed-draw-01').first;
+    expect(board.entries.single.imageUrl, '/tmp/sketch.jpg');
+  });
 }

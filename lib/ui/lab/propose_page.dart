@@ -18,8 +18,7 @@ class _LabProposePageState extends ConsumerState<LabProposePage> {
   final _title = TextEditingController();
   final _body = TextEditingController();
   final _choices = TextEditingController();
-  var _category = LabCategory.stand;
-  var _format = LabFormat.ogiri;
+  LabFormat? _format;
   var _correct = 0;
   var _busy = false;
   var _done = false;
@@ -35,10 +34,13 @@ class _LabProposePageState extends ConsumerState<LabProposePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final choices = splitChoices(_choices.text);
     return LabScaffold(
-      children: [
-        LabHeader(title: l10n.labPropose),
+      header: LabHeader(title: l10n.labPropose),
+      body: SingleChildScrollView(
+        padding: LabScaffold.scrollPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
         if (_done)
           PopCard(
             child: Text(
@@ -50,101 +52,50 @@ class _LabProposePageState extends ConsumerState<LabProposePage> {
               ),
             ),
           )
-        else ...[
-          TextField(
-            controller: _title,
-            maxLength: labTitleMax,
-            decoration: InputDecoration(labelText: l10n.labProposeTitle),
+        else if (_format == null)
+          _GenreStep(
+            onPick: (format) => setState(() => _format = format),
+          )
+        else
+          _ContentStep(
+            l10n: l10n,
+            format: _format!,
+            title: _title,
+            body: _body,
+            choices: _choices,
+            correct: _correct,
+            busy: _busy,
+            onCorrect: (index) => setState(() => _correct = index),
+            onChoicesChanged: () => setState(() {}),
+            onChangeGenre: () => setState(() {
+              _format = null;
+              _title.clear();
+              _body.clear();
+              _choices.clear();
+              _correct = 0;
+            }),
+            onSend: _send,
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _body,
-            maxLength: labBodyMax,
-            maxLines: 4,
-            decoration: InputDecoration(labelText: l10n.labProposeBody),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.labCategory,
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final category in LabCategory.values)
-                ChoiceChip(
-                  label: Text(labCategoryLabel(l10n, category)),
-                  selected: _category == category,
-                  onSelected: (_) => setState(() => _category = category),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.labProposeFormat,
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final format in LabFormat.values)
-                ChoiceChip(
-                  label: Text(labFormatLabel(l10n, format)),
-                  selected: _format == format,
-                  onSelected: (_) => setState(() => _format = format),
-                ),
-            ],
-          ),
-          if (_format == LabFormat.quiz || _format == LabFormat.choice) ...[
-            const SizedBox(height: 12),
-            TextField(
-              controller: _choices,
-              maxLines: 4,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(labelText: l10n.labChoicesHint),
-            ),
-            if (_format == LabFormat.quiz && choices.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                l10n.labCorrectOptional,
-                style: const TextStyle(color: TickColors.muted, fontSize: 13),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (var index = 0; index < choices.length; index++)
-                    ChoiceChip(
-                      label: Text(choices[index]),
-                      selected: _correct == index,
-                      onSelected: (_) => setState(() => _correct = index),
-                    ),
-                ],
-              ),
-            ],
           ],
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: _busy ? null : _send,
-            child: Text(l10n.labProposeSend),
-          ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 
   Future<void> _send() async {
     final l10n = AppLocalizations.of(context);
+    final format = _format!;
     final choices = splitChoices(_choices.text);
+    final bodyText = _body.text.trim().isEmpty
+        ? l10n.labProposeBodyDefault
+        : _body.text.trim();
     final draft = LabDraft(
       title: _title.text,
-      body: _body.text,
-      category: _category,
-      format: _format,
+      body: bodyText,
+      category: LabCategory.stand,
+      format: format,
       choices: choices,
-      correctIndex: _format == LabFormat.quiz && choices.isNotEmpty
+      correctIndex: format == LabFormat.quiz && choices.isNotEmpty
           ? _correct.clamp(0, choices.length - 1)
           : null,
     );
@@ -167,5 +118,202 @@ class _LabProposePageState extends ConsumerState<LabProposePage> {
       _done = outcome.ok;
     });
     if (!outcome.ok) labTellOutcome(context, outcome);
+  }
+}
+
+class _GenreStep extends StatelessWidget {
+  const _GenreStep({required this.onPick});
+
+  final ValueChanged<LabFormat> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.labProposePickGenre,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 12),
+        for (final format in labProposeFormats) ...[
+          _GenreTile(
+            label: labFormatLabel(l10n, format),
+            hint: labProposeTitleHint(l10n, format),
+            onTap: () => onPick(format),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _GenreTile extends StatelessWidget {
+  const _GenreTile({
+    required this.label,
+    required this.hint,
+    required this.onTap,
+  });
+
+  final String label;
+  final String hint;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 17,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hint,
+                    style: const TextStyle(
+                      color: TickColors.muted,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: TickColors.muted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ContentStep extends StatelessWidget {
+  const _ContentStep({
+    required this.l10n,
+    required this.format,
+    required this.title,
+    required this.body,
+    required this.choices,
+    required this.correct,
+    required this.busy,
+    required this.onCorrect,
+    required this.onChoicesChanged,
+    required this.onChangeGenre,
+    required this.onSend,
+  });
+
+  final AppLocalizations l10n;
+  final LabFormat format;
+  final TextEditingController title;
+  final TextEditingController body;
+  final TextEditingController choices;
+  final int correct;
+  final bool busy;
+  final ValueChanged<int> onCorrect;
+  final VoidCallback onChoicesChanged;
+  final VoidCallback onChangeGenre;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    final split = splitChoices(choices.text);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: onChangeGenre,
+            icon: const Icon(Icons.arrow_back, size: 18),
+            label: Text(l10n.labProposeChangeGenre),
+          ),
+        ),
+        Text(
+          labFormatLabel(l10n, format),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: TickColors.muted,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: title,
+          maxLength: labTitleMax,
+          decoration: InputDecoration(
+            labelText: l10n.labProposeTitle,
+            hintText: labProposeTitleHint(l10n, format),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: body,
+          maxLength: labBodyMax,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: l10n.labProposeBody,
+            hintText: l10n.labProposeBodyHint,
+          ),
+        ),
+        if (format == LabFormat.quiz || format == LabFormat.choice) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: choices,
+            maxLines: 4,
+            onChanged: (_) => onChoicesChanged(),
+            decoration: InputDecoration(labelText: l10n.labChoicesHint),
+          ),
+          if (format == LabFormat.quiz && split.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.labCorrectOptional,
+              style: const TextStyle(color: TickColors.muted, fontSize: 13),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (var index = 0; index < split.length; index++)
+                  ChoiceChip(
+                    label: Text(split[index]),
+                    selected: correct == index,
+                    onSelected: (_) => onCorrect(index),
+                  ),
+              ],
+            ),
+          ],
+        ],
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: TickColors.ink,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            onPressed: busy ? null : onSend,
+            child: Text(l10n.labProposeSend),
+          ),
+        ),
+      ],
+    );
   }
 }

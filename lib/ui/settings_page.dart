@@ -7,6 +7,7 @@ import 'package:tick/lab/logic.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/state/app_state.dart';
 import 'package:tick/ui/premium_offer.dart';
+import 'package:tick/ui/lab_profile_section.dart';
 import 'package:tick/ui/theme.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -46,16 +47,16 @@ class SettingsPage extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
                   title: Text(
-                    l10n.registerAccount,
+                    l10n.signInEmail,
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
-                  subtitle: Text(l10n.registerAccountHelp),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/settings/account'),
                 ),
               ),
               const SizedBox(height: 12),
             ],
+            _SectionTitle(l10n.settingsWork),
             PopCard(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
@@ -83,7 +84,8 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            _SectionTitle(l10n.settingsNotify),
             PopCard(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
@@ -120,34 +122,8 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            PopCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.endAction,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final action in EndAction.values)
-                        ChoiceChip(
-                          label: Text(_endLabel(l10n, action)),
-                          selected: settings.endAction == action,
-                          onSelected: (_) => controller.updateSettings(
-                            settings.copyWith(endAction: action),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            _SectionTitle(l10n.settingsTimer),
             PopCard(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: SwitchListTile(
@@ -159,72 +135,83 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            _SectionTitle(l10n.camouflage),
+            PopCard(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: ListTile(
+                title: Text(
+                  l10n.camouflage,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(
+                  l10n.camouflageSettingsLead,
+                  style: const TextStyle(color: TickColors.muted),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/settings/camouflage'),
+              ),
+            ),
             const SizedBox(height: 12),
             PopCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.trigger,
+                    l10n.mascotTitle,
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.camouflageHint,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      fontSize: 13,
-                    ),
-                  ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  Row(
                     children: [
-                      for (final trigger in CamouflageTrigger.values)
-                        ChoiceChip(
-                          label: premiumLabel(
-                            _triggerLabel(l10n, trigger),
-                            locked:
-                                !app.premium &&
-                                trigger != CamouflageTrigger.corner,
+                      for (final kind in MascotKind.values) ...[
+                        if (kind != MascotKind.values.first)
+                          const SizedBox(width: 8),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => controller.updateSettings(
+                              settings.copyWith(mascot: kind),
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: settings.mascot == kind
+                                    ? TickColors.yellow
+                                    : const Color(0xFFFFFBF4),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: settings.mascot == kind
+                                      ? TickColors.yellow
+                                      : TickColors.line,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/character/${kind.folder}/normal.png',
+                                      height: 64,
+                                      width: 64,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      kind == MascotKind.chick
+                                          ? l10n.mascotChick
+                                          : l10n.mascotSloth,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                          selected: settings.camouflageTrigger == trigger,
-                          onSelected: (_) {
-                            if (!app.premium &&
-                                trigger != CamouflageTrigger.corner) {
-                              showPremiumOffer(context, ref);
-                              return;
-                            }
-                            controller.updateSettings(
-                              settings.copyWith(camouflageTrigger: trigger),
-                            );
-                          },
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final look in CamouflageLook.values)
-                        ChoiceChip(
-                          label: premiumLabel(
-                            _lookLabel(l10n, look),
-                            locked: !app.premium && look != CamouflageLook.home,
-                          ),
-                          selected: settings.camouflageLook == look,
-                          onSelected: (_) {
-                            if (!app.premium && look != CamouflageLook.home) {
-                              showPremiumOffer(context, ref);
-                              return;
-                            }
-                            controller.updateSettings(
-                              settings.copyWith(camouflageLook: look),
-                            );
-                          },
-                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -277,7 +264,8 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            _SectionTitle(l10n.settingsMore),
             PopCard(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Column(
@@ -316,10 +304,12 @@ class SettingsPage extends ConsumerWidget {
                       l10n.camouflage,
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
+                    subtitle: Text(
+                      l10n.camouflageSettingsLead,
+                      style: const TextStyle(color: TickColors.muted),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ref
-                        .read(appControllerProvider.notifier)
-                        .setCamouflage(true),
+                    onTap: () => context.push('/settings/camouflage'),
                   ),
                   if (labCanReview(app.auth?.email))
                     ListTile(
@@ -333,6 +323,10 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
             ),
+            if (app.firebaseConfigured && app.auth?.provider != 'local') ...[
+              const SizedBox(height: 16),
+              const LabProfileSection(),
+            ],
           ],
         ),
       ),
@@ -351,12 +345,25 @@ bool _anonymous(AppState app) {
   return auth == null || auth.anonymous || auth.provider == 'local';
 }
 
-String _endLabel(AppLocalizations l10n, EndAction action) {
-  return switch (action) {
-    EndAction.celebration => l10n.actionCelebration,
-    EndAction.home => l10n.actionHome,
-    EndAction.history => l10n.actionHistory,
-  };
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 6),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w800,
+          color: TickColors.muted,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
 }
 
 class _CustomLineField extends StatefulWidget {
@@ -406,14 +413,6 @@ class _CustomLineFieldState extends State<_CustomLineField> {
   }
 }
 
-String _lookLabel(AppLocalizations l10n, CamouflageLook look) {
-  return switch (look) {
-    CamouflageLook.home => l10n.lookHome,
-    CamouflageLook.notes => l10n.lookNotes,
-    CamouflageLook.calendar => l10n.lookCalendar,
-  };
-}
-
 String _voiceLabel(AppLocalizations l10n, ChickVoice voice) {
   return switch (voice) {
     ChickVoice.plain => l10n.voicePlain,
@@ -423,10 +422,3 @@ String _voiceLabel(AppLocalizations l10n, ChickVoice voice) {
   };
 }
 
-String _triggerLabel(AppLocalizations l10n, CamouflageTrigger trigger) {
-  return switch (trigger) {
-    CamouflageTrigger.corner => l10n.triggerCorner,
-    CamouflageTrigger.longPress => l10n.triggerLong,
-    CamouflageTrigger.swipe => l10n.triggerSwipe,
-  };
-}
