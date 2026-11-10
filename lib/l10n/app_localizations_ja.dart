@@ -671,10 +671,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get idleAfterShiftStatus => '定時過ぎ';
 
   @override
-  String get idleAfterShiftBody => '本日の勤務は終了しています。\nお疲れ様でした🎵';
+  String get idleAfterShiftBody =>
+      '本日の勤務は終了しています。\n下から時間外のタイマーも始められます。';
 
   @override
   String get idleAfterShiftAction => 'スケジュールを開く';
+
+  @override
+  String get dayOff => '休み';
+
+  @override
+  String get pickWeekdayPattern => '勤務形態を選ぶ';
+
+  @override
+  String get noPatternsYet => '勤務形態がありません。先に追加してください。';
+
+  @override
+  String get todayPattern => '今日の勤務形態';
+
+  @override
+  String get weekdaysHint => '曜日をタップして形態を切り替えられます';
+
+  @override
+  String get scheduleSetupTitle => '勤務時間を設定';
+
+  @override
+  String get scheduleSetupBody => '平日の開始・終了時刻を入れてください。土日は任意です。';
+
+  @override
+  String get scheduleSetupDaysOptional => '土日も働く（任意）';
+
+  @override
+  String get scheduleSetupSave => 'この内容で保存';
+
+  @override
+  String get scheduleSetupDone => '勤務スケジュールを保存しました';
 
   @override
   String get startTimer => 'タイマーを開始';

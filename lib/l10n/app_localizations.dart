@@ -1415,7 +1415,7 @@ abstract class AppLocalizations {
   /// No description provided for @idleAfterShiftBody.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s shift is over.\nNice work today 🎵'**
+  /// **'Today\'s shift is over.\nYou can still start a timer below.'**
   String get idleAfterShiftBody;
 
   /// No description provided for @idleAfterShiftAction.
@@ -1423,6 +1423,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open schedule'**
   String get idleAfterShiftAction;
+
+  /// No description provided for @dayOff.
+  String get dayOff;
+
+  /// No description provided for @pickWeekdayPattern.
+  String get pickWeekdayPattern;
+
+  /// No description provided for @noPatternsYet.
+  String get noPatternsYet;
+
+  /// No description provided for @todayPattern.
+  String get todayPattern;
+
+  /// No description provided for @weekdaysHint.
+  String get weekdaysHint;
+
+  /// No description provided for @scheduleSetupTitle.
+  String get scheduleSetupTitle;
+
+  /// No description provided for @scheduleSetupBody.
+  String get scheduleSetupBody;
+
+  /// No description provided for @scheduleSetupDaysOptional.
+  String get scheduleSetupDaysOptional;
+
+  /// No description provided for @scheduleSetupSave.
+  String get scheduleSetupSave;
+
+  /// No description provided for @scheduleSetupDone.
+  String get scheduleSetupDone;
 
   /// No description provided for @startTimer.
   ///

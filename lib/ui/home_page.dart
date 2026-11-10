@@ -115,8 +115,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 custom: app.settings.customChickLine,
               );
         final shiftPromptShowing = app.prompt != null && !running;
-        final showManualStart =
-            !running && !idleAfterShift && app.prompt == null;
+        final showManualStart = !running && app.prompt == null;
         final mascotFlex = running
             ? 4
             : showManualStart

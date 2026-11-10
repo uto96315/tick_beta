@@ -340,6 +340,7 @@ class AppSettings {
     required this.callSound,
     required this.lastIntervalMinutes,
     required this.tutorialSeen,
+    required this.scheduleOnboarded,
     required this.slackIntroSeen,
     required this.homeShot,
     required this.mascot,
@@ -361,6 +362,7 @@ class AppSettings {
   final CallSound callSound;
   final int lastIntervalMinutes;
   final bool tutorialSeen;
+  final bool scheduleOnboarded;
   final bool slackIntroSeen;
   final String homeShot;
   final MascotKind mascot;
@@ -383,6 +385,7 @@ class AppSettings {
       callSound: CallSound.classic,
       lastIntervalMinutes: 15,
       tutorialSeen: false,
+      scheduleOnboarded: false,
       slackIntroSeen: false,
       homeShot: '',
       mascot: MascotKind.chick,
@@ -406,6 +409,7 @@ class AppSettings {
     CallSound? callSound,
     int? lastIntervalMinutes,
     bool? tutorialSeen,
+    bool? scheduleOnboarded,
     bool? slackIntroSeen,
     String? homeShot,
     MascotKind? mascot,
@@ -427,6 +431,7 @@ class AppSettings {
       callSound: callSound ?? this.callSound,
       lastIntervalMinutes: lastIntervalMinutes ?? this.lastIntervalMinutes,
       tutorialSeen: tutorialSeen ?? this.tutorialSeen,
+      scheduleOnboarded: scheduleOnboarded ?? this.scheduleOnboarded,
       slackIntroSeen: slackIntroSeen ?? this.slackIntroSeen,
       homeShot: homeShot ?? this.homeShot,
       mascot: mascot ?? this.mascot,
@@ -450,6 +455,7 @@ class AppSettings {
     'callSound': callSound.name,
     'lastIntervalMinutes': lastIntervalMinutes,
     'tutorialSeen': tutorialSeen,
+    'scheduleOnboarded': scheduleOnboarded,
     'slackIntroSeen': slackIntroSeen,
     'homeShot': homeShot,
     'mascot': mascot.name,
@@ -496,6 +502,7 @@ class AppSettings {
       ),
       lastIntervalMinutes: (json['lastIntervalMinutes'] as num?)?.toInt() ?? 15,
       tutorialSeen: json['tutorialSeen'] as bool? ?? false,
+      scheduleOnboarded: json['scheduleOnboarded'] as bool? ?? true,
       slackIntroSeen: json['slackIntroSeen'] as bool? ?? false,
       homeShot: json['homeShot'] as String? ?? '',
       mascot: MascotKind.values.byNameOr(

@@ -6,6 +6,7 @@ import 'package:tick/domain/schedule.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/ui/theme.dart';
+import 'package:tick/ui/weekday_pattern_picker.dart';
 
 class SchedulePage extends ConsumerWidget {
   const SchedulePage({super.key});
@@ -39,7 +40,34 @@ class SchedulePage extends ConsumerWidget {
             child: Text(l10n.newPattern),
           ),
           const SizedBox(height: 8),
+          Text(l10n.todayPattern, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 4),
+          PopCard(
+            child: ListTile(
+              title: Text(
+                weekdayPatternSubtitle(
+                  l10n,
+                  app.patterns,
+                  app.week.days[DateTime.now().weekday],
+                ),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              trailing: const Icon(Icons.swap_horiz),
+              onTap: () => pickWeekdayPattern(
+                context,
+                ref,
+                DateTime.now().weekday,
+                title: l10n.todayPattern,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Text(l10n.weekdays, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 4),
+          Text(
+            l10n.weekdaysHint,
+            style: const TextStyle(color: TickColors.muted, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -48,12 +76,7 @@ class SchedulePage extends ConsumerWidget {
                 _DayDot(
                   label: labels[weekday - 1],
                   on: app.week.days[weekday] != null,
-                  onTap: () {
-                    final ids = <String?>[null, for (final pattern in app.patterns) pattern.id];
-                    final index = ids.indexOf(app.week.days[weekday]);
-                    final next = ids[(index < 0 ? 0 : index + 1) % ids.length];
-                    ref.read(appControllerProvider.notifier).assignWeekday(weekday, next);
-                  },
+                  onTap: () => pickWeekdayPattern(context, ref, weekday),
                 ),
             ],
           ),

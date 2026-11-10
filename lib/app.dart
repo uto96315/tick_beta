@@ -6,6 +6,7 @@ import 'package:tick/ui/copy.dart';
 import 'package:tick/ui/premium_offer.dart';
 import 'package:tick/ui/router.dart';
 import 'package:tick/ui/theme.dart';
+import 'package:tick/ui/schedule_setup_overlay.dart';
 import 'package:tick/ui/tutorial_page.dart';
 import 'package:tick/ui/update_gate.dart';
 import 'package:tick/ui/visuals.dart';
@@ -156,6 +157,16 @@ class _EffectsState extends ConsumerState<_Effects>
             !state.camouflage,
       ),
     );
+    final scheduleSetup = ref.watch(
+      appControllerProvider.select(
+        (state) =>
+            state.ready &&
+            state.settings.tutorialSeen &&
+            !state.settings.scheduleOnboarded &&
+            state.liveCall == null &&
+            !state.camouflage,
+      ),
+    );
     final kind = ref.watch(
       appControllerProvider.select((state) => state.settings.mascot),
     );
@@ -165,6 +176,7 @@ class _EffectsState extends ConsumerState<_Effects>
       children: [
         widget.child,
         if (tutorial) const TutorialOverlay(),
+        if (scheduleSetup) const ScheduleSetupOverlay(),
         const Positioned.fill(child: UpdateGate()),
         if (_banner != null)
           Positioned(

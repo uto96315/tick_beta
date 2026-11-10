@@ -314,6 +314,11 @@ class AppController extends Notifier<AppState> {
     updateSettings(_db.settings.copyWith(tutorialSeen: true));
   }
 
+  void completeScheduleSetup() {
+    if (_db.settings.scheduleOnboarded) return;
+    updateSettings(_db.settings.copyWith(scheduleOnboarded: true));
+  }
+
   void updateSettings(AppSettings settings) {
     _db.settings = settings.copyWith(updatedAt: _deps.clock.now());
     _commit();

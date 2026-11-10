@@ -691,10 +691,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get idleAfterShiftBody =>
-      'Today\'s shift is over.\nNice work today 🎵';
+      'Today\'s shift is over.\nYou can still start a timer below.';
 
   @override
   String get idleAfterShiftAction => 'Open schedule';
+
+  @override
+  String get dayOff => 'Day off';
+
+  @override
+  String get pickWeekdayPattern => 'Choose work pattern';
+
+  @override
+  String get noPatternsYet => 'No patterns yet. Add one first.';
+
+  @override
+  String get todayPattern => 'Today\'s pattern';
+
+  @override
+  String get weekdaysHint => 'Tap a weekday to change its pattern';
+
+  @override
+  String get scheduleSetupTitle => 'Set your work hours';
+
+  @override
+  String get scheduleSetupBody =>
+      'Enter your usual start and end times. Weekends are optional.';
+
+  @override
+  String get scheduleSetupDaysOptional => 'Work on weekends (optional)';
+
+  @override
+  String get scheduleSetupSave => 'Save';
+
+  @override
+  String get scheduleSetupDone => 'Schedule saved';
 
   @override
   String get startTimer => 'Start the timer';

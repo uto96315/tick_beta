@@ -251,7 +251,10 @@ void main() {
       tester.platformDispatcher.clearLocaleTestValue();
     });
     final persisted = PersistedState.seed(languageCode: 'ja');
-    persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    persisted.settings = persisted.settings.copyWith(
+      tutorialSeen: true,
+      scheduleOnboarded: true,
+    );
 
     await tester.pumpWidget(
       ProviderScope(
@@ -376,7 +379,10 @@ void main() {
       tester.platformDispatcher.clearLocaleTestValue();
     });
     final persisted = PersistedState.seed(languageCode: 'ja');
-    persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    persisted.settings = persisted.settings.copyWith(
+      tutorialSeen: true,
+      scheduleOnboarded: true,
+    );
     final labBox = LabBox();
     for (final seed in labSeeds('ja')) {
       labBox.prompts[seed.id] = seed;
@@ -415,7 +421,10 @@ void main() {
       tester.platformDispatcher.clearLocaleTestValue();
     });
     final persisted = PersistedState.seed(languageCode: 'ja');
-    persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+    persisted.settings = persisted.settings.copyWith(
+      tutorialSeen: true,
+      scheduleOnboarded: true,
+    );
     final labBox = LabBox();
     for (final seed in labSeeds('ja')) {
       labBox.prompts[seed.id] = seed;
@@ -449,7 +458,10 @@ Future<void> _pumpApp(
     tester.view.resetDevicePixelRatio();
   });
   final persisted = PersistedState.seed(languageCode: 'ja');
-  persisted.settings = persisted.settings.copyWith(tutorialSeen: true);
+  persisted.settings = persisted.settings.copyWith(
+      tutorialSeen: true,
+      scheduleOnboarded: true,
+    );
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
