@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tick/data/chick_banter.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/ui/theme.dart';
@@ -141,6 +142,7 @@ List<String> chickLines(
   ChickPose pose, {
   ChickVoice voice = ChickVoice.plain,
   String custom = '',
+  DateTime? now,
 }) {
   final line = custom.trim();
   if (voice == ChickVoice.custom && line.isNotEmpty) return [line];
@@ -164,63 +166,12 @@ List<String> chickLines(
       l10n.voiceKansai6,
     ];
   }
-  return switch (pose) {
-    ChickPose.normal => [
-      l10n.chickNormal1,
-      l10n.chickNormal2,
-      l10n.chickNormal3,
-      l10n.chickNormal4,
-      l10n.chickNormal5,
-    ],
-    ChickPose.tired => [
-      l10n.chickTired1,
-      l10n.chickTired2,
-      l10n.chickTired3,
-      l10n.chickTired4,
-      l10n.chickTired5,
-    ],
-    ChickPose.happy => [
-      l10n.chickHappy1,
-      l10n.chickHappy2,
-      l10n.chickHappy3,
-      l10n.chickHappy4,
-      l10n.chickHappy5,
-    ],
-    ChickPose.cheer => [
-      l10n.chickCheer1,
-      l10n.chickCheer2,
-      l10n.chickCheer3,
-      l10n.chickCheer4,
-      l10n.chickCheer5,
-    ],
-    ChickPose.attention => [
-      l10n.chickAttention1,
-      l10n.chickAttention2,
-      l10n.chickAttention3,
-      l10n.chickAttention4,
-      l10n.chickAttention5,
-    ],
-    ChickPose.surprise => [
-      l10n.chickSurprise1,
-      l10n.chickSurprise2,
-      l10n.chickSurprise3,
-    ],
-    ChickPose.sleep => [l10n.chickSleep1, l10n.chickSleep2, l10n.chickSleep3],
-    ChickPose.done => [l10n.chickDone1, l10n.chickDone2, l10n.chickDone3],
-    ChickPose.back => [l10n.chickBack1, l10n.chickBack2, l10n.chickBack3],
-    ChickPose.notice => [
-      l10n.chickNotice1,
-      l10n.chickNotice2,
-      l10n.chickNotice3,
-    ],
-    ChickPose.goodjob => [
-      l10n.chickGoodjob1,
-      l10n.chickGoodjob2,
-      l10n.chickGoodjob3,
-    ],
-    ChickPose.love => [l10n.chickLove1, l10n.chickLove2, l10n.chickLove3],
-    ChickPose.hungry => [l10n.moodHungry1, l10n.moodHungry2, l10n.moodHungry3],
-  };
+  final clock = now ?? DateTime.now();
+  final lang = l10n.localeName.split('_').first;
+  final pool = chickBanterLines(Locale(lang), clock);
+  if (pool.isEmpty) return [l10n.chickNormal1];
+  final shift = pose.index % pool.length;
+  return [...pool.sublist(shift), ...pool.sublist(0, shift)];
 }
 
 List<String> moodLines(AppLocalizations l10n, ChickMood mood) {

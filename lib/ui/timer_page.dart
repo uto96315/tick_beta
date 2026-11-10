@@ -38,6 +38,7 @@ class TimerPage extends ConsumerWidget {
                       ChickPose.normal,
                       voice: shownVoice(app.premium, app.settings.chickVoice),
                       custom: app.settings.customChickLine,
+                      now: DateTime.now(),
                     ),
                     onDark: true,
                   ),
@@ -107,6 +108,7 @@ class TimerPage extends ConsumerWidget {
           pose,
           voice: shownVoice(app.premium, app.settings.chickVoice),
           custom: app.settings.customChickLine,
+          now: now,
         );
         return Scaffold(
           backgroundColor: TickColors.navy,

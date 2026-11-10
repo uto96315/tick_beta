@@ -113,6 +113,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 pose,
                 voice: shownVoice(app.premium, app.settings.chickVoice),
                 custom: app.settings.customChickLine,
+                now: now,
               );
         final shiftPromptShowing = app.prompt != null && !running;
         final showManualStart = !running && app.prompt == null;

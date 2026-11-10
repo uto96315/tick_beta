@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tick/data/chick_banter.dart';
 import 'package:tick/domain/app_update.dart';
 import 'package:tick/domain/engine.dart';
 import 'package:tick/domain/fake_call_policy.dart';
@@ -342,5 +344,14 @@ void main() {
       decideUpdate(currentBuild: 0, minBuild: 1, latestBuild: 1, dismissedBuild: 0, url: url).kind,
       UpdateKind.none,
     );
+  });
+
+  test('chick banter pool has 200 lines per locale', () {
+    final now = DateTime(2026, 1, 1, 12);
+    expect(chickBanterLines(const Locale('ja'), now), hasLength(200));
+    expect(chickBanterLines(const Locale('en'), now), hasLength(200));
+    final later = now.add(const Duration(hours: 1));
+    expect(chickBanterLines(const Locale('ja'), later).first,
+        isNot(chickBanterLines(const Locale('ja'), now).first));
   });
 }
