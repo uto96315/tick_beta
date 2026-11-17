@@ -215,8 +215,26 @@ abstract class AppLocalizations {
   /// No description provided for @endEarly.
   ///
   /// In en, this message translates to:
-  /// **'Stop here'**
+  /// **'End shift'**
   String get endEarly;
+
+  /// No description provided for @endShiftConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'End this shift?'**
+  String get endShiftConfirmTitle;
+
+  /// No description provided for @endShiftConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the time so far and end the work timer.'**
+  String get endShiftConfirmBody;
+
+  /// No description provided for @endShiftConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'End timer'**
+  String get endShiftConfirmAction;
 
   /// No description provided for @earlyDone.
   ///
@@ -1418,41 +1436,71 @@ abstract class AppLocalizations {
   /// **'Today\'s shift is over.\nYou can still start a timer below.'**
   String get idleAfterShiftBody;
 
+  /// No description provided for @dayOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Day off'**
+  String get dayOff;
+
+  /// No description provided for @pickWeekdayPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose work pattern'**
+  String get pickWeekdayPattern;
+
+  /// No description provided for @noPatternsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No patterns yet. Add one first.'**
+  String get noPatternsYet;
+
+  /// No description provided for @todayPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s pattern'**
+  String get todayPattern;
+
+  /// No description provided for @weekdaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a weekday to change its pattern'**
+  String get weekdaysHint;
+
+  /// No description provided for @scheduleSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your work hours'**
+  String get scheduleSetupTitle;
+
+  /// No description provided for @scheduleSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your usual start and end times. Weekends are optional.'**
+  String get scheduleSetupBody;
+
+  /// No description provided for @scheduleSetupDaysOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Work on weekends (optional)'**
+  String get scheduleSetupDaysOptional;
+
+  /// No description provided for @scheduleSetupSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get scheduleSetupSave;
+
+  /// No description provided for @scheduleSetupDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule saved'**
+  String get scheduleSetupDone;
+
   /// No description provided for @idleAfterShiftAction.
   ///
   /// In en, this message translates to:
   /// **'Open schedule'**
   String get idleAfterShiftAction;
-
-  /// No description provided for @dayOff.
-  String get dayOff;
-
-  /// No description provided for @pickWeekdayPattern.
-  String get pickWeekdayPattern;
-
-  /// No description provided for @noPatternsYet.
-  String get noPatternsYet;
-
-  /// No description provided for @todayPattern.
-  String get todayPattern;
-
-  /// No description provided for @weekdaysHint.
-  String get weekdaysHint;
-
-  /// No description provided for @scheduleSetupTitle.
-  String get scheduleSetupTitle;
-
-  /// No description provided for @scheduleSetupBody.
-  String get scheduleSetupBody;
-
-  /// No description provided for @scheduleSetupDaysOptional.
-  String get scheduleSetupDaysOptional;
-
-  /// No description provided for @scheduleSetupSave.
-  String get scheduleSetupSave;
-
-  /// No description provided for @scheduleSetupDone.
-  String get scheduleSetupDone;
 
   /// No description provided for @startTimer.
   ///

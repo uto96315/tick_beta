@@ -67,7 +67,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get extend => '延長する';
 
   @override
-  String get endEarly => '途中で終わる';
+  String get endEarly => '勤務を終了';
+
+  @override
+  String get endShiftConfirmTitle => '勤務を終了しますか？';
+
+  @override
+  String get endShiftConfirmBody => 'ここまでの時間を記録して、勤務タイマーを終了します。';
+
+  @override
+  String get endShiftConfirmAction => '勤務を終了';
 
   @override
   String get earlyDone => '今日はここまで。';
@@ -671,11 +680,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get idleAfterShiftStatus => '定時過ぎ';
 
   @override
-  String get idleAfterShiftBody =>
-      '本日の勤務は終了しています。\n下から時間外のタイマーも始められます。';
-
-  @override
-  String get idleAfterShiftAction => 'スケジュールを開く';
+  String get idleAfterShiftBody => '本日の勤務は終了しています。\n下から時間外のタイマーも始められます。';
 
   @override
   String get dayOff => '休み';
@@ -706,6 +711,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scheduleSetupDone => '勤務スケジュールを保存しました';
+
+  @override
+  String get idleAfterShiftAction => 'スケジュールを開く';
 
   @override
   String get startTimer => 'タイマーを開始';

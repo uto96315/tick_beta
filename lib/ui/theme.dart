@@ -42,6 +42,24 @@ class TickTheme {
         centerTitle: true,
         titleTextStyle: TextStyle(fontFamily: 'Nunito', color: ink, fontSize: 17, fontWeight: FontWeight.w700),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: TickColors.cream,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Nunito',
+          color: ink,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+        ),
+        contentTextStyle: const TextStyle(
+          fontFamily: 'Nunito',
+          color: ink,
+          fontSize: 15,
+          height: 1.5,
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 4, 24, 20),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: TickColors.card,
         indicatorColor: TickColors.yellow.withValues(alpha: 0.7),

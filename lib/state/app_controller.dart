@@ -182,6 +182,21 @@ class AppController extends Notifier<AppState> {
     _commit();
   }
 
+  void updateSessionTimes({DateTime? start, DateTime? end}) {
+    final session = _db.session;
+    if (session == null) return;
+    final now = _deps.clock.now();
+    final updated = retimeSession(session, start: start, end: end, now: now);
+    if (identical(updated, session)) {
+      _flashCode('too-short');
+      _commit();
+      return;
+    }
+    _db.session = updated;
+    _db.bumpRuntime(now);
+    _commit();
+  }
+
   void extendBy(int minutes) {
     final session = _db.session;
     if (session == null) return;

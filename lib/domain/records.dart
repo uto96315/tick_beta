@@ -152,7 +152,10 @@ class TimerSession {
   final DateTime updatedAt;
 
   TimerSession copyWith({
+    DateTime? workDate,
+    DateTime? actualStart,
     DateTime? plannedEnd,
+    DateTime? originalPlannedEnd,
     int? intervalMinutes,
     List<BreakSpan>? breaks,
     List<ExtensionRecord>? extensions,
@@ -162,10 +165,10 @@ class TimerSession {
   }) {
     return TimerSession(
       id: id,
-      workDate: workDate,
-      actualStart: actualStart,
+      workDate: workDate ?? this.workDate,
+      actualStart: actualStart ?? this.actualStart,
       plannedEnd: plannedEnd ?? this.plannedEnd,
-      originalPlannedEnd: originalPlannedEnd,
+      originalPlannedEnd: originalPlannedEnd ?? this.originalPlannedEnd,
       intervalMinutes: intervalMinutes ?? this.intervalMinutes,
       breaks: breaks ?? this.breaks,
       extensions: extensions ?? this.extensions,

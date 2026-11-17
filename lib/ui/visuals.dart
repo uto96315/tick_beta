@@ -296,7 +296,7 @@ class _ChickTalkState extends State<ChickTalk> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 6), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (!mounted || widget.lines.isEmpty) return;
       setState(() => _index++);
     });

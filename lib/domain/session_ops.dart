@@ -103,6 +103,47 @@ TimerSession changeInterval(TimerSession session, int minutes, DateTime now) {
   return session.copyWith(intervalMinutes: interval, celebratedCount: progress.completed, updatedAt: now);
 }
 
+TimerSession retimeSession(
+  TimerSession session, {
+  DateTime? start,
+  DateTime? end,
+  required DateTime now,
+}) {
+  final actualStart = start ?? session.actualStart;
+  final plannedEnd = end ?? session.plannedEnd;
+  if (!plannedEnd.isAfter(actualStart.add(const Duration(minutes: 1)))) {
+    return session;
+  }
+  final endDelta = end == null ? Duration.zero : end.difference(session.plannedEnd);
+  final segments = buildSegments(
+    start: actualStart,
+    end: plannedEnd,
+    intervalMinutes: session.intervalMinutes,
+  );
+  final progress = evaluateSegments(
+    segments: segments,
+    now: now,
+    sessionEnd: plannedEnd,
+  );
+  return session.copyWith(
+    workDate: DateTime(actualStart.year, actualStart.month, actualStart.day),
+    actualStart: actualStart,
+    plannedEnd: plannedEnd,
+    originalPlannedEnd: session.originalPlannedEnd.add(endDelta),
+    extensions: [
+      for (final extension in session.extensions)
+        ExtensionRecord(
+          at: extension.at,
+          previousEnd: extension.previousEnd.add(endDelta),
+          newEnd: extension.newEnd.add(endDelta),
+          minutes: extension.minutes,
+        ),
+    ],
+    celebratedCount: progress.completed,
+    updatedAt: now,
+  );
+}
+
 TimerSession extendSession(TimerSession session, int minutes, DateTime now) {
   final previous = session.plannedEnd;
   final nextEnd = previous.add(Duration(minutes: minutes));

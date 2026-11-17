@@ -74,15 +74,13 @@ class _HomePageState extends ConsumerState<HomePage> {
             : segmentViews(segments, progress);
         final remainCount = progress?.remainingCount ?? 0;
         final shownShift = covering ?? upcoming;
-        final idleAfterShift = _idleAfterScheduledEnd(
-          calendar,
-          now,
-          running,
-        );
-        final rangeStart =
-            shownShift?.start ?? (running ? session.actualStart : now);
-        final rangeEnd =
-            shownShift?.end ?? (running ? session.plannedEnd : shiftEnd);
+        final idleAfterShift = _idleAfterScheduledEnd(calendar, now, running);
+        final rangeStart = running
+            ? session.actualStart
+            : shownShift?.start ?? now;
+        final rangeEnd = running
+            ? session.plannedEnd
+            : shownShift?.end ?? shiftEnd;
         final remaining = running
             ? _chunkLeft(context, remainCount)
             : l10n.notRunning;
@@ -286,7 +284,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                           ],
                         ] else ...[
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: FilledButton.icon(
+                              onPressed: () =>
+                                  _confirmEndEarly(context, ref, l10n),
+                              icon: const Icon(Icons.stop_circle_rounded),
+                              label: Text(l10n.endEarly),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFAD281F),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(50),
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                           _ToolRow(
                             l10n: l10n,
                             onCall: () => context.push('/call'),
@@ -312,42 +333,41 @@ class _HomePageState extends ConsumerState<HomePage> {
     AppLocalizations l10n,
   ) {
     return PopCard(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.startPromptTitle,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${formatHm(shift.start)} – ${formatHm(shift.end)}',
-              style: const TextStyle(color: TickColors.muted),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () =>
-                        ref.read(appControllerProvider.notifier).acceptPrompt(),
-                    child: Text(l10n.startNow),
-                  ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.startPromptTitle,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${formatHm(shift.start)} – ${formatHm(shift.end)}',
+            style: const TextStyle(color: TickColors.muted),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: () =>
+                      ref.read(appControllerProvider.notifier).acceptPrompt(),
+                  child: Text(l10n.startNow),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => ref
-                        .read(appControllerProvider.notifier)
-                        .dismissPrompt(),
-                    child: Text(l10n.notToday),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () =>
+                      ref.read(appControllerProvider.notifier).dismissPrompt(),
+                  child: Text(l10n.notToday),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -671,6 +691,18 @@ class _HomePageState extends ConsumerState<HomePage> {
       week: app.week,
       overrides: app.overrides,
     );
+    final session = app.session;
+    if (session != null &&
+        session.patternId == null &&
+        session.shiftKey == null) {
+      await _editRunningSessionBound(
+        context,
+        l10n,
+        session,
+        editingStart: editingStart,
+      );
+      return;
+    }
     final shift = calendar.shiftCovering(now) ?? calendar.upcomingOn(now);
     final pattern = calendar.patternById(shift?.patternId);
     if (pattern != null) {
@@ -682,12 +714,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       );
       if (picked == null) return;
       final clock = ClockTime(picked.hour, picked.minute);
-      ref.read(appControllerProvider.notifier).upsertPattern(
-        pattern.copyWith(
-          start: editingStart ? clock : null,
-          end: editingStart ? null : clock,
-        ),
-      );
+      ref
+          .read(appControllerProvider.notifier)
+          .upsertPattern(
+            pattern.copyWith(
+              start: editingStart ? clock : null,
+              end: editingStart ? null : clock,
+            ),
+          );
       return;
     }
     DateOverride? override;
@@ -710,23 +744,30 @@ class _HomePageState extends ConsumerState<HomePage> {
       );
       if (picked == null) return;
       final clock = ClockTime(picked.hour, picked.minute);
-      ref.read(appControllerProvider.notifier).upsertOverride(
-        DateOverride(
-          id: override.id,
-          date: override.date,
-          holiday: override.holiday,
-          name: override.name,
-          start: editingStart ? clock : override.start,
-          end: editingStart ? override.end : clock,
-          breaks: override.breaks,
-          updatedAt: override.updatedAt,
-        ),
-      );
+      ref
+          .read(appControllerProvider.notifier)
+          .upsertOverride(
+            DateOverride(
+              id: override.id,
+              date: override.date,
+              holiday: override.holiday,
+              name: override.name,
+              start: editingStart ? clock : override.start,
+              end: editingStart ? override.end : clock,
+              breaks: override.breaks,
+              updatedAt: override.updatedAt,
+            ),
+          );
       return;
     }
     if (ref.read(appControllerProvider).session != null) {
       if (!context.mounted) return;
-      context.push('/settings/schedule');
+      await _editRunningSessionBound(
+        context,
+        l10n,
+        ref.read(appControllerProvider).session!,
+        editingStart: editingStart,
+      );
       return;
     }
     if (!context.mounted) return;
@@ -747,6 +788,36 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (picked != null) setState(() => _end = picked);
   }
 
+  Future<void> _editRunningSessionBound(
+    BuildContext context,
+    AppLocalizations l10n,
+    TimerSession session, {
+    required bool editingStart,
+  }) async {
+    final current = editingStart ? session.actualStart : session.plannedEnd;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: current.hour, minute: current.minute),
+      helpText: editingStart ? l10n.shiftFrom : l10n.shiftTo,
+    );
+    if (picked == null || !context.mounted) return;
+    final selected = DateTime(
+      current.year,
+      current.month,
+      current.day,
+      picked.hour,
+      picked.minute,
+    );
+    if (editingStart) {
+      ref.read(appControllerProvider.notifier).updateSessionTimes(start: selected);
+    } else {
+      final end = selected.isAfter(session.actualStart)
+          ? selected
+          : selected.add(const Duration(days: 1));
+      ref.read(appControllerProvider.notifier).updateSessionTimes(end: end);
+    }
+  }
+
   void _pickMood(BuildContext context, ChickMood? mood) {
     final notifier = ref.read(appControllerProvider.notifier);
     showChickMoodPicker(
@@ -761,6 +832,160 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
     );
   }
+}
+
+Future<void> _confirmEndEarly(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    builder: (dialogContext) => Dialog(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: DecoratedBox(
+            decoration: const BoxDecoration(color: TickColors.cream),
+            child: Stack(
+              children: [
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 156,
+                  child: IgnorePointer(
+                    child: CustomPaint(painter: _EndShiftWavePainter()),
+                  ),
+                ),
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LivingMascot(pose: ChickPose.goodjob, size: 112),
+                        const SizedBox(height: 14),
+                        Text(
+                          l10n.endShiftConfirmTitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: TickColors.ink,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.endShiftConfirmBody,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: TickColors.ink,
+                            fontSize: 15,
+                            height: 1.55,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFAD281F),
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(dialogContext, true),
+                            icon: const Icon(Icons.stop_circle_rounded),
+                            label: Text(l10n.endShiftConfirmAction),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: TickColors.ink,
+                              side: const BorderSide(
+                                color: TickColors.ink,
+                                width: 1.4,
+                              ),
+                              shape: const StadiumBorder(),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            onPressed: () =>
+                                Navigator.pop(dialogContext, false),
+                            child: Text(l10n.cancel),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  if (confirmed == true && context.mounted) {
+    ref.read(appControllerProvider.notifier).endEarly();
+  }
+}
+
+class _EndShiftWavePainter extends CustomPainter {
+  const _EndShiftWavePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(0, size.height * 0.34)
+      ..cubicTo(
+        size.width * 0.22,
+        size.height * 0.03,
+        size.width * 0.35,
+        size.height * 0.64,
+        size.width * 0.58,
+        size.height * 0.39,
+      )
+      ..cubicTo(
+        size.width * 0.78,
+        size.height * 0.17,
+        size.width * 0.86,
+        size.height * 0.06,
+        size.width,
+        size.height * 0.25,
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x00FFD15C), Color(0x66FFD15C)],
+      ).createShader(Offset.zero & size);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _EndShiftWavePainter oldDelegate) => false;
 }
 
 String _chunkLeft(BuildContext context, int count) {
@@ -791,8 +1016,10 @@ class _MascotZone extends StatelessWidget {
         const fontSize = 13.0;
         const gapAboveMascot = 2.0;
         const bubbleBlock = bubbleH + 15;
-        final mascotRoom =
-            (h - bubbleBlock - gapAboveMascot - 6).clamp(48.0, 152.0);
+        final mascotRoom = (h - bubbleBlock - gapAboveMascot - 6).clamp(
+          48.0,
+          152.0,
+        );
         final mascot = math.min(w * 0.54, mascotRoom);
         if (!h.isFinite || h <= 0 || !w.isFinite || w <= 0) {
           return const SizedBox.shrink();
@@ -831,10 +1058,7 @@ class _MascotZone extends StatelessWidget {
 }
 
 class _IdleAfterShiftCard extends StatelessWidget {
-  const _IdleAfterShiftCard({
-    required this.l10n,
-    required this.onSchedule,
-  });
+  const _IdleAfterShiftCard({required this.l10n, required this.onSchedule});
 
   final AppLocalizations l10n;
   final VoidCallback onSchedule;
@@ -1078,7 +1302,9 @@ class _DayHourStrip extends StatelessWidget {
     final title = _hourGroupTitle(segments, indexes);
     final hasCurrent = indexes.any((i) => views[i].current);
     return Material(
-      color: hasCurrent ? TickColors.yellow.withValues(alpha: 0.35) : Colors.white,
+      color: hasCurrent
+          ? TickColors.yellow.withValues(alpha: 0.35)
+          : Colors.white,
       borderRadius: BorderRadius.circular(14),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -1094,9 +1320,7 @@ class _DayHourStrip extends StatelessWidget {
               children: [
                 for (var n = 0; n < indexes.length; n++) ...[
                   if (n > 0) const SizedBox(width: 4),
-                  Expanded(
-                    child: _DayChunkMark(view: views[indexes[n]]),
-                  ),
+                  Expanded(child: _DayChunkMark(view: views[indexes[n]])),
                 ],
               ],
             ),
@@ -1293,8 +1517,9 @@ class _ChunkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final done = view.done;
-    final borderColor =
-        done || view.current ? TickColors.yellow : TickColors.line;
+    final borderColor = done || view.current
+        ? TickColors.yellow
+        : TickColors.line;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: done ? TickColors.yellow : Colors.white,
@@ -1415,8 +1640,8 @@ class _ChunkWaterPainter extends CustomPainter {
     const waves = 2.2;
     const amp = 3.0;
     for (var x = 0.0; x <= size.width; x++) {
-      final y = top +
-          math.sin((x / size.width * waves * 2 * math.pi) + phase) * amp;
+      final y =
+          top + math.sin((x / size.width * waves * 2 * math.pi) + phase) * amp;
       wavePath.lineTo(x, y);
     }
     wavePath
@@ -1426,8 +1651,11 @@ class _ChunkWaterPainter extends CustomPainter {
 
     final foamPath = Path()..moveTo(0, top);
     for (var x = 0.0; x <= size.width; x++) {
-      final y = top +
-          math.sin((x / size.width * waves * 2 * math.pi) + phase + 0.6) * amp * 0.65 -
+      final y =
+          top +
+          math.sin((x / size.width * waves * 2 * math.pi) + phase + 0.6) *
+              amp *
+              0.65 -
           1.5;
       foamPath.lineTo(x, y);
     }

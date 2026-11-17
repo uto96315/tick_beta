@@ -18,21 +18,38 @@ Future<void> openCamouflage(BuildContext context, WidgetRef ref) async {
     final choice = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: TickColors.cream,
         title: Text(l10n.camouflage),
         content: Text('${l10n.camouflageFirst}\n\n$homeNote'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'cancel'),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'setup'),
-            child: Text(l10n.camouflageSetup),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, 'go'),
-            child: Text(l10n.camouflageFirstGo),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, 'go'),
+                child: Text(l10n.camouflageFirstGo),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'cancel'),
+                    child: Text(l10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'setup'),
+                    child: Text(l10n.camouflageSetup),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

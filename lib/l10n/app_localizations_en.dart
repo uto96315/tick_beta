@@ -67,7 +67,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get extend => 'Extend';
 
   @override
-  String get endEarly => 'Stop here';
+  String get endEarly => 'End shift';
+
+  @override
+  String get endShiftConfirmTitle => 'End this shift?';
+
+  @override
+  String get endShiftConfirmBody =>
+      'Save the time so far and end the work timer.';
+
+  @override
+  String get endShiftConfirmAction => 'End timer';
 
   @override
   String get earlyDone => 'Stopping here.';
@@ -694,9 +704,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Today\'s shift is over.\nYou can still start a timer below.';
 
   @override
-  String get idleAfterShiftAction => 'Open schedule';
-
-  @override
   String get dayOff => 'Day off';
 
   @override
@@ -726,6 +733,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scheduleSetupDone => 'Schedule saved';
+
+  @override
+  String get idleAfterShiftAction => 'Open schedule';
 
   @override
   String get startTimer => 'Start the timer';
