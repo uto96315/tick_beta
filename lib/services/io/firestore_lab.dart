@@ -723,7 +723,7 @@ class FirestoreLabStore implements LabStore {
           controller.add(const VentFeed(remoteFailed: true));
           return;
         }
-        subscription = _db
+        final feedQuery = _db
             .collection('ventPosts')
             .where(
               'expiresAt',
@@ -732,7 +732,8 @@ class FirestoreLabStore implements LabStore {
               ),
             )
             .orderBy('expiresAt')
-            .orderBy('createdAt', descending: true)
+            .orderBy('createdAt', descending: true);
+        subscription = feedQuery
             .limit(30)
             .snapshots()
             .listen(
@@ -743,8 +744,15 @@ class FirestoreLabStore implements LabStore {
                     final posts = await Future.wait(
                       snapshot.docs.map((doc) => _ventPost(doc, me)),
                     );
+                    var count = posts.length;
+                    try {
+                      count =
+                          (await feedQuery.count().get()).count ?? posts.length;
+                    } catch (error) {
+                      debugPrint('vent count fetch failed: $error');
+                    }
                     if (!cancelled && current == generation) {
-                      controller.add(VentFeed(posts: posts));
+                      controller.add(VentFeed(posts: posts, count: count));
                     }
                   } catch (error) {
                     debugPrint('vent feed parse failed: $error');

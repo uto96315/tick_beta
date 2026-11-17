@@ -14,6 +14,7 @@ class ScheduleSetupOverlay extends ConsumerStatefulWidget {
 }
 
 class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
+  final _pickerNavigatorKey = GlobalKey<NavigatorState>();
   ClockTime _start = const ClockTime(9, 0);
   ClockTime _end = const ClockTime(18, 0);
   var _saturday = false;
@@ -42,6 +43,15 @@ class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
       _loaded = true;
     }
 
+    return Navigator(
+      key: _pickerNavigatorKey,
+      onGenerateRoute: (_) => MaterialPageRoute<void>(
+        builder: (context) => _setupSurface(context, l10n),
+      ),
+    );
+  }
+
+  Widget _setupSurface(BuildContext context, AppLocalizations l10n) {
     return Material(
       color: TickColors.cream,
       child: SafeArea(
@@ -123,11 +133,14 @@ class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
 
   Future<void> _pickTime({required bool start}) async {
     final initial = start ? _start : _end;
+    final pickerContext = _pickerNavigatorKey.currentState?.overlay?.context;
+    if (pickerContext == null) return;
     final picked = await showTimePicker(
-      context: context,
+      context: pickerContext,
       initialTime: TimeOfDay(hour: initial.hour, minute: initial.minute),
+      useRootNavigator: false,
     );
-    if (picked == null) return;
+    if (picked == null || !mounted) return;
     setState(() {
       final clock = ClockTime(picked.hour, picked.minute);
       if (start) {
@@ -152,7 +165,8 @@ class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
     }
     prior ??= existing.isNotEmpty ? existing.first : null;
     final id = prior?.id ?? 'default';
-    final name = prior?.name ??
+    final name =
+        prior?.name ??
         (Localizations.localeOf(context).languageCode == 'ja'
             ? 'ふつうの一日'
             : 'Regular day');
@@ -162,7 +176,8 @@ class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
         name: name,
         start: _start,
         end: _end,
-        breaks: prior?.breaks ??
+        breaks:
+            prior?.breaks ??
             const [
               BreakTemplate(
                 id: 'lunch',
@@ -187,8 +202,7 @@ class _ScheduleSetupOverlayState extends ConsumerState<ScheduleSetupOverlay> {
     }
     notifier.completeScheduleSetup();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.scheduleSetupDone)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.scheduleSetupDone)));
   }
 }

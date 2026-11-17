@@ -502,14 +502,15 @@ class MemoryLabStore implements LabStore {
   @override
   Stream<VentFeed> watchVents() => _live(() {
     final currentTime = now();
-    final posts =
+    final activePosts =
         _box.vents.values
             .where((post) => post.expiresAt.isAfter(currentTime))
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return VentFeed(
+      count: activePosts.length,
       posts: [
-        for (final post in posts.take(30))
+        for (final post in activePosts.take(30))
           VentPost(
             id: post.id,
             text: post.text,

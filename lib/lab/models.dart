@@ -152,11 +152,13 @@ class VentPost {
 class VentFeed {
   const VentFeed({
     this.posts = const [],
+    this.count = 0,
     this.loading = false,
     this.remoteFailed = false,
   });
 
   final List<VentPost> posts;
+  final int count;
   final bool loading;
   final bool remoteFailed;
 }

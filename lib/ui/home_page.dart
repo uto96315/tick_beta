@@ -30,12 +30,19 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  late final Stream<VentFeed> _ventFeed;
   var _byDuration = false;
   var _useShift = true;
   TimeOfDay _end = const TimeOfDay(hour: 18, minute: 0);
   int _hours = 8;
   int _minutes = 0;
   int? _interval;
+
+  @override
+  void initState() {
+    super.initState();
+    _ventFeed = ref.read(labStoreProvider).watchVents();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -275,12 +282,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ],
                         if (!running) ...[
                           const SizedBox(height: 4),
-                          _ToolRow(
-                            l10n: l10n,
-                            onCall: () => context.push('/call'),
-                            onLab: () => context.push('/lab'),
-                            onAway: () => openCamouflage(context, ref),
-                            onVents: () => context.push('/vents'),
+                          StreamBuilder<VentFeed>(
+                            stream: _ventFeed,
+                            builder: (context, snapshot) => _ToolRow(
+                              l10n: l10n,
+                              ventCount: snapshot.data?.count ?? 0,
+                              onCall: () => context.push('/call'),
+                              onLab: () => context.push('/lab'),
+                              onAway: () => openCamouflage(context, ref),
+                              onVents: () => context.push('/vents'),
+                            ),
                           ),
                           const SizedBox(height: 4),
                           const _TodayPromptBanner(),
@@ -332,12 +343,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ],
                         ] else ...[
                           const SizedBox(height: 12),
-                          _ToolRow(
-                            l10n: l10n,
-                            onCall: () => context.push('/call'),
-                            onLab: () => context.push('/lab'),
-                            onAway: () => openCamouflage(context, ref),
-                            onVents: () => context.push('/vents'),
+                          StreamBuilder<VentFeed>(
+                            stream: _ventFeed,
+                            builder: (context, snapshot) => _ToolRow(
+                              l10n: l10n,
+                              ventCount: snapshot.data?.count ?? 0,
+                              onCall: () => context.push('/call'),
+                              onLab: () => context.push('/lab'),
+                              onAway: () => openCamouflage(context, ref),
+                              onVents: () => context.push('/vents'),
+                            ),
                           ),
                         ],
                       ],
@@ -1799,6 +1814,7 @@ class _TodayPromptTile extends StatelessWidget {
 class _ToolRow extends StatelessWidget {
   const _ToolRow({
     required this.l10n,
+    required this.ventCount,
     required this.onCall,
     required this.onLab,
     required this.onAway,
@@ -1806,6 +1822,7 @@ class _ToolRow extends StatelessWidget {
   });
 
   final AppLocalizations l10n;
+  final int ventCount;
   final VoidCallback onCall;
   final VoidCallback onLab;
   final VoidCallback onAway;
@@ -1838,6 +1855,7 @@ class _ToolRow extends StatelessWidget {
           ink: const Color(0xFFB94B36),
           label: l10n.toolVents,
           onTap: onVents,
+          badgeCount: ventCount,
         ),
         const SizedBox(width: 8),
         _Tool(
@@ -1857,6 +1875,7 @@ class _Tool extends StatelessWidget {
     super.key,
     this.icon,
     this.face,
+    this.badgeCount = 0,
     required this.tint,
     required this.ink,
     required this.label,
@@ -1865,6 +1884,7 @@ class _Tool extends StatelessWidget {
 
   final IconData? icon;
   final Widget? face;
+  final int badgeCount;
   final Color tint;
   final Color ink;
   final String label;
@@ -1895,8 +1915,44 @@ class _Tool extends StatelessWidget {
                   child: SizedBox(
                     width: 44,
                     height: 44,
-                    child: Center(
-                      child: face ?? Icon(icon!, color: ink, size: 24),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.center,
+                      children: [
+                        face ?? Icon(icon!, color: ink, size: 24),
+                        if (badgeCount > 0)
+                          Positioned(
+                            top: -7,
+                            right: -8,
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 20,
+                                minHeight: 20,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFC92E22),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                badgeCount > 99 ? '99+' : '$badgeCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  height: 1,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

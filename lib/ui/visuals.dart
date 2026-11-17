@@ -296,7 +296,7 @@ class _ChickTalkState extends State<ChickTalk> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 60), (_) {
       if (!mounted || widget.lines.isEmpty) return;
       setState(() => _index++);
     });
@@ -305,7 +305,15 @@ class _ChickTalkState extends State<ChickTalk> {
   @override
   void didUpdateWidget(ChickTalk oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.lines.join('\n') != widget.lines.join('\n')) _index = 0;
+    if (oldWidget.lines.join('\n') != widget.lines.join('\n')) {
+      final currentLine = oldWidget.lines.isEmpty
+          ? null
+          : oldWidget.lines[_index % oldWidget.lines.length];
+      final currentIndex = currentLine == null
+          ? -1
+          : widget.lines.indexOf(currentLine);
+      _index = currentIndex < 0 ? 0 : currentIndex;
+    }
   }
 
   @override
@@ -326,7 +334,7 @@ class _ChickTalkState extends State<ChickTalk> {
     final fontSize = widget.fontSize ?? (widget.tight ? 12.0 : 14.0);
     final radius =
         widget.cornerRadius ?? (custom ? 20.0 : (widget.tight ? 14.0 : 18.0));
-    final tail = custom ? 11.0 : (widget.tight ? 8.0 : 10.0);
+    final tail = custom ? 8.0 : (widget.tight ? 8.0 : 10.0);
     final hPad = custom ? 16.0 : (widget.tight ? 10.0 : 14.0);
     return Column(
       mainAxisSize: MainAxisSize.min,

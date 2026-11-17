@@ -171,7 +171,72 @@ List<String> chickLines(
   final pool = chickBanterLines(Locale(lang), clock);
   if (pool.isEmpty) return const [];
   final shift = pose.index % pool.length;
-  return [...pool.sublist(shift), ...pool.sublist(0, shift)];
+  final rotatedBanter = [...pool.sublist(shift), ...pool.sublist(0, shift)];
+  final encouragement = _encouragementLines(l10n, pose);
+  if (encouragement.isEmpty) return rotatedBanter;
+  final pepShift = (clock.hour + clock.day + pose.index) % encouragement.length;
+  final rotatedEncouragement = [
+    ...encouragement.sublist(pepShift),
+    ...encouragement.sublist(0, pepShift),
+  ];
+  final mixed = <String>[];
+  var pepIndex = 0;
+  for (var i = 0; i < rotatedBanter.length; i++) {
+    mixed.add(rotatedBanter[i]);
+    if ((i + 1) % 3 == 0) {
+      mixed.add(rotatedEncouragement[pepIndex % rotatedEncouragement.length]);
+      pepIndex++;
+    }
+  }
+  return mixed;
+}
+
+List<String> _encouragementLines(AppLocalizations l10n, ChickPose pose) {
+  return switch (pose) {
+    ChickPose.normal => [
+      l10n.chickNormal4,
+      l10n.chickNormal5,
+      l10n.chickNormal1,
+    ],
+    ChickPose.happy => [l10n.chickHappy4, l10n.chickHappy5, l10n.chickHappy1],
+    ChickPose.cheer => [
+      l10n.chickCheer1,
+      l10n.chickCheer2,
+      l10n.chickCheer3,
+      l10n.chickCheer4,
+      l10n.chickCheer5,
+    ],
+    ChickPose.back => [l10n.chickBack1, l10n.chickBack2, l10n.chickBack3],
+    ChickPose.tired ||
+    ChickPose.hungry => [l10n.chickTired4, l10n.chickTired5, l10n.chickTired1],
+    ChickPose.attention => [
+      l10n.chickAttention1,
+      l10n.chickAttention2,
+      l10n.chickAttention3,
+      l10n.chickAttention4,
+      l10n.chickAttention5,
+    ],
+    ChickPose.notice => [
+      l10n.chickNotice1,
+      l10n.chickNotice2,
+      l10n.chickNotice3,
+    ],
+    ChickPose.love => [l10n.chickLove1, l10n.chickLove2, l10n.chickLove3],
+    ChickPose.done => [l10n.chickDone1, l10n.chickDone2, l10n.chickDone3],
+    ChickPose.goodjob => [
+      l10n.chickGoodjob1,
+      l10n.chickGoodjob2,
+      l10n.chickGoodjob3,
+      l10n.chickCheer4,
+      l10n.chickCheer5,
+    ],
+    ChickPose.surprise => [
+      l10n.chickSurprise1,
+      l10n.chickSurprise2,
+      l10n.chickSurprise3,
+    ],
+    ChickPose.sleep => [l10n.chickSleep1, l10n.chickSleep2, l10n.chickSleep3],
+  };
 }
 
 List<String> moodLines(AppLocalizations l10n, ChickMood mood) {
