@@ -168,5 +168,113 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow update, delete: if false;
     }
+
+    function ventReactionPath(postId, userId) {
+      return /databases/$(database)/documents/ventPosts/$(postId)/reactions/$(userId);
+    }
+
+    function ventOwnerPath(postId, userId) {
+      return /databases/$(database)/documents/ventOwners/$(userId)/ventOwnerPosts/$(postId);
+    }
+
+    function validVentReactionCounts(postId) {
+      let path = ventReactionPath(postId, request.auth.uid);
+      let beforeType = exists(path) ? get(path).data.type : 'none';
+      let afterType = existsAfter(path) ? getAfter(path).data.type : 'none';
+      return afterType in ['none', 'relate', 'cheer']
+        && request.resource.data.relateCount == resource.data.relateCount
+          + (afterType == 'relate' ? 1 : 0)
+          - (beforeType == 'relate' ? 1 : 0)
+        && request.resource.data.cheerCount == resource.data.cheerCount
+          + (afterType == 'cheer' ? 1 : 0)
+          - (beforeType == 'cheer' ? 1 : 0);
+    }
+
+    match /ventPosts/{postId} {
+      allow get, list: if signedIn() && resource.data.expiresAt > request.time;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'text', 'createdAt', 'expiresAt', 'relateCount', 'cheerCount'
+        ])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 140
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt <= request.time
+        && request.resource.data.createdAt > request.time - duration.value(1, 'm')
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(1, 'd')
+        && request.resource.data.relateCount == 0
+        && request.resource.data.cheerCount == 0
+        && existsAfter(ventOwnerPath(postId, request.auth.uid))
+        && getAfter(ventOwnerPath(postId, request.auth.uid)).data.createdAt == request.resource.data.createdAt
+        && getAfter(ventOwnerPath(postId, request.auth.uid)).data.expiresAt == request.resource.data.expiresAt;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['relateCount', 'cheerCount'])
+        && validVentReactionCounts(postId);
+      allow delete: if signedIn() && exists(ventOwnerPath(postId, request.auth.uid));
+
+      match /reactions/{userId} {
+        function activePost() {
+          return exists(/databases/$(database)/documents/ventPosts/$(postId))
+            && get(/databases/$(database)/documents/ventPosts/$(postId)).data.expiresAt > request.time;
+        }
+        function canReact() {
+          return activePost()
+            && !exists(ventOwnerPath(postId, request.auth.uid));
+        }
+        allow get: if signedIn() && userId == request.auth.uid && activePost();
+        allow list: if false;
+        allow create, update: if signedIn()
+          && userId == request.auth.uid
+          && canReact()
+          && request.resource.data.keys().hasOnly(['type', 'expiresAt'])
+          && request.resource.data.type in ['relate', 'cheer']
+          && request.resource.data.expiresAt == get(
+            /databases/$(database)/documents/ventPosts/$(postId)
+          ).data.expiresAt;
+        allow delete: if signedIn() && userId == request.auth.uid && canReact();
+      }
+    }
+
+    match /ventOwners/{userId}/ventOwnerPosts/{postId} {
+      allow get: if signedIn()
+        && userId == request.auth.uid
+        && (!exists(ventOwnerPath(postId, userId))
+          || resource.data.expiresAt > request.time);
+      allow list: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.expiresAt > request.time;
+      allow create: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['createdAt', 'expiresAt'])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.expiresAt is timestamp
+        && !exists(/databases/$(database)/documents/ventPosts/$(postId))
+        && existsAfter(/databases/$(database)/documents/ventPosts/$(postId))
+        && getAfter(/databases/$(database)/documents/ventPosts/$(postId)).data.createdAt == request.resource.data.createdAt
+        && getAfter(/databases/$(database)/documents/ventPosts/$(postId)).data.expiresAt == request.resource.data.expiresAt;
+      allow delete: if signedIn()
+        && userId == request.auth.uid
+        && exists(/databases/$(database)/documents/ventPosts/$(postId));
+      allow update: if false;
+    }
+
+    match /ventReports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['postId', 'reporterUid', 'createdAt', 'expiresAt'])
+        && request.resource.data.postId is string
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.expiresAt is timestamp
+        && reportId == request.resource.data.postId + '_' + request.auth.uid
+        && exists(/databases/$(database)/documents/ventPosts/$(request.resource.data.postId))
+        && request.resource.data.expiresAt == get(/databases/$(database)/documents/ventPosts/$(request.resource.data.postId)).data.expiresAt
+        && !exists(ventOwnerPath(request.resource.data.postId, request.auth.uid));
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
   }
 }

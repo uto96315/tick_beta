@@ -515,6 +515,154 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyHistory => 'No days saved yet.';
 
   @override
+  String get todoTitle => 'To-dos';
+
+  @override
+  String get todoNewTask => 'New to-do';
+
+  @override
+  String get todoTaskHint => 'What needs doing?';
+
+  @override
+  String get todoAdd => 'Add';
+
+  @override
+  String get todoNoTasks => 'No to-dos yet.';
+
+  @override
+  String get todoUnscheduled => 'No time set';
+
+  @override
+  String get todoScheduled => 'Scheduled by hour';
+
+  @override
+  String get todoCompleted => 'Done';
+
+  @override
+  String get todoTimeNone => 'No time';
+
+  @override
+  String get todoCurrentChunk => 'For this chunk';
+
+  @override
+  String todoViewAll(Object count) {
+    return 'View all ($count)';
+  }
+
+  @override
+  String get todoDelete => 'Delete to-do';
+
+  @override
+  String get todoEdit => 'Edit';
+
+  @override
+  String get todoHourSection => 'When should you do it?';
+
+  @override
+  String get todoHourChoice => 'Choose an hour';
+
+  @override
+  String get todoHourField => 'Time of day';
+
+  @override
+  String todoHourLabel(Object hour) {
+    return 'Hour $hour';
+  }
+
+  @override
+  String get todoPriorityTitle => 'Priority';
+
+  @override
+  String get todoPriorityLow => 'Low';
+
+  @override
+  String get todoPriorityNormal => 'Normal';
+
+  @override
+  String get todoPriorityHigh => 'High';
+
+  @override
+  String get toolVents => 'Vents';
+
+  @override
+  String get ventTitle => 'Venting together';
+
+  @override
+  String get ventComposeTitle => 'Let it out here';
+
+  @override
+  String get ventHint => 'Write a short note';
+
+  @override
+  String get ventSend => 'Post';
+
+  @override
+  String get ventEmpty => 'No posts yet. Want to leave the first note?';
+
+  @override
+  String get ventPrivacy =>
+      'Posts are anonymous and leave the feed after 24 hours. No replies.';
+
+  @override
+  String get ventLocalOnly =>
+      'In this environment, posts aren\'t shared with others.';
+
+  @override
+  String ventVisibleCount(Object count) {
+    return 'Vents shown: $count';
+  }
+
+  @override
+  String get ventRelate => 'I get it';
+
+  @override
+  String get ventCheer => 'Rooting for you';
+
+  @override
+  String get ventReport => 'Report';
+
+  @override
+  String get ventDelete => 'Delete my post';
+
+  @override
+  String get ventReportConfirm => 'Report this post to the team?';
+
+  @override
+  String get ventDeleteConfirm => 'Delete this post?';
+
+  @override
+  String get ventCancel => 'Cancel';
+
+  @override
+  String get ventConfirm => 'Confirm';
+
+  @override
+  String get ventReported => 'Report sent';
+
+  @override
+  String get ventDeleted => 'Post deleted';
+
+  @override
+  String get ventReportDuplicate => 'You already reported this post';
+
+  @override
+  String get ventPostError =>
+      'Could not post. Check your connection and try again.';
+
+  @override
+  String get ventAgeNow => 'Just now';
+
+  @override
+  String ventAgeMinutes(Object count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String ventAgeHours(Object count) {
+    return '${count}h ago';
+  }
+
+  @override
   String get running => 'In progress';
 
   @override

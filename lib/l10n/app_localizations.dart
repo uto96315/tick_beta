@@ -1070,6 +1070,276 @@ abstract class AppLocalizations {
   /// **'No days saved yet.'**
   String get emptyHistory;
 
+  /// No description provided for @todoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To-dos'**
+  String get todoTitle;
+
+  /// No description provided for @todoNewTask.
+  ///
+  /// In en, this message translates to:
+  /// **'New to-do'**
+  String get todoNewTask;
+
+  /// No description provided for @todoTaskHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs doing?'**
+  String get todoTaskHint;
+
+  /// No description provided for @todoAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get todoAdd;
+
+  /// No description provided for @todoNoTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No to-dos yet.'**
+  String get todoNoTasks;
+
+  /// No description provided for @todoUnscheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'No time set'**
+  String get todoUnscheduled;
+
+  /// No description provided for @todoScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled by hour'**
+  String get todoScheduled;
+
+  /// No description provided for @todoCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get todoCompleted;
+
+  /// No description provided for @todoTimeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No time'**
+  String get todoTimeNone;
+
+  /// No description provided for @todoCurrentChunk.
+  ///
+  /// In en, this message translates to:
+  /// **'For this chunk'**
+  String get todoCurrentChunk;
+
+  /// No description provided for @todoViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all ({count})'**
+  String todoViewAll(Object count);
+
+  /// No description provided for @todoDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete to-do'**
+  String get todoDelete;
+
+  /// No description provided for @todoEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get todoEdit;
+
+  /// No description provided for @todoHourSection.
+  ///
+  /// In en, this message translates to:
+  /// **'When should you do it?'**
+  String get todoHourSection;
+
+  /// No description provided for @todoHourChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an hour'**
+  String get todoHourChoice;
+
+  /// No description provided for @todoHourField.
+  ///
+  /// In en, this message translates to:
+  /// **'Time of day'**
+  String get todoHourField;
+
+  /// No description provided for @todoHourLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hour {hour}'**
+  String todoHourLabel(Object hour);
+
+  /// No description provided for @todoPriorityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get todoPriorityTitle;
+
+  /// No description provided for @todoPriorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get todoPriorityLow;
+
+  /// No description provided for @todoPriorityNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get todoPriorityNormal;
+
+  /// No description provided for @todoPriorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get todoPriorityHigh;
+
+  /// No description provided for @toolVents.
+  ///
+  /// In en, this message translates to:
+  /// **'Vents'**
+  String get toolVents;
+
+  /// No description provided for @ventTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Venting together'**
+  String get ventTitle;
+
+  /// No description provided for @ventComposeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let it out here'**
+  String get ventComposeTitle;
+
+  /// No description provided for @ventHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a short note'**
+  String get ventHint;
+
+  /// No description provided for @ventSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get ventSend;
+
+  /// No description provided for @ventEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts yet. Want to leave the first note?'**
+  String get ventEmpty;
+
+  /// No description provided for @ventPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts are anonymous and leave the feed after 24 hours. No replies.'**
+  String get ventPrivacy;
+
+  /// No description provided for @ventLocalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'In this environment, posts aren\'t shared with others.'**
+  String get ventLocalOnly;
+
+  /// No description provided for @ventVisibleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Vents shown: {count}'**
+  String ventVisibleCount(Object count);
+
+  /// No description provided for @ventRelate.
+  ///
+  /// In en, this message translates to:
+  /// **'I get it'**
+  String get ventRelate;
+
+  /// No description provided for @ventCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Rooting for you'**
+  String get ventCheer;
+
+  /// No description provided for @ventReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get ventReport;
+
+  /// No description provided for @ventDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my post'**
+  String get ventDelete;
+
+  /// No description provided for @ventReportConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this post to the team?'**
+  String get ventReportConfirm;
+
+  /// No description provided for @ventDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this post?'**
+  String get ventDeleteConfirm;
+
+  /// No description provided for @ventCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get ventCancel;
+
+  /// No description provided for @ventConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get ventConfirm;
+
+  /// No description provided for @ventReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent'**
+  String get ventReported;
+
+  /// No description provided for @ventDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Post deleted'**
+  String get ventDeleted;
+
+  /// No description provided for @ventReportDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'You already reported this post'**
+  String get ventReportDuplicate;
+
+  /// No description provided for @ventPostError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not post. Check your connection and try again.'**
+  String get ventPostError;
+
+  /// No description provided for @ventAgeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get ventAgeNow;
+
+  /// No description provided for @ventAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String ventAgeMinutes(Object count);
+
+  /// No description provided for @ventAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String ventAgeHours(Object count);
+
   /// No description provided for @running.
   ///
   /// In en, this message translates to:

@@ -6,6 +6,8 @@ enum LabPhase { open, closed }
 
 enum ProposalStatus { pending, accepted, rejected }
 
+enum VentReaction { relate, cheer }
+
 enum LabFailure {
   empty,
   tooLong,
@@ -123,6 +125,40 @@ class LabFeed {
 
   /// True until the first Firestore prompt snapshot is parsed.
   final bool loading;
+}
+
+class VentPost {
+  const VentPost({
+    required this.id,
+    required this.text,
+    required this.createdAt,
+    required this.expiresAt,
+    required this.relateCount,
+    required this.cheerCount,
+    required this.mine,
+    this.myReaction,
+  });
+
+  final String id;
+  final String text;
+  final DateTime createdAt;
+  final DateTime expiresAt;
+  final int relateCount;
+  final int cheerCount;
+  final bool mine;
+  final VentReaction? myReaction;
+}
+
+class VentFeed {
+  const VentFeed({
+    this.posts = const [],
+    this.loading = false,
+    this.remoteFailed = false,
+  });
+
+  final List<VentPost> posts;
+  final bool loading;
+  final bool remoteFailed;
 }
 
 class PromptBoard {

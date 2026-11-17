@@ -11,6 +11,7 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/session_ops.dart';
+import 'package:tick/domain/todo.dart';
 import 'package:tick/config/operators.dart';
 import 'package:tick/lab/lab_store.dart';
 import 'package:tick/lab/draw_batch.dart';
@@ -194,6 +195,57 @@ class AppController extends Notifier<AppState> {
     }
     _db.session = updated;
     _db.bumpRuntime(now);
+    _commit();
+  }
+
+  void saveTodo({
+    String? id,
+    required String title,
+    int? hour,
+    TodoPriority priority = TodoPriority.normal,
+  }) {
+    final trimmed = title.trim();
+    if (trimmed.isEmpty) return;
+    final now = _deps.clock.now();
+    final index = id == null
+        ? -1
+        : _db.todos.indexWhere((item) => item.id == id);
+    final previous = index < 0 ? null : _db.todos[index];
+    final todo = TodoItem(
+      id: previous?.id ?? _deps.newId(),
+      title: trimmed,
+      done: previous?.done ?? false,
+      hour: hour,
+      priority: priority,
+      createdAt: previous?.createdAt ?? now,
+      updatedAt: now,
+    );
+    if (index < 0) {
+      _db.todos = [..._db.todos, todo];
+    } else {
+      _db.todos[index] = todo;
+    }
+    _commit();
+  }
+
+  void toggleTodo(String id) {
+    final index = _db.todos.indexWhere((item) => item.id == id);
+    if (index < 0) return;
+    final item = _db.todos[index];
+    _db.todos[index] = TodoItem(
+      id: item.id,
+      title: item.title,
+      done: !item.done,
+      hour: item.hour,
+      priority: item.priority,
+      createdAt: item.createdAt,
+      updatedAt: _deps.clock.now(),
+    );
+    _commit();
+  }
+
+  void deleteTodo(String id) {
+    _db.removeWhere('todos', id, _deps.clock.now());
     _commit();
   }
 
@@ -658,6 +710,13 @@ class AppController extends Notifier<AppState> {
   Future<String?> deleteAccount() async {
     final uid = _db.uid;
     try {
+      if (uid != null && _deps.firebaseConfigured) {
+        try {
+          await _deps.lab.deleteMyVents();
+        } catch (error) {
+          debugPrint('vent cleanup failed: $error');
+        }
+      }
       await _deps.auth.deleteAccount();
       if (uid != null && _deps.firebaseConfigured) {
         try {
@@ -1008,8 +1067,7 @@ class AppController extends Notifier<AppState> {
     try {
       final remote = await _deps.labProfileRemote!.fetch(uid);
       if (remote == null) return;
-      if (remote.nick.isNotEmpty &&
-          validateLabNick(remote.nick) == null) {
+      if (remote.nick.isNotEmpty && validateLabNick(remote.nick) == null) {
         _db.labNick = remote.nick;
       }
       if (remote.avatarUrl != null) {
@@ -1054,10 +1112,9 @@ class AppController extends Notifier<AppState> {
     final store = _deps.lab;
     if (!store.canReview) return;
     try {
-      final feed = await store
-          .watchPrompts()
-          .first
-          .timeout(const Duration(seconds: 20));
+      final feed = await store.watchPrompts().first.timeout(
+        const Duration(seconds: 20),
+      );
       final hasOgiri = feed.prompts.any(
         (prompt) => prompt.id.startsWith('seed-ogiri-'),
       );
@@ -1206,6 +1263,7 @@ class AppController extends Notifier<AppState> {
       settings: _db.settings,
       session: _db.session,
       history: List.unmodifiable(_db.history),
+      todos: List.unmodifiable(_db.todos),
       patterns: List.unmodifiable(_db.patterns),
       week: _db.week,
       overrides: List.unmodifiable(_db.overrides),

@@ -499,6 +499,151 @@ class AppLocalizationsJa extends AppLocalizations {
   String get emptyHistory => 'まだ履歴がない。';
 
   @override
+  String get todoTitle => 'TODO';
+
+  @override
+  String get todoNewTask => '新しいTODO';
+
+  @override
+  String get todoTaskHint => 'やることを書く';
+
+  @override
+  String get todoAdd => '追加';
+
+  @override
+  String get todoNoTasks => 'TODOはまだありません。';
+
+  @override
+  String get todoUnscheduled => '時間未設定';
+
+  @override
+  String get todoScheduled => '時間帯を設定したTODO';
+
+  @override
+  String get todoCompleted => '完了';
+
+  @override
+  String get todoTimeNone => '設定しない';
+
+  @override
+  String get todoCurrentChunk => 'この区切りのTODO';
+
+  @override
+  String todoViewAll(Object count) {
+    return 'すべて見る（$count件）';
+  }
+
+  @override
+  String get todoDelete => 'TODOを削除';
+
+  @override
+  String get todoEdit => '編集';
+
+  @override
+  String get todoHourSection => '何時台にやる？';
+
+  @override
+  String get todoHourChoice => '時間帯を指定';
+
+  @override
+  String get todoHourField => '時間帯';
+
+  @override
+  String todoHourLabel(Object hour) {
+    return '$hour時台';
+  }
+
+  @override
+  String get todoPriorityTitle => '優先度';
+
+  @override
+  String get todoPriorityLow => '低';
+
+  @override
+  String get todoPriorityNormal => 'ふつう';
+
+  @override
+  String get todoPriorityHigh => '高';
+
+  @override
+  String get toolVents => 'ぼやき';
+
+  @override
+  String get ventTitle => 'みんなのぼやき';
+
+  @override
+  String get ventComposeTitle => 'ここで吐き出していこう';
+
+  @override
+  String get ventHint => '短くひとこと書いてみよう';
+
+  @override
+  String get ventSend => '投稿する';
+
+  @override
+  String get ventEmpty => 'まだ投稿はありません。最初のひとことを書いてみる？';
+
+  @override
+  String get ventPrivacy => '投稿は匿名で表示され、24時間で一覧から消えます。返信はありません。';
+
+  @override
+  String get ventLocalOnly => 'この環境では、投稿は他の人には共有されません。';
+
+  @override
+  String ventVisibleCount(Object count) {
+    return '表示中のぼやき：$count件';
+  }
+
+  @override
+  String get ventRelate => 'わかる';
+
+  @override
+  String get ventCheer => '応援してる';
+
+  @override
+  String get ventReport => '報告する';
+
+  @override
+  String get ventDelete => '自分の投稿を削除';
+
+  @override
+  String get ventReportConfirm => 'この投稿を運営に報告しますか？';
+
+  @override
+  String get ventDeleteConfirm => 'この投稿を削除しますか？';
+
+  @override
+  String get ventCancel => 'キャンセル';
+
+  @override
+  String get ventConfirm => '確認';
+
+  @override
+  String get ventReported => '報告しました';
+
+  @override
+  String get ventDeleted => '投稿を削除しました';
+
+  @override
+  String get ventReportDuplicate => 'この投稿は報告済みです';
+
+  @override
+  String get ventPostError => '投稿できませんでした。通信を確認してもう一度お試しください。';
+
+  @override
+  String get ventAgeNow => 'たった今';
+
+  @override
+  String ventAgeMinutes(Object count) {
+    return '$count分前';
+  }
+
+  @override
+  String ventAgeHours(Object count) {
+    return '$count時間前';
+  }
+
+  @override
   String get running => '進行中';
 
   @override

@@ -1,6 +1,7 @@
 import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
+import 'package:tick/domain/todo.dart';
 import 'package:tick/services/gateways.dart';
 
 class Flash {
@@ -19,6 +20,7 @@ class AppState {
     required this.settings,
     required this.session,
     required this.history,
+    required this.todos,
     required this.patterns,
     required this.week,
     required this.overrides,
@@ -50,6 +52,7 @@ class AppState {
   final AppSettings settings;
   final TimerSession? session;
   final List<WorkRecord> history;
+  final List<TodoItem> todos;
   final List<WorkPattern> patterns;
   final WeekPlan week;
   final List<DateOverride> overrides;
@@ -83,6 +86,7 @@ class AppState {
       settings: AppSettings.initial(now),
       session: null,
       history: const [],
+      todos: const [],
       patterns: const [],
       week: WeekPlan(days: const {}, updatedAt: now),
       overrides: const [],

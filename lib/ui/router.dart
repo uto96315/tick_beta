@@ -18,6 +18,8 @@ import 'package:tick/ui/pattern_page.dart';
 import 'package:tick/ui/premium_page.dart';
 import 'package:tick/ui/schedule_page.dart';
 import 'package:tick/ui/settings_page.dart';
+import 'package:tick/ui/todo_page.dart';
+import 'package:tick/ui/vent_page.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -44,6 +46,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/', builder: (_, _) => const HomePage()),
+      GoRoute(path: '/todos', builder: (_, _) => const TodoPage()),
+      GoRoute(path: '/vents', builder: (_, _) => const VentPage()),
       GoRoute(
         path: '/settings',
         pageBuilder: (_, state) => _slide(state, const SettingsPage()),
@@ -87,10 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/lab',
         builder: (_, _) => const LabHubPage(),
         routes: [
-          GoRoute(
-            path: 'list',
-            builder: (_, _) => const LabListPage(),
-          ),
+          GoRoute(path: 'list', builder: (_, _) => const LabListPage()),
           GoRoute(
             path: 'prompt/:id',
             builder: (_, state) =>

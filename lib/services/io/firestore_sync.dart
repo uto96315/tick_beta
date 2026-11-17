@@ -5,6 +5,7 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/state_sync.dart';
+import 'package:tick/domain/todo.dart';
 import 'package:tick/services/gateways.dart';
 
 /// Offline-first sync. The on-device store is what the UI reads.
@@ -34,6 +35,7 @@ class FirestoreSync implements RemoteSync {
     final root = _db.collection('users').doc(uid);
     for (final name in [
       'history',
+      'todos',
       'patterns',
       'overrides',
       'callers',
@@ -59,6 +61,7 @@ class FirestoreSync implements RemoteSync {
     final weekDoc = await singletons.doc('week').get();
     final entitlementDoc = await singletons.doc('entitlement').get();
     final history = await _collection(root, 'history');
+    final todos = await _collection(root, 'todos');
     final patterns = await _collection(root, 'patterns');
     final overrides = await _collection(root, 'overrides');
     final callers = await _collection(root, 'callers');
@@ -71,6 +74,7 @@ class FirestoreSync implements RemoteSync {
         weekDoc.exists ||
         entitlementDoc.exists ||
         history.isNotEmpty ||
+        todos.isNotEmpty ||
         patterns.isNotEmpty ||
         overrides.isNotEmpty ||
         callers.isNotEmpty ||
@@ -82,12 +86,15 @@ class FirestoreSync implements RemoteSync {
       settings: _map(settingsDoc) == null
           ? null
           : AppSettings.fromJson(_map(settingsDoc)!),
-      runtime: _map(runtimeDoc) == null ? null : RuntimeSnapshot.fromJson(_map(runtimeDoc)!),
+      runtime: _map(runtimeDoc) == null
+          ? null
+          : RuntimeSnapshot.fromJson(_map(runtimeDoc)!),
       week: _map(weekDoc) == null ? null : WeekPlan.fromJson(_map(weekDoc)!),
       entitlement: _map(entitlementDoc) == null
           ? null
           : Entitlement.fromJson(_map(entitlementDoc)!),
       history: [for (final item in history) WorkRecord.fromJson(item)],
+      todos: [for (final item in todos) TodoItem.fromJson(item)],
       patterns: [for (final item in patterns) WorkPattern.fromJson(item)],
       overrides: [for (final item in overrides) DateOverride.fromJson(item)],
       callers: [for (final item in callers) Caller.fromJson(item)],
@@ -104,7 +111,9 @@ class FirestoreSync implements RemoteSync {
       await singletons.doc('settings').set(plan.state.settings.toJson());
     }
     if (plan.writeRuntime) {
-      await singletons.doc('runtime').set(RuntimeSnapshot.fromState(plan.state).toJson());
+      await singletons
+          .doc('runtime')
+          .set(RuntimeSnapshot.fromState(plan.state).toJson());
     }
     if (plan.writeWeek) {
       await singletons.doc('week').set(plan.state.week.toJson());
@@ -119,17 +128,19 @@ class FirestoreSync implements RemoteSync {
       await root.collection(delete.collection).doc(delete.id).delete();
     }
     for (final tombstone in plan.tombstones) {
-      await root.collection('tombstones').doc(tombstone.key.replaceAll('::', '_')).set(
-        tombstone.toJson(),
-      );
+      await root
+          .collection('tombstones')
+          .doc(tombstone.key.replaceAll('::', '_'))
+          .set(tombstone.toJson());
     }
   }
 
-  Future<List<Map<String, dynamic>>> _collection(DocumentReference<Map<String, dynamic>> root, String name) async {
+  Future<List<Map<String, dynamic>>> _collection(
+    DocumentReference<Map<String, dynamic>> root,
+    String name,
+  ) async {
     final snapshot = await root.collection(name).get();
-    return [
-      for (final doc in snapshot.docs) doc.data(),
-    ];
+    return [for (final doc in snapshot.docs) doc.data()];
   }
 
   Map<String, dynamic>? _map(DocumentSnapshot<Map<String, dynamic>> doc) {

@@ -12,6 +12,8 @@ import 'package:tick/lab/profile.dart';
 import 'package:tick/services/gateways.dart';
 import 'package:tick/services/io/lab_profile_remote.dart';
 
+const _ventExpiryReadBuffer = Duration(minutes: 1);
+
 class FirestoreLabStore implements LabStore {
   FirestoreLabStore({
     required this.auth,
@@ -61,18 +63,15 @@ class FirestoreLabStore implements LabStore {
 
   void _emitPromptFeed(LabFeed feed, {required String reason}) {
     _lastPromptFeed = feed;
-    LabFeedLog.event(
-      'emit',
-      {
-        'reason': reason,
-        'loading': feed.loading,
-        'remoteFailed': feed.remoteFailed,
-        'count': feed.prompts.length,
-        'featuredOpen': feed.prompts
-            .where((p) => p.featured && p.phase == LabPhase.open)
-            .length,
-      },
-    );
+    LabFeedLog.event('emit', {
+      'reason': reason,
+      'loading': feed.loading,
+      'remoteFailed': feed.remoteFailed,
+      'count': feed.prompts.length,
+      'featuredOpen': feed.prompts
+          .where((p) => p.featured && p.phase == LabPhase.open)
+          .length,
+    });
     final ctrl = _promptFeedCtrl;
     if (ctrl != null && !ctrl.isClosed) {
       ctrl.add(feed);
@@ -95,10 +94,10 @@ class FirestoreLabStore implements LabStore {
     unawaited(() async {
       LabFeedLog.event('auth.start');
       final uid = await _ensureUser();
-      LabFeedLog.event(
-        'auth.done',
-        {'uid': uid ?? '(null)', 'ms': watch.elapsedMilliseconds},
-      );
+      LabFeedLog.event('auth.done', {
+        'uid': uid ?? '(null)',
+        'ms': watch.elapsedMilliseconds,
+      });
       if (_promptSub != null) return;
       if (uid == null) {
         LabFeedLog.event('listen.abort', {'reason': 'no uid'});
@@ -127,19 +126,16 @@ class FirestoreLabStore implements LabStore {
               final sorted = sortLabPrompts(base);
               final meta = snapshot.metadata;
               final awaitingServer = meta.isFromCache && sorted.isEmpty;
-              LabFeedLog.event(
-                'snapshot',
-                {
-                  'ms': watch.elapsedMilliseconds,
-                  'rawDocs': rawDocs,
-                  'parsed': base.length,
-                  'skipped': skipped,
-                  'sorted': sorted.length,
-                  'fromCache': meta.isFromCache,
-                  'hasPendingWrites': meta.hasPendingWrites,
-                  'awaitingServer': awaitingServer,
-                },
-              );
+              LabFeedLog.event('snapshot', {
+                'ms': watch.elapsedMilliseconds,
+                'rawDocs': rawDocs,
+                'parsed': base.length,
+                'skipped': skipped,
+                'sorted': sorted.length,
+                'fromCache': meta.isFromCache,
+                'hasPendingWrites': meta.hasPendingWrites,
+                'awaitingServer': awaitingServer,
+              });
               _emitPromptFeed(
                 LabFeed(prompts: sorted, loading: awaitingServer),
                 reason: awaitingServer ? 'cache empty' : 'snapshot',
@@ -159,14 +155,11 @@ class FirestoreLabStore implements LabStore {
           final hint = error.toString().contains('permission-denied')
               ? 'deploy firestore.rules or check labPrompts read rule'
               : null;
-          LabFeedLog.event(
-            'snapshots.error',
-            {
-              'error': error,
-              'ms': watch.elapsedMilliseconds,
-              if (hint != null) 'hint': hint,
-            },
-          );
+          LabFeedLog.event('snapshots.error', {
+            'error': error,
+            'ms': watch.elapsedMilliseconds,
+            if (hint != null) 'hint': hint,
+          });
           debugPrint('lab prompts failed: $error\n$stack');
           _emitPromptFeed(
             const LabFeed(prompts: [], loading: false, remoteFailed: true),
@@ -180,6 +173,7 @@ class FirestoreLabStore implements LabStore {
       );
     }());
   }
+
   final _boardStreams = <String, Stream<PromptBoard>>{};
   Stream<List<LabProposal>>? _proposalStream;
   Stream<List<LabReport>>? _reportStream;
@@ -188,10 +182,8 @@ class FirestoreLabStore implements LabStore {
       _db.collection('labPrompts');
 
   /// Must match [firestore.rules] (`phase in open|closed`) or list queries fail.
-  Query<Map<String, dynamic>> get _publishedPrompts => _prompts.where(
-        'phase',
-        whereIn: ['open', 'closed'],
-      );
+  Query<Map<String, dynamic>> get _publishedPrompts =>
+      _prompts.where('phase', whereIn: ['open', 'closed']);
 
   CollectionReference<Map<String, dynamic>> get _proposals =>
       _db.collection('labProposals');
@@ -263,17 +255,17 @@ class FirestoreLabStore implements LabStore {
             joined.add(promptId);
           }
         } catch (error) {
-          LabFeedLog.event(
-            'joinedSet.oneFailed',
-            {'promptId': promptId, 'error': error},
-          );
+          LabFeedLog.event('joinedSet.oneFailed', {
+            'promptId': promptId,
+            'error': error,
+          });
         }
       }),
     );
-    LabFeedLog.event(
-      'joinedSet',
-      {'checked': ids.length, 'count': joined.length},
-    );
+    LabFeedLog.event('joinedSet', {
+      'checked': ids.length,
+      'count': joined.length,
+    });
     return joined;
   }
 
@@ -691,7 +683,10 @@ class FirestoreLabStore implements LabStore {
   Future<LabOutcome> deleteEntry(String promptId, String entryUid) async {
     if (!canReview) return const LabOutcome.fail(LabFailure.forbidden);
     try {
-      final entryRef = _prompts.doc(promptId).collection('entries').doc(entryUid);
+      final entryRef = _prompts
+          .doc(promptId)
+          .collection('entries')
+          .doc(entryUid);
       final ballotSnap = await _prompts
           .doc(promptId)
           .collection('ballots')
@@ -707,6 +702,285 @@ class FirestoreLabStore implements LabStore {
     } catch (error) {
       debugPrint('lab delete entry failed: $error');
       return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Stream<VentFeed> watchVents() {
+    return Stream<VentFeed>.multi((controller) {
+      var cancelled = false;
+      var generation = 0;
+      StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? subscription;
+      controller.add(const VentFeed(loading: true));
+      controller.onCancel = () {
+        cancelled = true;
+        subscription?.cancel();
+      };
+      unawaited(() async {
+        final me = await _ensureUser();
+        if (cancelled) return;
+        if (me == null) {
+          controller.add(const VentFeed(remoteFailed: true));
+          return;
+        }
+        subscription = _db
+            .collection('ventPosts')
+            .where(
+              'expiresAt',
+              isGreaterThan: Timestamp.fromDate(
+                now().add(_ventExpiryReadBuffer),
+              ),
+            )
+            .orderBy('expiresAt')
+            .orderBy('createdAt', descending: true)
+            .limit(30)
+            .snapshots()
+            .listen(
+              (snapshot) {
+                final current = ++generation;
+                unawaited(() async {
+                  try {
+                    final posts = await Future.wait(
+                      snapshot.docs.map((doc) => _ventPost(doc, me)),
+                    );
+                    if (!cancelled && current == generation) {
+                      controller.add(VentFeed(posts: posts));
+                    }
+                  } catch (error) {
+                    debugPrint('vent feed parse failed: $error');
+                    if (!cancelled && current == generation) {
+                      controller.add(const VentFeed(remoteFailed: true));
+                    }
+                  }
+                }());
+              },
+              onError: (Object error) {
+                debugPrint('vent feed failed: $error');
+                if (!cancelled) {
+                  controller.add(const VentFeed(remoteFailed: true));
+                }
+              },
+            );
+      }());
+    });
+  }
+
+  Future<VentPost> _ventPost(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    String me,
+  ) async {
+    final data = _plain(doc.data());
+    final reactionFuture = doc.reference.collection('reactions').doc(me).get();
+    final ownerFuture = _db
+        .collection('ventOwners')
+        .doc(me)
+        .collection('ventOwnerPosts')
+        .doc(doc.id)
+        .get();
+    final reaction = await reactionFuture;
+    final owner = await ownerFuture;
+    final reactionName = reaction.data()?['type'] as String?;
+    final createdAt = data['createdAt'];
+    final expiresAt = data['expiresAt'];
+    return VentPost(
+      id: doc.id,
+      text: data['text'] as String? ?? '',
+      createdAt: createdAt is DateTime
+          ? createdAt
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      expiresAt: expiresAt is DateTime
+          ? expiresAt
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      relateCount: (data['relateCount'] as num?)?.toInt() ?? 0,
+      cheerCount: (data['cheerCount'] as num?)?.toInt() ?? 0,
+      mine: owner.exists,
+      myReaction: switch (reactionName) {
+        'relate' => VentReaction.relate,
+        'cheer' => VentReaction.cheer,
+        _ => null,
+      },
+    );
+  }
+
+  @override
+  Future<LabOutcome> submitVent(String text) async {
+    final cleaned = text.trim();
+    if (cleaned.isEmpty) return const LabOutcome.fail(LabFailure.empty);
+    if (cleaned.length > 140) {
+      return const LabOutcome.fail(LabFailure.tooLong);
+    }
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    final createdAt = now();
+    try {
+      final id = newId();
+      final expiresAt = Timestamp.fromDate(
+        createdAt.add(const Duration(hours: 24)),
+      );
+      final postRef = _db.collection('ventPosts').doc(id);
+      final ownerRef = _db
+          .collection('ventOwners')
+          .doc(me)
+          .collection('ventOwnerPosts')
+          .doc(id);
+      final batch = _db.batch();
+      batch.set(postRef, {
+        'text': cleaned,
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': expiresAt,
+        'relateCount': 0,
+        'cheerCount': 0,
+      });
+      batch.set(ownerRef, {
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': expiresAt,
+      });
+      await batch.commit();
+      return const LabOutcome.ok();
+    } catch (error) {
+      debugPrint('vent submit failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<LabOutcome> toggleVentReaction(
+    String postId,
+    VentReaction reaction,
+  ) async {
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    final postRef = _db.collection('ventPosts').doc(postId);
+    final reactionRef = postRef.collection('reactions').doc(me);
+    final ownerRef = _db
+        .collection('ventOwners')
+        .doc(me)
+        .collection('ventOwnerPosts')
+        .doc(postId);
+    try {
+      await _db.runTransaction((transaction) async {
+        final post = await transaction.get(postRef);
+        if (!post.exists) throw StateError('missing-vent');
+        final postData = post.data()!;
+        final owner = await transaction.get(ownerRef);
+        if (owner.exists) throw StateError('own-vent');
+        final reactionDoc = await transaction.get(reactionRef);
+        final previous = reactionDoc.data()?['type'] as String?;
+        final selected = reaction.name;
+        var relateCount = (postData['relateCount'] as num?)?.toInt() ?? 0;
+        var cheerCount = (postData['cheerCount'] as num?)?.toInt() ?? 0;
+        if (previous == selected) {
+          transaction.delete(reactionRef);
+          if (previous == VentReaction.relate.name) relateCount--;
+          if (previous == VentReaction.cheer.name) cheerCount--;
+        } else {
+          transaction.set(reactionRef, {
+            'type': selected,
+            'expiresAt': postData['expiresAt'],
+          });
+          if (previous == VentReaction.relate.name) relateCount--;
+          if (previous == VentReaction.cheer.name) cheerCount--;
+          if (selected == VentReaction.relate.name) relateCount++;
+          if (selected == VentReaction.cheer.name) cheerCount++;
+        }
+        transaction.update(postRef, {
+          'relateCount': relateCount,
+          'cheerCount': cheerCount,
+        });
+      });
+      return const LabOutcome.ok();
+    } catch (error) {
+      debugPrint('vent reaction failed: $error');
+      if (error is StateError && error.message == 'own-vent') {
+        return const LabOutcome.fail(LabFailure.selfVote);
+      }
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<LabOutcome> deleteVent(String postId) async {
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    try {
+      final ref = _db.collection('ventPosts').doc(postId);
+      final doc = await ref.get();
+      if (!doc.exists) return const LabOutcome.fail(LabFailure.invalid);
+      final ownerRef = _db
+          .collection('ventOwners')
+          .doc(me)
+          .collection('ventOwnerPosts')
+          .doc(postId);
+      if (!(await ownerRef.get()).exists) {
+        return const LabOutcome.fail(LabFailure.forbidden);
+      }
+      final batch = _db.batch();
+      batch.delete(ref);
+      batch.delete(ownerRef);
+      await batch.commit();
+      return const LabOutcome.ok();
+    } catch (error) {
+      debugPrint('vent delete failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<LabOutcome> reportVent(String postId) async {
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    try {
+      final post = await _db.collection('ventPosts').doc(postId).get();
+      if (!post.exists) return const LabOutcome.fail(LabFailure.invalid);
+      final owner = await _db
+          .collection('ventOwners')
+          .doc(me)
+          .collection('ventOwnerPosts')
+          .doc(postId)
+          .get();
+      if (owner.exists) {
+        return const LabOutcome.fail(LabFailure.selfVote);
+      }
+      final reportRef = _db.collection('ventReports').doc('${postId}_$me');
+      await reportRef.set({
+        'postId': postId,
+        'reporterUid': me,
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': post.data()?['expiresAt'],
+      });
+      return const LabOutcome.ok();
+    } on FirebaseException catch (error) {
+      if (error.code == 'permission-denied' || error.code == 'already-exists') {
+        return const LabOutcome.fail(LabFailure.already);
+      }
+      debugPrint('vent report failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    } catch (error) {
+      debugPrint('vent report failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<void> deleteMyVents() async {
+    final me = await _ensureUser();
+    if (me == null) return;
+    final owners = await _db
+        .collection('ventOwners')
+        .doc(me)
+        .collection('ventOwnerPosts')
+        .where(
+          'expiresAt',
+          isGreaterThan: Timestamp.fromDate(now().add(_ventExpiryReadBuffer)),
+        )
+        .get();
+    for (var offset = 0; offset < owners.docs.length; offset += 5) {
+      final batch = _db.batch();
+      for (final owner in owners.docs.skip(offset).take(5)) {
+        batch.delete(_db.collection('ventPosts').doc(owner.id));
+        batch.delete(owner.reference);
+      }
+      await batch.commit();
     }
   }
 

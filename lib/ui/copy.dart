@@ -169,7 +169,7 @@ List<String> chickLines(
   final clock = now ?? DateTime.now();
   final lang = l10n.localeName.split('_').first;
   final pool = chickBanterLines(Locale(lang), clock);
-  if (pool.isEmpty) return [l10n.chickNormal1];
+  if (pool.isEmpty) return const [];
   final shift = pose.index % pool.length;
   return [...pool.sublist(shift), ...pool.sublist(0, shift)];
 }
@@ -197,7 +197,11 @@ List<String> moodLines(AppLocalizations l10n, ChickMood mood) {
       l10n.moodSleepy4,
       l10n.moodSleepy5,
     ],
-    ChickMood.cheer => [l10n.chickGoodjob1, l10n.chickGoodjob2, l10n.chickGoodjob3],
+    ChickMood.cheer => [
+      l10n.chickGoodjob1,
+      l10n.chickGoodjob2,
+      l10n.chickGoodjob3,
+    ],
     ChickMood.fine => [
       l10n.moodFine1,
       l10n.moodFine2,

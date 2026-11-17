@@ -7,6 +7,7 @@ import 'package:tick/domain/format.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/segments.dart';
+import 'package:tick/domain/todo.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
@@ -73,6 +74,20 @@ class _HomePageState extends ConsumerState<HomePage> {
             ? const <SegmentView>[]
             : segmentViews(segments, progress);
         final remainCount = progress?.remainingCount ?? 0;
+        final currentSegment = progress?.currentIndex == null
+            ? null
+            : segments[progress!.currentIndex!];
+        final currentTodos = currentSegment == null
+            ? <TodoItem>[]
+            : app.todos
+                  .where(
+                    (todo) =>
+                        todoAppliesToHour(todo, currentSegment.start.hour),
+                  )
+                  .toList();
+        currentTodos.sort(
+          (a, b) => b.priority.index.compareTo(a.priority.index),
+        );
         final shownShift = covering ?? upcoming;
         final idleAfterShift = _idleAfterScheduledEnd(calendar, now, running);
         final rangeStart = running
@@ -142,6 +157,23 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                       const Spacer(),
                       IconButton(
+                        tooltip: l10n.todoTitle,
+                        onPressed: () => context.push('/todos'),
+                        icon: const Icon(
+                          Icons.checklist_rounded,
+                          color: TickColors.ink,
+                        ),
+                      ),
+                      if (running)
+                        IconButton(
+                          tooltip: l10n.endEarly,
+                          onPressed: () => _confirmEndEarly(context, ref, l10n),
+                          icon: const Icon(
+                            Icons.stop_circle_rounded,
+                            color: Color(0xFFAD281F),
+                          ),
+                        ),
+                      IconButton(
                         onPressed: () => context.push('/settings'),
                         icon: const Icon(
                           Icons.settings_outlined,
@@ -193,6 +225,20 @@ class _HomePageState extends ConsumerState<HomePage> {
                             title: l10n.todaySoFar,
                             completed: progress.completed,
                             total: progress.total,
+                            segments: segments,
+                            now: now,
+                          ),
+                        ],
+                        if (running && currentTodos.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          _CurrentTodoCard(
+                            title: l10n.todoCurrentChunk,
+                            todos: currentTodos,
+                            onToggle: (todo) => ref
+                                .read(appControllerProvider.notifier)
+                                .toggleTodo(todo.id),
+                            onOpen: () => context.push('/todos'),
+                            viewAllLabel: l10n.todoViewAll(currentTodos.length),
                           ),
                         ],
                         if (shiftPromptShowing) ...[
@@ -234,6 +280,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             onCall: () => context.push('/call'),
                             onLab: () => context.push('/lab'),
                             onAway: () => openCamouflage(context, ref),
+                            onVents: () => context.push('/vents'),
                           ),
                           const SizedBox(height: 4),
                           const _TodayPromptBanner(),
@@ -285,34 +332,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ],
                         ] else ...[
                           const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: FilledButton.icon(
-                              onPressed: () =>
-                                  _confirmEndEarly(context, ref, l10n),
-                              icon: const Icon(Icons.stop_circle_rounded),
-                              label: Text(l10n.endEarly),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFFAD281F),
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size.fromHeight(50),
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
                           _ToolRow(
                             l10n: l10n,
                             onCall: () => context.push('/call'),
                             onLab: () => context.push('/lab'),
                             onAway: () => openCamouflage(context, ref),
+                            onVents: () => context.push('/vents'),
                           ),
                         ],
                       ],
@@ -809,7 +834,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       picked.minute,
     );
     if (editingStart) {
-      ref.read(appControllerProvider.notifier).updateSessionTimes(start: selected);
+      ref
+          .read(appControllerProvider.notifier)
+          .updateSessionTimes(start: selected);
     } else {
       final end = selected.isAfter(session.actualStart)
           ? selected
@@ -1775,12 +1802,14 @@ class _ToolRow extends StatelessWidget {
     required this.onCall,
     required this.onLab,
     required this.onAway,
+    required this.onVents,
   });
 
   final AppLocalizations l10n;
   final VoidCallback onCall;
   final VoidCallback onLab;
   final VoidCallback onAway;
+  final VoidCallback onVents;
 
   @override
   Widget build(BuildContext context) {
@@ -1801,6 +1830,14 @@ class _ToolRow extends StatelessWidget {
           label: l10n.toolLab,
           onTap: onLab,
           face: const TickMascot(pose: ChickPose.happy, size: 28),
+        ),
+        const SizedBox(width: 8),
+        _Tool(
+          icon: Icons.chat_bubble_outline_rounded,
+          tint: const Color(0xFFFFECE5),
+          ink: const Color(0xFFB94B36),
+          label: l10n.toolVents,
+          onTap: onVents,
         ),
         const SizedBox(width: 8),
         _Tool(
@@ -1885,16 +1922,135 @@ class _Tool extends StatelessWidget {
   }
 }
 
+class _CurrentTodoCard extends StatelessWidget {
+  const _CurrentTodoCard({
+    required this.title,
+    required this.todos,
+    required this.onToggle,
+    required this.onOpen,
+    required this.viewAllLabel,
+  });
+
+  final String title;
+  final List<TodoItem> todos;
+  final ValueChanged<TodoItem> onToggle;
+  final VoidCallback onOpen;
+  final String viewAllLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopCard(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: TickColors.ink,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: onOpen,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 32),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(viewAllLabel),
+              ),
+            ],
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 38),
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: 1,
+              itemBuilder: (context, index) {
+                final todo = todos[index];
+                return SizedBox(
+                  height: 38,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 34,
+                        child: Checkbox.adaptive(
+                          value: todo.done,
+                          activeColor: TickColors.ink,
+                          visualDensity: VisualDensity.compact,
+                          onChanged: (_) => onToggle(todo),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          todo.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: TickColors.ink,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      if (todo.priority == TodoPriority.high)
+                        const Icon(
+                          Icons.priority_high_rounded,
+                          color: Color(0xFFC74034),
+                          size: 18,
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DayDots extends StatelessWidget {
   const _DayDots({
     required this.title,
     required this.completed,
     required this.total,
+    required this.segments,
+    required this.now,
   });
 
   final String title;
   final int completed;
   final int total;
+  final List<Segment> segments;
+  final DateTime now;
+
+  List<int> get _hours {
+    if (segments.isEmpty) return const [];
+    final first = segments.first.start;
+    final last = segments.last.end;
+    final hours = <int>[];
+    var cursor = DateTime(first.year, first.month, first.day, first.hour);
+    while (cursor.isBefore(last)) {
+      hours.add(cursor.hour);
+      cursor = cursor.add(const Duration(hours: 1));
+    }
+    return hours;
+  }
+
+  bool _isFinishedHour(int hour) {
+    final matching = segments.where((segment) => segment.start.hour == hour);
+    return matching.isNotEmpty &&
+        matching.every((segment) => !now.isBefore(segment.end));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1913,14 +2069,68 @@ class _DayDots extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: total == 0 ? 0 : completed / total,
-            minHeight: 8,
-            backgroundColor: const Color(0xFFF0EBE0),
-            color: TickColors.yellow,
+        const SizedBox(height: 2),
+        SizedBox(
+          height: 42,
+          child: Row(
+            children: [
+              for (final hour in _hours)
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final finished = _isFinishedHour(hour);
+                      final current = segments.any(
+                        (segment) =>
+                            segment.start.hour == hour &&
+                            now.isAfter(segment.start) &&
+                            now.isBefore(segment.end),
+                      );
+                      return Center(
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                '$hour',
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: current
+                                      ? TickColors.ink
+                                      : finished
+                                      ? const Color(0xFF91A0B5)
+                                      : const Color(0xFF536985),
+                                  fontSize: 25,
+                                  height: 1,
+                                  fontWeight: current
+                                      ? FontWeight.w800
+                                      : FontWeight.w500,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                              ),
+                              if (finished)
+                                Transform.rotate(
+                                  angle: -0.95,
+                                  child: Container(
+                                    width: constraints.maxWidth * 0.72,
+                                    height: 3,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE34B43),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ],

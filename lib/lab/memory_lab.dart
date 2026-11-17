@@ -11,6 +11,7 @@ class LabBox {
   final votes = <String, Map<String, Set<String>>>{};
   final proposals = <String, LabProposal>{};
   final reports = <String, LabReport>{};
+  final vents = <String, _StoredVent>{};
   final _listeners = <void Function()>{};
 
   void listen(void Function() listener) => _listeners.add(listener);
@@ -43,6 +44,23 @@ class _StoredEntry {
   final int? choiceIndex;
   final DateTime createdAt;
   bool hidden = false;
+}
+
+class _StoredVent {
+  _StoredVent({
+    required this.id,
+    required this.uid,
+    required this.text,
+    required this.createdAt,
+    required this.expiresAt,
+  });
+
+  final String id;
+  final String uid;
+  final String text;
+  final DateTime createdAt;
+  final DateTime expiresAt;
+  final Map<String, VentReaction> reactions = {};
 }
 
 class MemoryLabStore implements LabStore {
@@ -479,5 +497,107 @@ class MemoryLabStore implements LabStore {
     _box.votes[promptId]?.remove(entryUid);
     _box.notify();
     return const LabOutcome.ok();
+  }
+
+  @override
+  Stream<VentFeed> watchVents() => _live(() {
+    final currentTime = now();
+    final posts =
+        _box.vents.values
+            .where((post) => post.expiresAt.isAfter(currentTime))
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return VentFeed(
+      posts: [
+        for (final post in posts.take(30))
+          VentPost(
+            id: post.id,
+            text: post.text,
+            createdAt: post.createdAt,
+            expiresAt: post.expiresAt,
+            relateCount: post.reactions.values
+                .where((reaction) => reaction == VentReaction.relate)
+                .length,
+            cheerCount: post.reactions.values
+                .where((reaction) => reaction == VentReaction.cheer)
+                .length,
+            mine: post.uid == uid,
+            myReaction: post.reactions[uid],
+          ),
+      ],
+    );
+  });
+
+  @override
+  Future<LabOutcome> submitVent(String text) async {
+    final cleaned = text.trim();
+    if (cleaned.isEmpty) return const LabOutcome.fail(LabFailure.empty);
+    if (cleaned.length > 140) {
+      return const LabOutcome.fail(LabFailure.tooLong);
+    }
+    final createdAt = now();
+    final id = newId();
+    _box.vents[id] = _StoredVent(
+      id: id,
+      uid: uid,
+      text: cleaned,
+      createdAt: createdAt,
+      expiresAt: createdAt.add(const Duration(hours: 24)),
+    );
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<LabOutcome> toggleVentReaction(
+    String postId,
+    VentReaction reaction,
+  ) async {
+    final post = _box.vents[postId];
+    if (post == null || !post.expiresAt.isAfter(now())) {
+      return const LabOutcome.fail(LabFailure.invalid);
+    }
+    if (post.uid == uid) return const LabOutcome.fail(LabFailure.selfVote);
+    if (post.reactions[uid] == reaction) {
+      post.reactions.remove(uid);
+    } else {
+      post.reactions[uid] = reaction;
+    }
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<LabOutcome> deleteVent(String postId) async {
+    final post = _box.vents[postId];
+    if (post == null) return const LabOutcome.fail(LabFailure.invalid);
+    if (post.uid != uid) return const LabOutcome.fail(LabFailure.forbidden);
+    _box.vents.remove(postId);
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<LabOutcome> reportVent(String postId) async {
+    final post = _box.vents[postId];
+    if (post == null) return const LabOutcome.fail(LabFailure.invalid);
+    if (post.uid == uid) return const LabOutcome.fail(LabFailure.selfVote);
+    _box.reports.putIfAbsent(
+      'vent_${postId}_$uid',
+      () => LabReport(
+        id: 'vent_${postId}_$uid',
+        promptId: 'vent',
+        entryUid: postId,
+        reporterUid: uid,
+        createdAt: now(),
+      ),
+    );
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<void> deleteMyVents() async {
+    _box.vents.removeWhere((_, post) => post.uid == uid);
+    _box.notify();
   }
 }

@@ -3,6 +3,7 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/sync_merge.dart';
+import 'package:tick/domain/todo.dart';
 
 class RuntimeSnapshot {
   const RuntimeSnapshot({
@@ -45,10 +46,14 @@ class RuntimeSnapshot {
   factory RuntimeSnapshot.fromJson(Map<String, dynamic> json) {
     return RuntimeSnapshot(
       session: json['session'] is Map
-          ? TimerSession.fromJson((json['session'] as Map).cast<String, dynamic>())
+          ? TimerSession.fromJson(
+              (json['session'] as Map).cast<String, dynamic>(),
+            )
           : null,
       clearedAt: _dt(json['clearedAt']),
-      runtimeUpdatedAt: _dt(json['runtimeUpdatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      runtimeUpdatedAt:
+          _dt(json['runtimeUpdatedAt']) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       pendingFreedom: json['pendingFreedom'] as bool? ?? false,
       freedomHistoryId: json['freedomHistoryId'] as String?,
       dismissedShiftKey: json['dismissedShiftKey'] as String?,
@@ -64,6 +69,7 @@ class RemoteSnapshot {
     this.week,
     this.entitlement,
     this.history = const [],
+    this.todos = const [],
     this.patterns = const [],
     this.overrides = const [],
     this.callers = const [],
@@ -78,6 +84,7 @@ class RemoteSnapshot {
   final WeekPlan? week;
   final Entitlement? entitlement;
   final List<WorkRecord> history;
+  final List<TodoItem> todos;
   final List<WorkPattern> patterns;
   final List<DateOverride> overrides;
   final List<Caller> callers;
@@ -87,7 +94,11 @@ class RemoteSnapshot {
 }
 
 class DocPut {
-  const DocPut({required this.collection, required this.id, required this.json});
+  const DocPut({
+    required this.collection,
+    required this.id,
+    required this.json,
+  });
 
   final String collection;
   final String id;
@@ -132,10 +143,20 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
 
   final settings = remote.settings == null
       ? local.settings
-      : pickNewer(local.settings, local.settings.updatedAt, remote.settings!, remote.settings!.updatedAt);
+      : pickNewer(
+          local.settings,
+          local.settings.updatedAt,
+          remote.settings!,
+          remote.settings!.updatedAt,
+        );
   final week = remote.week == null
       ? local.week
-      : pickNewer(local.week, local.week.updatedAt, remote.week!, remote.week!.updatedAt);
+      : pickNewer(
+          local.week,
+          local.week.updatedAt,
+          remote.week!,
+          remote.week!.updatedAt,
+        );
   final entitlement = remote.entitlement == null
       ? local.entitlement
       : mergeEntitlement(local.entitlement, remote.entitlement!);
@@ -207,6 +228,17 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
     toJson: (item) => item.toJson(),
     fromEntity: (entity) => CallCredit.fromJson(entity.json),
   );
+  final todos = _mergeRecords(
+    collection: 'todos',
+    local: local.todos,
+    remote: remote.todos,
+    localTombstones: local.tombstones,
+    remoteTombstones: remote.tombstones,
+    id: (item) => item.id,
+    updatedAt: (item) => item.updatedAt,
+    toJson: (item) => item.toJson(),
+    fromEntity: (entity) => TodoItem.fromJson(entity.json),
+  );
 
   final merged = PersistedState(
     uid: local.uid,
@@ -221,6 +253,7 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
     ringingCallerId: local.ringingCallerId,
     dismissedUpdateBuild: local.dismissedUpdateBuild,
     history: history.entities,
+    todos: todos.entities,
     patterns: patterns.entities,
     week: week,
     overrides: overrides.entities,
@@ -235,10 +268,13 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
       ...callers.tombstones,
       ...calls.tombstones,
       ...credits.tombstones,
+      ...todos.tombstones,
     ],
   );
 
-  final remoteTombstones = {for (final item in remote.tombstones) item.key: item};
+  final remoteTombstones = {
+    for (final item in remote.tombstones) item.key: item,
+  };
   final tombstoneWrites = [
     for (final item in merged.tombstones)
       if (!remoteTombstones.containsKey(item.key) ||
@@ -248,11 +284,17 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
 
   return StateSyncPlan(
     state: merged,
-    writeSettings: remote.settings == null || settings.updatedAt.isAfter(remote.settings!.updatedAt),
+    writeSettings:
+        remote.settings == null ||
+        settings.updatedAt.isAfter(remote.settings!.updatedAt),
     writeRuntime:
-        remote.runtime == null || runtime.runtimeUpdatedAt.isAfter(remote.runtime!.runtimeUpdatedAt),
-    writeWeek: remote.week == null || week.updatedAt.isAfter(remote.week!.updatedAt),
-    writeEntitlement: remote.entitlement == null || !_sameEntitlement(entitlement, remote.entitlement!),
+        remote.runtime == null ||
+        runtime.runtimeUpdatedAt.isAfter(remote.runtime!.runtimeUpdatedAt),
+    writeWeek:
+        remote.week == null || week.updatedAt.isAfter(remote.week!.updatedAt),
+    writeEntitlement:
+        remote.entitlement == null ||
+        !_sameEntitlement(entitlement, remote.entitlement!),
     puts: [
       ...history.puts,
       ...patterns.puts,
@@ -260,6 +302,7 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
       ...callers.puts,
       ...calls.puts,
       ...credits.puts,
+      ...todos.puts,
     ],
     deletes: [
       ...history.deletes,
@@ -268,6 +311,7 @@ StateSyncPlan planStateSync(PersistedState local, RemoteSnapshot remote) {
       ...callers.deletes,
       ...calls.deletes,
       ...credits.deletes,
+      ...todos.deletes,
     ],
     tombstones: tombstoneWrites,
   );
@@ -302,12 +346,20 @@ _Merged<T> _mergeRecords<T>({
     collection: collection,
     local: [
       for (final item in local)
-        RemoteEntity(id: id(item), updatedAt: updatedAt(item), json: toJson(item)),
+        RemoteEntity(
+          id: id(item),
+          updatedAt: updatedAt(item),
+          json: toJson(item),
+        ),
     ],
     localTombstones: localTombstones,
     remote: [
       for (final item in remote)
-        RemoteEntity(id: id(item), updatedAt: updatedAt(item), json: toJson(item)),
+        RemoteEntity(
+          id: id(item),
+          updatedAt: updatedAt(item),
+          json: toJson(item),
+        ),
     ],
     remoteTombstones: remoteTombstones,
   );
@@ -319,21 +371,25 @@ _Merged<T> _mergeRecords<T>({
         DocPut(collection: collection, id: entity.id, json: entity.json),
     ],
     deletes: [
-      for (final itemId in merged.deletes) DocPut(collection: collection, id: itemId, json: const {}),
+      for (final itemId in merged.deletes)
+        DocPut(collection: collection, id: itemId, json: const {}),
     ],
   );
 }
 
 RuntimeSnapshot _runtime(PersistedState local, RuntimeSnapshot? remote) {
   final current = RuntimeSnapshot.fromState(local);
-  if (remote == null || !remote.runtimeUpdatedAt.isAfter(current.runtimeUpdatedAt)) {
+  if (remote == null ||
+      !remote.runtimeUpdatedAt.isAfter(current.runtimeUpdatedAt)) {
     return current;
   }
   return remote;
 }
 
 bool _sameEntitlement(Entitlement a, Entitlement b) {
-  return a.premium == b.premium && a.source == b.source && a.updatedAt == b.updatedAt;
+  return a.premium == b.premium &&
+      a.source == b.source &&
+      a.updatedAt == b.updatedAt;
 }
 
 DateTime? _dt(Object? value) {

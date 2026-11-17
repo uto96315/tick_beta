@@ -4,6 +4,7 @@ import 'package:tick/domain/fake_call_policy.dart';
 import 'package:tick/domain/format.dart';
 import 'package:tick/domain/records.dart';
 import 'package:tick/domain/schedule.dart';
+import 'package:tick/domain/todo.dart';
 
 class PersistedState {
   PersistedState({
@@ -18,6 +19,7 @@ class PersistedState {
     required this.dismissedShiftKey,
     required this.ringingCallerId,
     required this.history,
+    required this.todos,
     required this.patterns,
     required this.week,
     required this.overrides,
@@ -44,6 +46,7 @@ class PersistedState {
   String? ringingCallerId;
   int dismissedUpdateBuild;
   List<WorkRecord> history;
+  List<TodoItem> todos;
   List<WorkPattern> patterns;
   WeekPlan week;
   List<DateOverride> overrides;
@@ -56,7 +59,11 @@ class PersistedState {
   String labAvatarPath;
   String labAvatarUrl;
 
-  factory PersistedState.seed({required String languageCode, String? uid, DateTime? now}) {
+  factory PersistedState.seed({
+    required String languageCode,
+    String? uid,
+    DateTime? now,
+  }) {
     final clock = now ?? DateTime.now();
     final ja = languageCode == 'ja';
     final pattern = WorkPattern(
@@ -85,9 +92,16 @@ class PersistedState {
       dismissedShiftKey: null,
       ringingCallerId: null,
       history: [],
+      todos: [],
       patterns: [pattern],
       week: WeekPlan(
-        days: {1: pattern.id, 2: pattern.id, 3: pattern.id, 4: pattern.id, 5: pattern.id},
+        days: {
+          1: pattern.id,
+          2: pattern.id,
+          3: pattern.id,
+          4: pattern.id,
+          5: pattern.id,
+        },
         updatedAt: clock,
       ),
       overrides: [],
@@ -138,6 +152,7 @@ class PersistedState {
       dismissedShiftKey: null,
       ringingCallerId: null,
       history: [],
+      todos: [],
       patterns: [],
       week: WeekPlan(days: const {}, updatedAt: epoch),
       overrides: [],
@@ -149,7 +164,12 @@ class PersistedState {
     );
   }
 
-  bool get isBlank => patterns.isEmpty && history.isEmpty && callers.isEmpty && session == null;
+  bool get isBlank =>
+      patterns.isEmpty &&
+      history.isEmpty &&
+      callers.isEmpty &&
+      todos.isEmpty &&
+      session == null;
 
   Map<String, dynamic> toJson() => {
     'schema': 1,
@@ -165,6 +185,7 @@ class PersistedState {
     'ringingCallerId': ringingCallerId,
     'dismissedUpdateBuild': dismissedUpdateBuild,
     'history': history.map((item) => item.toJson()).toList(),
+    'todos': todos.map((item) => item.toJson()).toList(),
     'patterns': patterns.map((item) => item.toJson()).toList(),
     'week': week.toJson(),
     'overrides': overrides.map((item) => item.toJson()).toList(),
@@ -184,19 +205,26 @@ class PersistedState {
       uid: json['uid'] as String?,
       needsPull: json['needsPull'] as bool? ?? false,
       settings: json['settings'] is Map
-          ? AppSettings.fromJson((json['settings'] as Map).cast<String, dynamic>())
+          ? AppSettings.fromJson(
+              (json['settings'] as Map).cast<String, dynamic>(),
+            )
           : seeded.settings,
       session: json['session'] is Map
-          ? TimerSession.fromJson((json['session'] as Map).cast<String, dynamic>())
+          ? TimerSession.fromJson(
+              (json['session'] as Map).cast<String, dynamic>(),
+            )
           : null,
       sessionClearedAt: _dt(json['sessionClearedAt']),
-      runtimeUpdatedAt: _dt(json['runtimeUpdatedAt']) ?? seeded.runtimeUpdatedAt,
+      runtimeUpdatedAt:
+          _dt(json['runtimeUpdatedAt']) ?? seeded.runtimeUpdatedAt,
       pendingFreedom: json['pendingFreedom'] as bool? ?? false,
       freedomHistoryId: json['freedomHistoryId'] as String?,
       dismissedShiftKey: json['dismissedShiftKey'] as String?,
       ringingCallerId: json['ringingCallerId'] as String?,
-      dismissedUpdateBuild: (json['dismissedUpdateBuild'] as num?)?.toInt() ?? 0,
+      dismissedUpdateBuild:
+          (json['dismissedUpdateBuild'] as num?)?.toInt() ?? 0,
       history: _list(json['history'], WorkRecord.fromJson),
+      todos: _list(json['todos'], TodoItem.fromJson),
       patterns: _list(json['patterns'], WorkPattern.fromJson),
       week: json['week'] is Map
           ? WeekPlan.fromJson((json['week'] as Map).cast<String, dynamic>())
@@ -206,7 +234,9 @@ class PersistedState {
       scheduledCalls: _list(json['scheduledCalls'], ScheduledFakeCall.fromJson),
       credits: _list(json['credits'], CallCredit.fromJson),
       entitlement: Entitlement.fromJson(
-        json['entitlement'] is Map ? (json['entitlement'] as Map).cast<String, dynamic>() : null,
+        json['entitlement'] is Map
+            ? (json['entitlement'] as Map).cast<String, dynamic>()
+            : null,
       ),
       tombstones: _list(json['tombstones'], Tombstone.fromJson),
       labNick: json['labNick'] as String? ?? '',
@@ -223,6 +253,8 @@ class PersistedState {
     switch (collection) {
       case 'history':
         history.removeWhere((item) => item.id == id);
+      case 'todos':
+        todos.removeWhere((item) => item.id == id);
       case 'patterns':
         patterns.removeWhere((item) => item.id == id);
       case 'overrides':
@@ -234,7 +266,9 @@ class PersistedState {
       case 'credits':
         credits.removeWhere((item) => item.id == id);
     }
-    tombstones.removeWhere((item) => item.collection == collection && item.id == id);
+    tombstones.removeWhere(
+      (item) => item.collection == collection && item.id == id,
+    );
     tombstones.add(Tombstone(collection: collection, id: id, deletedAt: now));
   }
 }

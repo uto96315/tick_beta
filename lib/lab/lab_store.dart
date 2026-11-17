@@ -54,4 +54,16 @@ abstract class LabStore {
   );
 
   Future<LabOutcome> deleteEntry(String promptId, String entryUid);
+
+  Stream<VentFeed> watchVents();
+
+  Future<LabOutcome> submitVent(String text);
+
+  Future<LabOutcome> toggleVentReaction(String postId, VentReaction reaction);
+
+  Future<LabOutcome> deleteVent(String postId);
+
+  Future<LabOutcome> reportVent(String postId);
+
+  Future<void> deleteMyVents();
 }
