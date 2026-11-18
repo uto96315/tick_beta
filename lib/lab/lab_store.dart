@@ -65,5 +65,11 @@ abstract class LabStore {
 
   Future<LabOutcome> reportVent(String postId);
 
-  Future<void> deleteMyVents();
+  Stream<Set<String>> watchBlockedVentAuthors();
+
+  Future<LabOutcome> blockVentAuthor(String authorKey);
+
+  Future<LabOutcome> unblockVentAuthor(String authorKey);
+
+  Future<void> deleteMyCommunityData();
 }

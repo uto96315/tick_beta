@@ -18,17 +18,27 @@ class VentPage extends ConsumerStatefulWidget {
 class _VentPageState extends ConsumerState<VentPage> {
   final _text = TextEditingController();
   late final Stream<VentFeed> _feed;
+  late final StreamSubscription<Set<String>> _blockedSubscription;
+  Set<String> _blockedAuthors = {};
+  final Set<String> _reportedPosts = {};
   var _posting = false;
 
   @override
   void initState() {
     super.initState();
     _feed = ref.read(labStoreProvider).watchVents();
+    _blockedSubscription = ref
+        .read(labStoreProvider)
+        .watchBlockedVentAuthors()
+        .listen((authors) {
+          if (mounted) setState(() => _blockedAuthors = authors);
+        });
   }
 
   @override
   void dispose() {
     _text.dispose();
+    _blockedSubscription.cancel();
     super.dispose();
   }
 
@@ -43,8 +53,15 @@ class _VentPageState extends ConsumerState<VentPage> {
       _text.clear();
       FocusScope.of(context).unfocus();
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.ventPostError)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result.failure == LabFailure.unsafeContent
+                ? l10n.unsafePost
+                : l10n.ventPostError,
+          ),
+        ),
+      );
     }
   }
 
@@ -64,6 +81,7 @@ class _VentPageState extends ConsumerState<VentPage> {
     if (!confirmed || !mounted) return;
     final result = await ref.read(labStoreProvider).reportVent(post.id);
     if (!mounted) return;
+    if (result.ok) setState(() => _reportedPosts.add(post.id));
     final message = result.ok
         ? l10n.ventReported
         : result.failure == LabFailure.already
@@ -82,6 +100,60 @@ class _VentPageState extends ConsumerState<VentPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(result.ok ? l10n.ventDeleted : l10n.ventPostError),
+      ),
+    );
+  }
+
+  Future<void> _block(VentPost post) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await _confirm(l10n.ventBlockConfirm, l10n.ventBlock);
+    if (!confirmed || !mounted) return;
+    final result = await ref
+        .read(labStoreProvider)
+        .blockVentAuthor(post.authorKey);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result.ok ? l10n.ventBlocked : l10n.ventPostError),
+      ),
+    );
+  }
+
+  Future<void> _manageBlocks() async {
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.ventBlockedList),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: _blockedAuthors.isEmpty
+              ? Text(l10n.ventNoBlockedUsers)
+              : ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final entry in _blockedAuthors.indexed)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.ventBlockedUser(entry.$1 + 1)),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            await ref
+                                .read(labStoreProvider)
+                                .unblockVentAuthor(entry.$2);
+                          },
+                          child: Text(l10n.ventUnblock),
+                        ),
+                      ),
+                  ],
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.ventCancel),
+          ),
+        ],
       ),
     );
   }
@@ -120,6 +192,13 @@ class _VentPageState extends ConsumerState<VentPage> {
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.ventBlockedList,
+            onPressed: _manageBlocks,
+            icon: const Icon(Icons.block_rounded),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,
@@ -220,6 +299,14 @@ class _VentPageState extends ConsumerState<VentPage> {
                       ),
                     );
                   }
+                  final visiblePosts = feed.posts
+                      .where(
+                        (post) =>
+                            !post.reportedByMe &&
+                            !_reportedPosts.contains(post.id) &&
+                            !_blockedAuthors.contains(post.authorKey),
+                      )
+                      .toList();
                   return Column(
                     children: [
                       Padding(
@@ -227,7 +314,7 @@ class _VentPageState extends ConsumerState<VentPage> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            l10n.ventVisibleCount(feed.posts.length),
+                            l10n.ventVisibleCount(visiblePosts.length),
                             style: const TextStyle(
                               color: TickColors.muted,
                               fontWeight: FontWeight.w800,
@@ -235,7 +322,7 @@ class _VentPageState extends ConsumerState<VentPage> {
                           ),
                         ),
                       ),
-                      if (feed.posts.isEmpty)
+                      if (visiblePosts.isEmpty)
                         Expanded(
                           child: Center(
                             child: Padding(
@@ -256,15 +343,16 @@ class _VentPageState extends ConsumerState<VentPage> {
                         Expanded(
                           child: ListView.separated(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                            itemCount: feed.posts.length,
+                            itemCount: visiblePosts.length,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) => _VentCard(
-                              post: feed.posts[index],
+                              post: visiblePosts[index],
                               onReact: (reaction) =>
-                                  _react(feed.posts[index], reaction),
-                              onReport: () => _report(feed.posts[index]),
-                              onDelete: () => _delete(feed.posts[index]),
+                                  _react(visiblePosts[index], reaction),
+                              onReport: () => _report(visiblePosts[index]),
+                              onDelete: () => _delete(visiblePosts[index]),
+                              onBlock: () => _block(visiblePosts[index]),
                             ),
                           ),
                         ),
@@ -286,12 +374,14 @@ class _VentCard extends StatelessWidget {
     required this.onReact,
     required this.onReport,
     required this.onDelete,
+    required this.onBlock,
   });
 
   final VentPost post;
   final ValueChanged<VentReaction> onReact;
   final VoidCallback onReport;
   final VoidCallback onDelete;
+  final VoidCallback onBlock;
 
   @override
   Widget build(BuildContext context) {
@@ -324,12 +414,15 @@ class _VentCard extends StatelessWidget {
                 onSelected: (value) {
                   if (value == 'delete') onDelete();
                   if (value == 'report') onReport();
+                  if (value == 'block') onBlock();
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: post.mine ? 'delete' : 'report',
                     child: Text(post.mine ? l10n.ventDelete : l10n.ventReport),
                   ),
+                  if (!post.mine && post.authorKey.isNotEmpty)
+                    PopupMenuItem(value: 'block', child: Text(l10n.ventBlock)),
                 ],
               ),
             ],

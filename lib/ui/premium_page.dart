@@ -10,16 +10,25 @@ class PremiumPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final premium = ref.watch(appControllerProvider.select((state) => state.premium));
+    final premium = ref.watch(
+      appControllerProvider.select((state) => state.premium),
+    );
     final controller = ref.read(appControllerProvider.notifier);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.premium)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Icon(Icons.workspace_premium_rounded, size: 56, color: Color(0xFFF0B429)),
+          const Icon(
+            Icons.workspace_premium_rounded,
+            size: 56,
+            color: Color(0xFFF0B429),
+          ),
           const SizedBox(height: 8),
-          Text(premium ? l10n.premiumOwned : l10n.priceFallback, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+          Text(
+            premium ? l10n.premiumOwned : l10n.priceFallback,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 8),
           Text(l10n.premiumPitch),
           const SizedBox(height: 8),
@@ -29,7 +38,6 @@ class PremiumPage extends ConsumerWidget {
           Text('· ${l10n.premiumOfferHomeShot}'),
           Text('· ${l10n.premiumLooks}'),
           Text('· ${l10n.premiumSounds}'),
-          Text('· ${l10n.premiumVoice}'),
           Text('· ${l10n.callBeforeEnd}'),
           const SizedBox(height: 20),
           if (!premium)
@@ -37,7 +45,9 @@ class PremiumPage extends ConsumerWidget {
               onPressed: () async {
                 final code = await controller.buyPremium();
                 if (code != null && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(authText(l10n, code))));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(authText(l10n, code))));
                 }
               },
               child: Text(l10n.buy),
@@ -47,7 +57,9 @@ class PremiumPage extends ConsumerWidget {
             onPressed: () async {
               final code = await controller.restorePremium();
               if (code != null && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(authText(l10n, code))));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(authText(l10n, code))));
               }
             },
             child: Text(l10n.restore),

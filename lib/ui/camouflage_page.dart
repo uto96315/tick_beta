@@ -27,7 +27,7 @@ Future<void> openCamouflage(BuildContext context, WidgetRef ref) async {
             children: [
               FilledButton(
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 48),
+                  minimumSize: const Size(0, 54),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -72,8 +72,12 @@ class CamouflagePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(appControllerProvider.select((state) => state.settings));
-    final premium = ref.watch(appControllerProvider.select((state) => state.premium));
+    final settings = ref.watch(
+      appControllerProvider.select((state) => state.settings),
+    );
+    final premium = ref.watch(
+      appControllerProvider.select((state) => state.premium),
+    );
     const trigger = CamouflageTrigger.corner;
     final look = shownLook(premium, settings.camouflageLook);
     final shot = settings.homeShot;
@@ -86,12 +90,15 @@ class CamouflagePage extends ConsumerWidget {
       CamouflageTrigger.longPress => l10n.backHintLong,
       CamouflageTrigger.swipe => l10n.backHintSwipe,
     };
-    void exit() => ref.read(appControllerProvider.notifier).setCamouflage(false);
+    void exit() =>
+        ref.read(appControllerProvider.notifier).setCamouflage(false);
     return GestureDetector(
       onLongPress: trigger == CamouflageTrigger.longPress ? exit : null,
-      onVerticalDragEnd: trigger == CamouflageTrigger.swipe ? (details) {
-        if ((details.primaryVelocity ?? 0) > 250) exit();
-      } : null,
+      onVerticalDragEnd: trigger == CamouflageTrigger.swipe
+          ? (details) {
+              if ((details.primaryVelocity ?? 0) > 250) exit();
+            }
+          : null,
       child: Scaffold(
         backgroundColor: showShot
             ? Colors.black
@@ -139,7 +146,6 @@ class CamouflagePage extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 String _clock() {
@@ -159,7 +165,14 @@ class _HomeCover extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_clock(), style: const TextStyle(color: Colors.white, fontSize: 64, fontWeight: FontWeight.w500)),
+          Text(
+            _clock(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 64,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const Spacer(),
           GridView.count(
             shrinkWrap: true,
@@ -181,7 +194,10 @@ class _HomeCover extends StatelessWidget {
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.28), borderRadius: BorderRadius.circular(28)),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(28),
+            ),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -192,7 +208,10 @@ class _HomeCover extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          Text(hint, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(
+            hint,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -215,24 +234,39 @@ class _NotesCover extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text(l10n.lookNotes, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
+        Text(
+          l10n.lookNotes,
+          style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
+        ),
         const SizedBox(height: 16),
         for (final note in notes)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(note.$1, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+                Text(
+                  note.$1,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(note.$2, style: const TextStyle(color: Color(0xFF8E8E93))),
               ],
             ),
           ),
         const SizedBox(height: 12),
-        Text(hint, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12)),
+        Text(
+          hint,
+          style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12),
+        ),
       ],
     );
   }
@@ -251,17 +285,39 @@ class _CalendarCover extends StatelessWidget {
     final startWeekday = first.weekday % 7;
     final days = DateTime(now.year, now.month + 1, 0).day;
     final ja = Localizations.localeOf(context).languageCode == 'ja';
-    final heads = ja ? ['日', '月', '火', '水', '木', '金', '土'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    final heads = ja
+        ? ['日', '月', '火', '水', '木', '金', '土']
+        : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        Text(l10n.lookCalendar, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: Color(0xFFFF3B30))),
-        Text('${now.year} / ${now.month}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+        Text(
+          l10n.lookCalendar,
+          style: const TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFFFF3B30),
+          ),
+        ),
+        Text(
+          '${now.year} / ${now.month}',
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
             for (final head in heads)
-              Expanded(child: Center(child: Text(head, style: const TextStyle(color: Color(0xFF8E8E93), fontWeight: FontWeight.w700)))),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    head,
+                    style: const TextStyle(
+                      color: Color(0xFF8E8E93),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 8),
@@ -277,8 +333,21 @@ class _CalendarCover extends StatelessWidget {
                   width: 32,
                   height: 32,
                   alignment: Alignment.center,
-                  decoration: day == now.day ? const BoxDecoration(color: Color(0xFFFF3B30), shape: BoxShape.circle) : null,
-                  child: Text('$day', style: TextStyle(color: day == now.day ? Colors.white : const Color(0xFF1C1C1E), fontWeight: FontWeight.w600)),
+                  decoration: day == now.day
+                      ? const BoxDecoration(
+                          color: Color(0xFFFF3B30),
+                          shape: BoxShape.circle,
+                        )
+                      : null,
+                  child: Text(
+                    '$day',
+                    style: TextStyle(
+                      color: day == now.day
+                          ? Colors.white
+                          : const Color(0xFF1C1C1E),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -286,17 +355,33 @@ class _CalendarCover extends StatelessWidget {
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Row(
             children: [
-              Container(width: 4, height: 36, decoration: BoxDecoration(color: const Color(0xFFFF3B30), borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 4,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3B30),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const SizedBox(width: 12),
-              Text(l10n.calLunch, style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(
+                l10n.calLunch,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        Text(hint, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12)),
+        Text(
+          hint,
+          style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12),
+        ),
       ],
     );
   }

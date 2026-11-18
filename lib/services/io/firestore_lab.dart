@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tick/lab/feed_log.dart';
+import 'package:tick/lab/content_filter.dart';
 import 'package:tick/lab/lab_store.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
@@ -279,6 +280,8 @@ class FirestoreLabStore implements LabStore {
         var ballots = <_Ballot>[];
         var gotEntries = false;
         var failed = false;
+        String? me;
+        var entryGeneration = 0;
         LabPrompt? prompt;
         StreamSubscription<dynamic>? entrySub;
         StreamSubscription<dynamic>? ballotSub;
@@ -295,7 +298,7 @@ class FirestoreLabStore implements LabStore {
         }
 
         unawaited(() async {
-          await _ensureUser();
+          me = await _ensureUser();
           if (cancelled) return;
           promptSub = _prompts.doc(promptId).snapshots().listen((doc) {
             if (doc.exists) prompt = _promptFrom(doc);
@@ -308,11 +311,28 @@ class FirestoreLabStore implements LabStore {
               .snapshots()
               .listen(
                 (snapshot) {
-                  entries = [for (final doc in snapshot.docs) _entryFrom(doc)]
-                      .whereType<_RemoteEntry>()
-                      .toList();
-                  gotEntries = true;
-                  emit();
+                  final generation = ++entryGeneration;
+                  unawaited(() async {
+                    try {
+                      final current = me;
+                      if (current == null) return;
+                      final parsed = await Future.wait(
+                        snapshot.docs.map(
+                          (doc) => _entryFrom(doc, promptId, current),
+                        ),
+                      );
+                      if (cancelled || generation != entryGeneration) return;
+                      entries = parsed.whereType<_RemoteEntry>().toList();
+                      gotEntries = true;
+                      emit();
+                    } catch (error) {
+                      debugPrint('lab entries failed: $error');
+                      if (cancelled || generation != entryGeneration) return;
+                      failed = true;
+                      gotEntries = true;
+                      emit();
+                    }
+                  }());
                 },
                 onError: (Object error) {
                   debugPrint('lab entries failed: $error');
@@ -779,6 +799,10 @@ class FirestoreLabStore implements LabStore {
   ) async {
     final data = _plain(doc.data());
     final reactionFuture = doc.reference.collection('reactions').doc(me).get();
+    final reportFuture = _db
+        .collection('ventReports')
+        .doc('${doc.id}_$me')
+        .get();
     final ownerFuture = _db
         .collection('ventOwners')
         .doc(me)
@@ -786,6 +810,7 @@ class FirestoreLabStore implements LabStore {
         .doc(doc.id)
         .get();
     final reaction = await reactionFuture;
+    final report = await reportFuture;
     final owner = await ownerFuture;
     final reactionName = reaction.data()?['type'] as String?;
     final createdAt = data['createdAt'];
@@ -802,6 +827,8 @@ class FirestoreLabStore implements LabStore {
       relateCount: (data['relateCount'] as num?)?.toInt() ?? 0,
       cheerCount: (data['cheerCount'] as num?)?.toInt() ?? 0,
       mine: owner.exists,
+      authorKey: data['authorKey'] as String? ?? '',
+      reportedByMe: report.exists,
       myReaction: switch (reactionName) {
         'relate' => VentReaction.relate,
         'cheer' => VentReaction.cheer,
@@ -816,6 +843,9 @@ class FirestoreLabStore implements LabStore {
     if (cleaned.isEmpty) return const LabOutcome.fail(LabFailure.empty);
     if (cleaned.length > 140) {
       return const LabOutcome.fail(LabFailure.tooLong);
+    }
+    if (validateAnswer(cleaned) == LabFailure.unsafeContent) {
+      return const LabOutcome.fail(LabFailure.unsafeContent);
     }
     final me = await _ensureUser();
     if (me == null) return const LabOutcome.fail(LabFailure.offline);
@@ -834,6 +864,7 @@ class FirestoreLabStore implements LabStore {
       final batch = _db.batch();
       batch.set(postRef, {
         'text': cleaned,
+        'authorKey': contentAuthorKey(me),
         'createdAt': FieldValue.serverTimestamp(),
         'expiresAt': expiresAt,
         'relateCount': 0,
@@ -970,23 +1001,128 @@ class FirestoreLabStore implements LabStore {
   }
 
   @override
-  Future<void> deleteMyVents() async {
+  Stream<Set<String>> watchBlockedVentAuthors() {
+    return Stream<String?>.fromFuture(_ensureUser()).asyncExpand((me) {
+      if (me == null) return Stream.value(const <String>{});
+      return _db
+          .collection('ventBlocks')
+          .doc(me)
+          .collection('authors')
+          .snapshots()
+          .map(
+            (snapshot) => Set.unmodifiable(snapshot.docs.map((doc) => doc.id)),
+          );
+    });
+  }
+
+  @override
+  Future<LabOutcome> blockVentAuthor(String authorKey) async {
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    if (authorKey.isEmpty || authorKey == contentAuthorKey(me)) {
+      return const LabOutcome.fail(LabFailure.invalid);
+    }
+    try {
+      await _db
+          .collection('ventBlocks')
+          .doc(me)
+          .collection('authors')
+          .doc(authorKey)
+          .set({'createdAt': FieldValue.serverTimestamp()});
+      return const LabOutcome.ok();
+    } catch (error) {
+      debugPrint('vent block failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<LabOutcome> unblockVentAuthor(String authorKey) async {
+    final me = await _ensureUser();
+    if (me == null) return const LabOutcome.fail(LabFailure.offline);
+    try {
+      await _db
+          .collection('ventBlocks')
+          .doc(me)
+          .collection('authors')
+          .doc(authorKey)
+          .delete();
+      return const LabOutcome.ok();
+    } catch (error) {
+      debugPrint('vent unblock failed: $error');
+      return const LabOutcome.fail(LabFailure.offline);
+    }
+  }
+
+  @override
+  Future<void> deleteMyCommunityData() async {
     final me = await _ensureUser();
     if (me == null) return;
+
+    final entryRefs = <DocumentReference<Map<String, dynamic>>>[];
+    final prompts = await _publishedPrompts.get();
+    for (final prompt in prompts.docs) {
+      final entry = await prompt.reference.collection('entries').doc(me).get();
+      if (entry.exists) entryRefs.add(entry.reference);
+      try {
+        await FirebaseStorage.instance
+            .ref('labEntries/${prompt.id}/$me.jpg')
+            .delete();
+      } on FirebaseException catch (error) {
+        if (error.code != 'object-not-found') rethrow;
+      }
+    }
+    await _deleteDocuments(entryRefs);
+
+    final proposals = await _proposals.where('authorUid', isEqualTo: me).get();
+    await _deleteDocuments(proposals.docs.map((doc) => doc.reference));
+
+    final ballots = await _db
+        .collectionGroup('ballots')
+        .where('voterUid', isEqualTo: me)
+        .get();
+    await _deleteDocuments(ballots.docs.map((doc) => doc.reference));
+
+    final labReports = await _reports.where('reporterUid', isEqualTo: me).get();
+    await _deleteDocuments(labReports.docs.map((doc) => doc.reference));
+
+    final ventReports = await _db
+        .collection('ventReports')
+        .where('reporterUid', isEqualTo: me)
+        .get();
+    await _deleteDocuments(ventReports.docs.map((doc) => doc.reference));
+
     final owners = await _db
         .collection('ventOwners')
         .doc(me)
         .collection('ventOwnerPosts')
-        .where(
-          'expiresAt',
-          isGreaterThan: Timestamp.fromDate(now().add(_ventExpiryReadBuffer)),
-        )
         .get();
-    for (var offset = 0; offset < owners.docs.length; offset += 5) {
+    // Each post needs two deletes (the post and its owner index).
+    for (var offset = 0; offset < owners.docs.length; offset += 200) {
       final batch = _db.batch();
-      for (final owner in owners.docs.skip(offset).take(5)) {
+      for (final owner in owners.docs.skip(offset).take(200)) {
         batch.delete(_db.collection('ventPosts').doc(owner.id));
         batch.delete(owner.reference);
+      }
+      await batch.commit();
+    }
+
+    final blocked = await _db
+        .collection('ventBlocks')
+        .doc(me)
+        .collection('authors')
+        .get();
+    await _deleteDocuments(blocked.docs.map((doc) => doc.reference));
+  }
+
+  Future<void> _deleteDocuments(
+    Iterable<DocumentReference<Map<String, dynamic>>> documents,
+  ) async {
+    final refs = documents.toList();
+    for (var offset = 0; offset < refs.length; offset += 400) {
+      final batch = _db.batch();
+      for (final ref in refs.skip(offset).take(400)) {
+        batch.delete(ref);
       }
       await batch.commit();
     }
@@ -1053,11 +1189,14 @@ class FirestoreLabStore implements LabStore {
           votes: voters[entry.uid]?.length ?? 0,
           voted: me != null && (voters[entry.uid]?.contains(me) ?? false),
           mine: entry.uid == me,
+          reportedByMe: entry.reportedByMe,
         ),
     ]..sort(compareEntries);
     return PromptBoard(
       prompt: prompt?.copyWith(
-        entryCount: view.where((entry) => !entry.hidden).length,
+        entryCount: view
+            .where((entry) => !entry.hidden && !entry.reportedByMe)
+            .length,
       ),
       entries: view,
       remoteFailed: failed,
@@ -1070,7 +1209,11 @@ class FirestoreLabStore implements LabStore {
     return parsePrompt(doc.id, _plain(data));
   }
 
-  _RemoteEntry? _entryFrom(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+  Future<_RemoteEntry?> _entryFrom(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    String promptId,
+    String me,
+  ) async {
     final data = _plain(doc.data());
     final text = data['text'];
     final name = data['name'];
@@ -1080,6 +1223,7 @@ class FirestoreLabStore implements LabStore {
     final avatar = data['avatarUrl'];
     final choice = data['choiceIndex'];
     final created = data['createdAt'];
+    final report = await _reports.doc('${promptId}_${owner}_$me').get();
     return _RemoteEntry(
       uid: owner,
       name: name,
@@ -1091,6 +1235,7 @@ class FirestoreLabStore implements LabStore {
           ? created
           : DateTime.fromMillisecondsSinceEpoch(0),
       hidden: data['hidden'] == true,
+      reportedByMe: report.exists,
     );
   }
 
@@ -1177,6 +1322,7 @@ class _RemoteEntry {
     required this.createdAt,
     this.choiceIndex,
     this.hidden = false,
+    this.reportedByMe = false,
     this.imageUrl,
     this.avatarUrl,
   });
@@ -1189,6 +1335,7 @@ class _RemoteEntry {
   final int? choiceIndex;
   final DateTime createdAt;
   final bool hidden;
+  final bool reportedByMe;
 }
 
 class _Ballot {

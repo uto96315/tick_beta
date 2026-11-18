@@ -321,7 +321,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             const SizedBox(height: 8),
                             SizedBox(
                               width: double.infinity,
-                              height: 48,
+                              height: 54,
                               child: FilledButton.icon(
                                 style: FilledButton.styleFrom(
                                   backgroundColor: TickColors.ink,
@@ -956,7 +956,7 @@ Future<void> _confirmEndEarly(
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
-                          height: 52,
+                          height: 54,
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: TickColors.ink,

@@ -417,7 +417,7 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
             ),
             const SizedBox(height: 18),
             SizedBox(
-              height: 50,
+              height: 54,
               child: FilledButton(onPressed: _save, child: Text(l10n.save)),
             ),
             SizedBox(height: 12 + MediaQuery.paddingOf(context).bottom),

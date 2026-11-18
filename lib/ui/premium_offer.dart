@@ -31,11 +31,7 @@ Future<void> showPremiumOffer(BuildContext context, WidgetRef ref) async {
       l10n.premiumOfferSounds,
       l10n.premiumOfferSoundsNote,
     ),
-    (
-      Icons.layers_rounded,
-      l10n.premiumOfferLooks,
-      l10n.premiumOfferLooksNote,
-    ),
+    (Icons.layers_rounded, l10n.premiumOfferLooks, l10n.premiumOfferLooksNote),
     (
       Icons.schedule_rounded,
       l10n.premiumOfferBefore,
@@ -98,7 +94,7 @@ Future<void> showPremiumOffer(BuildContext context, WidgetRef ref) async {
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 54,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: TickColors.yellow,

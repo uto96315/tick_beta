@@ -27,20 +27,33 @@ class TickTheme {
       surface: TickColors.card,
       onSurface: ink,
     );
-    const label = TextStyle(fontFamily: 'Nunito', color: ink, fontWeight: FontWeight.w600);
+    const label = TextStyle(
+      fontFamily: 'Nunito',
+      color: ink,
+      fontWeight: FontWeight.w600,
+    );
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: TickColors.paper,
       fontFamily: 'Nunito',
-      textTheme: Typography.material2021().black.apply(bodyColor: ink, displayColor: ink, fontFamily: 'Nunito'),
+      textTheme: Typography.material2021().black.apply(
+        bodyColor: ink,
+        displayColor: ink,
+        fontFamily: 'Nunito',
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: TickColors.paper,
         foregroundColor: ink,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(fontFamily: 'Nunito', color: ink, fontSize: 17, fontWeight: FontWeight.w700),
+        titleTextStyle: TextStyle(
+          fontFamily: 'Nunito',
+          color: ink,
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: TickColors.cream,
@@ -78,24 +91,38 @@ class TickTheme {
         side: const BorderSide(color: TickColors.line),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
-      dividerTheme: const DividerThemeData(color: TickColors.line, space: 1, thickness: 1),
+      dividerTheme: const DividerThemeData(
+        color: TickColors.line,
+        space: 1,
+        thickness: 1,
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: TickColors.yellow,
           foregroundColor: ink,
           minimumSize: const Size.fromHeight(54),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: ink,
+          minimumSize: const Size.fromHeight(54),
+          textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           side: const BorderSide(color: TickColors.line),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
         ),
       ),
-      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: ink)),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: ink),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: TickColors.card,
@@ -103,9 +130,18 @@ class TickTheme {
           color: TickColors.muted.withValues(alpha: 0.55),
           fontWeight: FontWeight.w500,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: TickColors.line)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: TickColors.line)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: ink, width: 1.4)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: TickColors.line),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: TickColors.line),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: ink, width: 1.4),
+        ),
       ),
     );
   }
@@ -118,7 +154,12 @@ class PremiumMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('assets/images/icon/premium_icon.png', width: size, height: size, fit: BoxFit.contain);
+    return Image.asset(
+      'assets/images/icon/premium_icon.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+    );
   }
 }
 
@@ -127,16 +168,18 @@ Widget premiumLabel(String text, {required bool locked, double size = 16}) {
     mainAxisSize: MainAxisSize.min,
     children: [
       Text(text),
-      if (locked) ...[
-        const SizedBox(width: 4),
-        PremiumMark(size: size),
-      ],
+      if (locked) ...[const SizedBox(width: 4), PremiumMark(size: size)],
     ],
   );
 }
 
 class PopCard extends StatelessWidget {
-  const PopCard({super.key, required this.child, this.color = TickColors.card, this.padding = const EdgeInsets.all(16)});
+  const PopCard({
+    super.key,
+    required this.child,
+    this.color = TickColors.card,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   final Widget child;
   final Color color;
@@ -147,7 +190,13 @@ class PopCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        boxShadow: const [BoxShadow(color: Color(0x121B2A4A), blurRadius: 18, offset: Offset(0, 8))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x121B2A4A),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Material(
         color: color,

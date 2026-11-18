@@ -355,7 +355,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deleteAccount => 'アカウントを削除';
 
   @override
-  String get deleteAccountBody => 'アカウントと、設定・履歴を削除します。';
+  String get deleteAccountBody => 'アカウントと、設定・履歴・投稿・送信した通報記録を削除します。';
 
   @override
   String get email => 'メールアドレス';
@@ -629,6 +629,35 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ventPostError => '投稿できませんでした。通信を確認してもう一度お試しください。';
+
+  @override
+  String get unsafePost => 'この内容は投稿できません。表現を見直してください。';
+
+  @override
+  String get ventBlock => 'ブロック';
+
+  @override
+  String get ventBlockConfirmTitle => 'ブロックしますか？';
+
+  @override
+  String get ventBlockConfirm => '今後、この投稿者の投稿を表示しません。';
+
+  @override
+  String get ventBlocked => 'ブロックしました';
+
+  @override
+  String get ventBlockedList => 'ブロック中のユーザー';
+
+  @override
+  String get ventNoBlockedUsers => 'ブロック中のユーザーはいません。';
+
+  @override
+  String ventBlockedUser(int number) {
+    return 'ユーザー $number';
+  }
+
+  @override
+  String get ventUnblock => '解除';
 
   @override
   String get ventAgeNow => 'たった今';

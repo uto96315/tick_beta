@@ -58,7 +58,9 @@ class LabProfileRemote {
   Future<void> deleteUser(String uid) async {
     try {
       await _storage.ref('labProfiles/$uid.jpg').delete();
-    } catch (_) {}
+    } on FirebaseException catch (error) {
+      if (error.code != 'object-not-found') rethrow;
+    }
     await _profiles.doc(uid).delete();
   }
 }

@@ -20,6 +20,7 @@ enum LabFailure {
   draw,
   contact,
   photo,
+  unsafeContent,
 }
 
 class LabOutcome {
@@ -94,6 +95,7 @@ class LabEntry {
     required this.votes,
     required this.voted,
     required this.mine,
+    this.reportedByMe = false,
     this.choiceIndex,
     this.hidden = false,
     this.imageUrl,
@@ -110,6 +112,7 @@ class LabEntry {
   final int votes;
   final bool voted;
   final bool mine;
+  final bool reportedByMe;
   final bool hidden;
 }
 
@@ -136,6 +139,8 @@ class VentPost {
     required this.relateCount,
     required this.cheerCount,
     required this.mine,
+    this.authorKey = '',
+    this.reportedByMe = false,
     this.myReaction,
   });
 
@@ -146,6 +151,8 @@ class VentPost {
   final int relateCount;
   final int cheerCount;
   final bool mine;
+  final String authorKey;
+  final bool reportedByMe;
   final VentReaction? myReaction;
 }
 

@@ -1,4 +1,5 @@
 import 'package:tick/lab/models.dart';
+import 'package:tick/lab/content_filter.dart';
 
 import 'package:tick/config/operators.dart';
 
@@ -115,6 +116,9 @@ LabFailure? validateAnswer(String text) {
   if (trimmed.isEmpty) return LabFailure.empty;
   if (trimmed.length > labAnswerMax) return LabFailure.tooLong;
   if (labHasContact(trimmed)) return LabFailure.contact;
+  if (ContentFilter.containsBlockedPhrase(trimmed)) {
+    return LabFailure.unsafeContent;
+  }
   return null;
 }
 
@@ -125,6 +129,13 @@ LabFailure? validateDraft(LabDraft draft, {required bool publishing}) {
   if (title.length > labTitleMax || body.length > labBodyMax)
     return LabFailure.tooLong;
   if (labHasContact(title) || labHasContact(body)) return LabFailure.contact;
+  if ([
+    title,
+    body,
+    ...draft.cleanedChoices,
+  ].any(ContentFilter.containsBlockedPhrase)) {
+    return LabFailure.unsafeContent;
+  }
   if (draft.format == LabFormat.quiz || draft.format == LabFormat.choice) {
     final choices = draft.cleanedChoices;
     if (choices.length < 2 || choices.length > 4) return LabFailure.invalid;

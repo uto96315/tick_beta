@@ -363,7 +363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'This deletes the account and its settings and history.';
+      'This deletes the account, settings, history, posts, and reports you submitted.';
 
   @override
   String get email => 'Email';
@@ -648,6 +648,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ventPostError =>
       'Could not post. Check your connection and try again.';
+
+  @override
+  String get unsafePost =>
+      'This post can\'t be published. Please change the wording.';
+
+  @override
+  String get ventBlock => 'Block';
+
+  @override
+  String get ventBlockConfirmTitle => 'Block this user?';
+
+  @override
+  String get ventBlockConfirm => 'You won\'t see this user\'s posts anymore.';
+
+  @override
+  String get ventBlocked => 'User blocked';
+
+  @override
+  String get ventBlockedList => 'Blocked users';
+
+  @override
+  String get ventNoBlockedUsers => 'You haven\'t blocked anyone.';
+
+  @override
+  String ventBlockedUser(int number) {
+    return 'User $number';
+  }
+
+  @override
+  String get ventUnblock => 'Unblock';
 
   @override
   String get ventAgeNow => 'Just now';

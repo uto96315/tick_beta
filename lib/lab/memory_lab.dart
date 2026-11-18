@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:tick/lab/content_filter.dart';
 import 'package:tick/lab/lab_store.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/lab/models.dart';
@@ -12,6 +13,7 @@ class LabBox {
   final proposals = <String, LabProposal>{};
   final reports = <String, LabReport>{};
   final vents = <String, _StoredVent>{};
+  final blockedVentAuthors = <String, Set<String>>{};
   final _listeners = <void Function()>{};
 
   void listen(void Function() listener) => _listeners.add(listener);
@@ -251,10 +253,15 @@ class MemoryLabStore implements LabStore {
             votes: votes[entry.uid]?.length ?? 0,
             voted: votes[entry.uid]?.contains(uid) ?? false,
             mine: entry.uid == uid,
+            reportedByMe: _box.reports.containsKey(
+              '${promptId}_${entry.uid}_$uid',
+            ),
           ),
     ]..sort(compareEntries);
     final shown = prompt?.copyWith(
-      entryCount: entries.where((entry) => !entry.hidden).length,
+      entryCount: entries
+          .where((entry) => !entry.hidden && !entry.reportedByMe)
+          .length,
     );
     return PromptBoard(prompt: shown, entries: entries);
   }
@@ -523,6 +530,8 @@ class MemoryLabStore implements LabStore {
                 .where((reaction) => reaction == VentReaction.cheer)
                 .length,
             mine: post.uid == uid,
+            authorKey: contentAuthorKey(post.uid),
+            reportedByMe: _box.reports.containsKey('vent_${post.id}_$uid'),
             myReaction: post.reactions[uid],
           ),
       ],
@@ -535,6 +544,9 @@ class MemoryLabStore implements LabStore {
     if (cleaned.isEmpty) return const LabOutcome.fail(LabFailure.empty);
     if (cleaned.length > 140) {
       return const LabOutcome.fail(LabFailure.tooLong);
+    }
+    if (validateAnswer(cleaned) == LabFailure.unsafeContent) {
+      return const LabOutcome.fail(LabFailure.unsafeContent);
     }
     final createdAt = now();
     final id = newId();
@@ -593,12 +605,48 @@ class MemoryLabStore implements LabStore {
         createdAt: now(),
       ),
     );
+    _box.notify();
     return const LabOutcome.ok();
   }
 
   @override
-  Future<void> deleteMyVents() async {
+  Stream<Set<String>> watchBlockedVentAuthors() => _live(
+    () => Set.unmodifiable(_box.blockedVentAuthors[uid] ?? const <String>{}),
+  );
+
+  @override
+  Future<LabOutcome> blockVentAuthor(String authorKey) async {
+    if (authorKey.isEmpty) return const LabOutcome.fail(LabFailure.invalid);
+    _box.blockedVentAuthors.putIfAbsent(uid, () => <String>{}).add(authorKey);
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<LabOutcome> unblockVentAuthor(String authorKey) async {
+    _box.blockedVentAuthors[uid]?.remove(authorKey);
+    _box.notify();
+    return const LabOutcome.ok();
+  }
+
+  @override
+  Future<void> deleteMyCommunityData() async {
     _box.vents.removeWhere((_, post) => post.uid == uid);
+    for (final post in _box.vents.values) {
+      post.reactions.remove(uid);
+    }
+    for (final entries in _box.entries.values) {
+      entries.remove(uid);
+    }
+    for (final votes in _box.votes.values) {
+      votes.remove(uid);
+      for (final voters in votes.values) {
+        voters.remove(uid);
+      }
+    }
+    _box.proposals.removeWhere((_, proposal) => proposal.authorUid == uid);
+    _box.reports.removeWhere((_, report) => report.reporterUid == uid);
+    _box.blockedVentAuthors.remove(uid);
     _box.notify();
   }
 }

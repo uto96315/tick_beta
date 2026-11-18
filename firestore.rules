@@ -13,6 +13,19 @@ service cloud.firestore {
       return signedIn() && request.auth.token.email == 'yuto.mabe@gmail.com';
     }
 
+    function safePublicText(text) {
+      return text is string
+        && !text.matches('(?s).*(死ね|消えろ|殺す|殺してやる|レイプ|児童ポルノ|爆弾作り).*');
+    }
+
+    function safeChoices(choices) {
+      return choices is list
+        && (choices.size() < 1 || safePublicText(choices[0]))
+        && (choices.size() < 2 || safePublicText(choices[1]))
+        && (choices.size() < 3 || safePublicText(choices[2]))
+        && (choices.size() < 4 || safePublicText(choices[3]));
+    }
+
     function isSeed(promptId) {
       return promptId.matches('^seed-[a-z0-9-]{1,40}$');
     }
@@ -68,14 +81,17 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
         && request.resource.data.title.size() <= 40
+        && safePublicText(request.resource.data.title)
         && request.resource.data.body is string
         && request.resource.data.body.size() > 0
         && request.resource.data.body.size() <= 200
+        && safePublicText(request.resource.data.body)
         && request.resource.data.phase in ['open', 'closed']
         && request.resource.data.category in ['sit', 'stand', 'quiet']
         && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw', 'pen']
         && request.resource.data.choices is list
-        && request.resource.data.choices.size() <= 4;
+        && request.resource.data.choices.size() <= 4
+        && safeChoices(request.resource.data.choices);
       allow delete: if false;
 
       match /entries/{entryId} {
@@ -98,6 +114,7 @@ service cloud.firestore {
           && request.resource.data.name.size() <= 24
           && request.resource.data.text is string
           && request.resource.data.text.size() <= 80
+          && safePublicText(request.resource.data.text)
           && request.resource.data.createdAt is timestamp
           && (!('choiceIndex' in request.resource.data) || request.resource.data.choiceIndex is int)
           && validLabEntry(promptId)
@@ -108,7 +125,10 @@ service cloud.firestore {
         allow update: if isAdmin()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hidden'])
           && request.resource.data.hidden is bool;
-        allow delete: if isAdmin();
+        allow delete: if isAdmin()
+          || (signedIn()
+            && entryId == request.auth.uid
+            && resource.data.uid == request.auth.uid);
       }
 
       match /ballots/{ballotId} {
@@ -133,16 +153,20 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
         && request.resource.data.title.size() <= 40
+        && safePublicText(request.resource.data.title)
         && request.resource.data.body is string
         && request.resource.data.body.size() > 0
         && request.resource.data.body.size() <= 200
+        && safePublicText(request.resource.data.body)
         && request.resource.data.category in ['sit', 'stand', 'quiet']
         && request.resource.data.format in ['ogiri', 'quiz', 'choice', 'draw', 'pen']
         && request.resource.data.choices is list
-        && request.resource.data.choices.size() <= 4;
+        && request.resource.data.choices.size() <= 4
+        && safeChoices(request.resource.data.choices);
       allow read: if isAdmin() || (signedIn() && resource.data.authorUid == request.auth.uid);
       allow update: if isAdmin();
-      allow delete: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.authorUid == request.auth.uid);
     }
 
     match /labProfiles/{userId} {
@@ -165,8 +189,16 @@ service cloud.firestore {
         && request.resource.data.promptId is string
         && request.resource.data.entryUid is string
         && reportId == request.resource.data.promptId + '_' + request.resource.data.entryUid + '_' + request.auth.uid;
-      allow read: if isAdmin();
-      allow update, delete: if false;
+      allow get: if isAdmin()
+        || (signedIn()
+          && reportId.matches('^.*_' + request.auth.uid + '$')
+          && (!exists(/databases/$(database)/documents/labReports/$(reportId))
+            || resource.data.reporterUid == request.auth.uid));
+      allow list: if isAdmin()
+        || (signedIn() && resource.data.reporterUid == request.auth.uid);
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.reporterUid == request.auth.uid);
     }
 
     function ventReactionPath(postId, userId) {
@@ -194,11 +226,14 @@ service cloud.firestore {
       allow get, list: if signedIn() && resource.data.expiresAt > request.time;
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly([
-          'text', 'createdAt', 'expiresAt', 'relateCount', 'cheerCount'
+          'text', 'authorKey', 'createdAt', 'expiresAt', 'relateCount', 'cheerCount'
         ])
         && request.resource.data.text is string
+        && safePublicText(request.resource.data.text)
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() <= 140
+        && request.resource.data.authorKey is string
+        && request.resource.data.authorKey.size() == 64
         && request.resource.data.createdAt is timestamp
         && request.resource.data.createdAt <= request.time
         && request.resource.data.createdAt > request.time - duration.value(1, 'm')
@@ -245,8 +280,7 @@ service cloud.firestore {
         && (!exists(ventOwnerPath(postId, userId))
           || resource.data.expiresAt > request.time);
       allow list: if signedIn()
-        && userId == request.auth.uid
-        && resource.data.expiresAt > request.time;
+        && userId == request.auth.uid;
       allow create: if signedIn()
         && userId == request.auth.uid
         && request.resource.data.keys().hasOnly(['createdAt', 'expiresAt'])
@@ -273,8 +307,26 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/ventPosts/$(request.resource.data.postId))
         && request.resource.data.expiresAt == get(/databases/$(database)/documents/ventPosts/$(request.resource.data.postId)).data.expiresAt
         && !exists(ventOwnerPath(request.resource.data.postId, request.auth.uid));
-      allow read: if isAdmin();
-      allow update, delete: if false;
+      allow get: if isAdmin()
+        || (signedIn()
+          && reportId.matches('^.*_' + request.auth.uid + '$')
+          && (!exists(/databases/$(database)/documents/ventReports/$(reportId))
+            || resource.data.reporterUid == request.auth.uid));
+      allow list: if isAdmin()
+        || (signedIn() && resource.data.reporterUid == request.auth.uid);
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.reporterUid == request.auth.uid);
+    }
+
+    match /ventBlocks/{userId}/authors/{authorKey} {
+      allow read: if signedIn() && userId == request.auth.uid;
+      allow create, update: if signedIn()
+        && userId == request.auth.uid
+        && authorKey.matches('^[a-f0-9]{64}$')
+        && request.resource.data.keys().hasOnly(['createdAt'])
+        && request.resource.data.createdAt is timestamp;
+      allow delete: if signedIn() && userId == request.auth.uid;
     }
   }
 }

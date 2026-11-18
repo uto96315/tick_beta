@@ -6,7 +6,6 @@ import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/lab/logic.dart';
 import 'package:tick/state/app_controller.dart';
 import 'package:tick/state/app_state.dart';
-import 'package:tick/ui/premium_offer.dart';
 import 'package:tick/ui/lab_profile_section.dart';
 import 'package:tick/ui/theme.dart';
 
@@ -217,53 +216,6 @@ class SettingsPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            PopCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.chickVoiceTitle,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final voice in ChickVoice.values)
-                        ChoiceChip(
-                          label: premiumLabel(
-                            _voiceLabel(l10n, voice),
-                            locked: !app.premium && voice != ChickVoice.plain,
-                          ),
-                          selected: settings.chickVoice == voice,
-                          onSelected: (_) {
-                            if (!app.premium && voice != ChickVoice.plain) {
-                              showPremiumOffer(context, ref);
-                              return;
-                            }
-                            controller.updateSettings(
-                              settings.copyWith(chickVoice: voice),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
-                  if (app.premium &&
-                      settings.chickVoice == ChickVoice.custom) ...[
-                    const SizedBox(height: 8),
-                    _CustomLineField(
-                      initial: settings.customChickLine,
-                      hint: l10n.customLine,
-                      onSave: (value) => controller.updateSettings(
-                        settings.copyWith(customChickLine: value),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
             const SizedBox(height: 16),
             _SectionTitle(l10n.settingsMore),
             PopCard(
@@ -274,19 +226,37 @@ class SettingsPage extends ConsumerWidget {
                     ListTile(
                       title: Text(
                         l10n.account,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/settings/account'),
                     ),
                   ListTile(
-                    leading: const PremiumMark(size: 32),
-                    title: Text(
-                      l10n.premium,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    subtitle: Text(
-                      app.premium ? l10n.premiumOwned : l10n.freeTier,
+                    title: Row(
+                      children: [
+                        Text(
+                          l10n.premium,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (app.premium)
+                          const PremiumMark(size: 28)
+                        else
+                          const Text(
+                            'Free',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: TickColors.muted,
+                            ),
+                          ),
+                      ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/settings/premium'),
@@ -294,7 +264,10 @@ class SettingsPage extends ConsumerWidget {
                   ListTile(
                     title: Text(
                       l10n.fakeCall,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/call'),
@@ -302,11 +275,10 @@ class SettingsPage extends ConsumerWidget {
                   ListTile(
                     title: Text(
                       l10n.camouflage,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    subtitle: Text(
-                      l10n.camouflageSettingsLead,
-                      style: const TextStyle(color: TickColors.muted),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/settings/camouflage'),
@@ -315,7 +287,10 @@ class SettingsPage extends ConsumerWidget {
                     ListTile(
                       title: Text(
                         l10n.labReview,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/lab/review'),
@@ -365,60 +340,3 @@ class _SectionTitle extends StatelessWidget {
     );
   }
 }
-
-class _CustomLineField extends StatefulWidget {
-  const _CustomLineField({
-    required this.initial,
-    required this.hint,
-    required this.onSave,
-  });
-
-  final String initial;
-  final String hint;
-  final ValueChanged<String> onSave;
-
-  @override
-  State<_CustomLineField> createState() => _CustomLineFieldState();
-}
-
-class _CustomLineFieldState extends State<_CustomLineField> {
-  late final TextEditingController _controller = TextEditingController(
-    text: widget.initial,
-  );
-
-  @override
-  void didUpdateWidget(_CustomLineField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initial != widget.initial &&
-        _controller.text != widget.initial) {
-      _controller.text = widget.initial;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      maxLength: 40,
-      decoration: InputDecoration(hintText: widget.hint),
-      onSubmitted: widget.onSave,
-      onEditingComplete: () => widget.onSave(_controller.text),
-    );
-  }
-}
-
-String _voiceLabel(AppLocalizations l10n, ChickVoice voice) {
-  return switch (voice) {
-    ChickVoice.plain => l10n.voicePlain,
-    ChickVoice.lazy => l10n.voiceLazy,
-    ChickVoice.kansai => l10n.voiceKansai,
-    ChickVoice.custom => l10n.voiceCustom,
-  };
-}
-

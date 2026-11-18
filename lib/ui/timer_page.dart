@@ -412,7 +412,7 @@ class TimerPage extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 54,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
@@ -592,7 +592,7 @@ Future<void> _editSessionBreakDuration(
   final field = TextEditingController(text: '${span.duration.inMinutes}');
   final minutes = await showDialog<int>(
     context: context,
-    builder: (context) => AlertDialog(
+    builder: (dialogContext) => AlertDialog(
       title: Text(l10n.breakTotal),
       content: TextField(
         controller: field,
@@ -602,19 +602,23 @@ Future<void> _editSessionBreakDuration(
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () =>
+              Navigator.of(dialogContext, rootNavigator: true).pop<int>(),
           child: Text(l10n.cancel),
         ),
         TextButton(
-          onPressed: () =>
-              Navigator.pop(context, int.tryParse(field.text.trim())),
+          onPressed: () {
+            final value = int.tryParse(field.text.trim());
+            if (value == null || value < 1) return;
+            Navigator.of(dialogContext, rootNavigator: true).pop<int>(value);
+          },
           child: Text(l10n.save),
         ),
       ],
     ),
   );
   field.dispose();
-  if (minutes == null || minutes < 1) return;
+  if (minutes == null || minutes < 1 || !context.mounted) return;
   ref
       .read(appControllerProvider.notifier)
       .updateSessionBreak(span.id, duration: Duration(minutes: minutes));

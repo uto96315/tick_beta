@@ -791,7 +791,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountBody.
   ///
   /// In en, this message translates to:
-  /// **'This deletes the account and its settings and history.'**
+  /// **'This deletes the account, settings, history, posts, and reports you submitted.'**
   String get deleteAccountBody;
 
   /// No description provided for @email.
@@ -1321,6 +1321,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not post. Check your connection and try again.'**
   String get ventPostError;
+
+  /// No description provided for @unsafePost.
+  ///
+  /// In en, this message translates to:
+  /// **'This post can\'t be published. Please change the wording.'**
+  String get unsafePost;
+
+  /// No description provided for @ventBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get ventBlock;
+
+  /// No description provided for @ventBlockConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this user?'**
+  String get ventBlockConfirmTitle;
+
+  /// No description provided for @ventBlockConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'You won\'t see this user\'s posts anymore.'**
+  String get ventBlockConfirm;
+
+  /// No description provided for @ventBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'User blocked'**
+  String get ventBlocked;
+
+  /// No description provided for @ventBlockedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get ventBlockedList;
+
+  /// No description provided for @ventNoBlockedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t blocked anyone.'**
+  String get ventNoBlockedUsers;
+
+  /// No description provided for @ventBlockedUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User {number}'**
+  String ventBlockedUser(int number);
+
+  /// No description provided for @ventUnblock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get ventUnblock;
 
   /// No description provided for @ventAgeNow.
   ///

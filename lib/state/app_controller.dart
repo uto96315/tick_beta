@@ -711,21 +711,13 @@ class AppController extends Notifier<AppState> {
     final uid = _db.uid;
     try {
       if (uid != null && _deps.firebaseConfigured) {
-        try {
-          await _deps.lab.deleteMyVents();
-        } catch (error) {
-          debugPrint('vent cleanup failed: $error');
-        }
+        await _deps.lab.deleteMyCommunityData();
+      }
+      if (uid != null && _deps.firebaseConfigured) {
+        await _deps.sync.deleteUser(uid);
+        await _deps.labProfileRemote?.deleteUser(uid);
       }
       await _deps.auth.deleteAccount();
-      if (uid != null && _deps.firebaseConfigured) {
-        try {
-          await _deps.sync.deleteUser(uid);
-          await _deps.labProfileRemote?.deleteUser(uid);
-        } catch (error) {
-          debugPrint('remote delete failed: $error');
-        }
-      }
       final user = await _deps.auth.ensureSignedIn();
       if (!ref.mounted) return null;
       _db = PersistedState.seed(

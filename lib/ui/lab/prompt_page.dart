@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tick/domain/format.dart';
 import 'package:tick/lab/logic.dart';
+import 'package:tick/lab/content_filter.dart';
 import 'package:tick/lab/models.dart';
 import 'package:tick/l10n/app_localizations.dart';
 import 'package:tick/state/app_controller.dart';
@@ -22,10 +25,25 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
   final _text = TextEditingController();
   var _busy = false;
   String? _pickedPhotoPath;
+  Set<String> _blockedAuthors = {};
+  final Set<String> _reportedEntries = {};
+  StreamSubscription<Set<String>>? _blockedSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _blockedSubscription = ref
+        .read(labStoreProvider)
+        .watchBlockedVentAuthors()
+        .listen((authors) {
+          if (mounted) setState(() => _blockedAuthors = authors);
+        });
+  }
 
   @override
   void dispose() {
     _text.dispose();
+    unawaited(_blockedSubscription?.cancel());
     super.dispose();
   }
 
@@ -42,6 +60,19 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
       builder: (context, snapshot) {
         final board = snapshot.data;
         final prompt = board?.prompt;
+        final entries =
+            board?.entries
+                .where(
+                  (entry) =>
+                      !entry.reportedByMe &&
+                      !_reportedEntries.contains(entry.uid) &&
+                      (entry.mine ||
+                          !_blockedAuthors.contains(
+                            contentAuthorKey(entry.uid),
+                          )),
+                )
+                .toList() ??
+            const <LabEntry>[];
         final headerTitle = prompt != null
             ? labFormatLabel(l10n, prompt.format)
             : l10n.labTitle;
@@ -54,94 +85,98 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-            if (prompt == null)
-              Text(l10n.labNotFound)
-            else ...[
-              if (board.remoteFailed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    l10n.labLoadError,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              PopCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      prompt.title,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        height: 1.35,
-                      ),
-                    ),
-                    if (prompt.body.trim().isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        prompt.body,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          height: 1.4,
-                          color: TickColors.muted,
+                      if (prompt == null)
+                        Text(l10n.labNotFound)
+                      else ...[
+                        if (board.remoteFailed)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              l10n.labLoadError,
+                              style: const TextStyle(
+                                color: TickColors.muted,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        PopCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                prompt.title,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.35,
+                                ),
+                              ),
+                              if (prompt.body.trim().isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  prompt.body,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    height: 1.4,
+                                    color: TickColors.muted,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              LabMeta(prompt: prompt),
-              if (prompt.closesAt != null && prompt.phase == LabPhase.open) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.labUntil(formatHm(prompt.closesAt!)),
-                  style: const TextStyle(
-                    color: TickColors.muted,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              if (labTakesPhoto(prompt.format))
-                _PhotoBox(
-                  prompt: prompt,
-                  entries: board.entries,
-                  pickedPath: _pickedPhotoPath,
-                  busy: _busy,
-                  onPick: _pickPhoto,
-                  onSubmit: _submitPhoto,
-                  onVote: _vote,
-                  onReport: _report,
-                  onDeleteEntry: canModerate ? _deleteEntry : null,
-                )
-              else if (labTakesText(prompt.format))
-                _OgiriBox(
-                  prompt: prompt,
-                  entries: board.entries,
-                  controller: _text,
-                  busy: _busy,
-                  onSubmit: _submitText,
-                  onVote: _vote,
-                  onReport: _report,
-                  onDeleteEntry: canModerate ? _deleteEntry : null,
-                )
-              else
-                _ChoiceBox(
-                  prompt: prompt,
-                  entries: board.entries,
-                  busy: _busy,
-                  onPick: _submitChoice,
-                  onVote: _vote,
-                  onReport: _report,
-                  onDeleteEntry: canModerate ? _deleteEntry : null,
-                  showAllEntries: canModerate,
-                ),
-            ],
+                        const SizedBox(height: 10),
+                        LabMeta(prompt: prompt),
+                        if (prompt.closesAt != null &&
+                            prompt.phase == LabPhase.open) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.labUntil(formatHm(prompt.closesAt!)),
+                            style: const TextStyle(
+                              color: TickColors.muted,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        if (labTakesPhoto(prompt.format))
+                          _PhotoBox(
+                            prompt: prompt,
+                            entries: entries,
+                            pickedPath: _pickedPhotoPath,
+                            busy: _busy,
+                            onPick: _pickPhoto,
+                            onSubmit: _submitPhoto,
+                            onVote: _vote,
+                            onReport: _report,
+                            onBlock: _block,
+                            onDeleteEntry: canModerate ? _deleteEntry : null,
+                          )
+                        else if (labTakesText(prompt.format))
+                          _OgiriBox(
+                            prompt: prompt,
+                            entries: entries,
+                            controller: _text,
+                            busy: _busy,
+                            onSubmit: _submitText,
+                            onVote: _vote,
+                            onReport: _report,
+                            onBlock: _block,
+                            onDeleteEntry: canModerate ? _deleteEntry : null,
+                          )
+                        else
+                          _ChoiceBox(
+                            prompt: prompt,
+                            entries: entries,
+                            busy: _busy,
+                            onPick: _submitChoice,
+                            onVote: _vote,
+                            onReport: _report,
+                            onBlock: _block,
+                            onDeleteEntry: canModerate ? _deleteEntry : null,
+                            showAllEntries: canModerate,
+                          ),
+                      ],
                     ],
                   ),
                 ),
@@ -274,10 +309,22 @@ class _LabPromptPageState extends ConsumerState<LabPromptPage> {
         .report(widget.id, entry.uid);
     if (!mounted) return;
     if (outcome.ok) {
+      setState(() => _reportedEntries.add(entry.uid));
       labTell(context, l10n.labReported);
     } else {
       labTellOutcome(context, outcome);
     }
+  }
+
+  Future<void> _block(LabEntry entry) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await labConfirmBlock(context);
+    if (!ok || !mounted) return;
+    final result = await ref
+        .read(labStoreProvider)
+        .blockVentAuthor(contentAuthorKey(entry.uid));
+    if (!mounted) return;
+    labTell(context, result.ok ? l10n.ventBlocked : l10n.ventPostError);
   }
 }
 
@@ -291,6 +338,7 @@ class _PhotoBox extends StatelessWidget {
     required this.onSubmit,
     required this.onVote,
     required this.onReport,
+    required this.onBlock,
     this.onDeleteEntry,
   });
 
@@ -302,6 +350,7 @@ class _PhotoBox extends StatelessWidget {
   final VoidCallback onSubmit;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final ValueChanged<LabEntry> onBlock;
   final Future<void> Function(LabEntry entry)? onDeleteEntry;
 
   @override
@@ -358,6 +407,7 @@ class _PhotoBox extends StatelessWidget {
           entries: entries,
           onVote: onVote,
           onReport: onReport,
+          onBlock: onBlock,
           onDeleteEntry: onDeleteEntry,
         ),
       ],
@@ -374,6 +424,7 @@ class _OgiriBox extends StatelessWidget {
     required this.onSubmit,
     required this.onVote,
     required this.onReport,
+    required this.onBlock,
     this.onDeleteEntry,
   });
 
@@ -384,6 +435,7 @@ class _OgiriBox extends StatelessWidget {
   final VoidCallback onSubmit;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final ValueChanged<LabEntry> onBlock;
   final Future<void> Function(LabEntry entry)? onDeleteEntry;
 
   @override
@@ -427,6 +479,7 @@ class _OgiriBox extends StatelessWidget {
           entries: entries,
           onVote: onVote,
           onReport: onReport,
+          onBlock: onBlock,
           onDeleteEntry: onDeleteEntry,
         ),
       ],
@@ -442,6 +495,7 @@ class _ChoiceBox extends StatelessWidget {
     required this.onPick,
     required this.onVote,
     required this.onReport,
+    required this.onBlock,
     this.onDeleteEntry,
     this.showAllEntries = false,
   });
@@ -452,6 +506,7 @@ class _ChoiceBox extends StatelessWidget {
   final void Function(int index, String label) onPick;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final ValueChanged<LabEntry> onBlock;
   final Future<void> Function(LabEntry entry)? onDeleteEntry;
   final bool showAllEntries;
 
@@ -526,6 +581,7 @@ class _ChoiceBox extends StatelessWidget {
               entry: entry,
               onVote: onVote,
               onReport: onReport,
+              onBlock: onBlock,
               onDeleteEntry: onDeleteEntry,
             ),
         ],
@@ -541,6 +597,7 @@ class _ChoiceBox extends StatelessWidget {
               entry: entry,
               onVote: onVote,
               onReport: onReport,
+              onBlock: onBlock,
               onDeleteEntry: onDeleteEntry,
             ),
         ],
@@ -589,4 +646,3 @@ class _ShareBar extends StatelessWidget {
     );
   }
 }
-

@@ -126,6 +126,7 @@ String labFailureMessage(AppLocalizations l10n, LabFailure failure) =>
       LabFailure.draw => l10n.labDrawLater,
       LabFailure.photo => l10n.labFailPhotoEmpty,
       LabFailure.contact => l10n.labFailContact,
+      LabFailure.unsafeContent => l10n.unsafePost,
     };
 
 class LabFeedLoading extends StatelessWidget {
@@ -138,10 +139,7 @@ class LabFeedLoading extends StatelessWidget {
     const indicator = SizedBox(
       width: 32,
       height: 32,
-      child: CircularProgressIndicator(
-        color: TickColors.ink,
-        strokeWidth: 2.5,
-      ),
+      child: CircularProgressIndicator(color: TickColors.ink, strokeWidth: 2.5),
     );
     if (expanded) {
       return const Center(child: indicator);
@@ -209,15 +207,31 @@ Widget _labDialogActionRow(
     children: [
       Expanded(
         child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           onPressed: () => Navigator.pop(context, false),
-          child: Text(cancelLabel),
+          child: Text(cancelLabel, maxLines: 1, softWrap: false),
         ),
       ),
       const SizedBox(width: 12),
       Expanded(
         child: FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(54),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           onPressed: () => Navigator.pop(context, true),
-          child: Text(confirmLabel),
+          child: Text(confirmLabel, maxLines: 1, softWrap: false),
         ),
       ),
     ],
@@ -234,17 +248,100 @@ Future<bool> labConfirm(
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(title),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+      contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(detail),
+          Text(detail, style: const TextStyle(fontSize: 16, height: 1.5)),
           const SizedBox(height: 20),
           _labDialogActionRow(
             context,
             cancelLabel: l10n.cancel,
             confirmLabel: confirmLabel ?? l10n.labSend,
+          ),
+        ],
+      ),
+    ),
+  );
+  return ok ?? false;
+}
+
+Future<bool> labConfirmBlock(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+      contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      title: Text(
+        l10n.ventBlockConfirmTitle,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.ventBlockConfirm,
+            style: const TextStyle(fontSize: 16, height: 1.5),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(54),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(dialogContext).pop<bool>(false),
+                  child: Text(
+                    l10n.ventCancel,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(54),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(dialogContext).pop<bool>(true),
+                  child: Text(
+                    l10n.ventBlock,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -375,12 +472,14 @@ class LabRankList extends StatelessWidget {
     required this.entries,
     required this.onVote,
     required this.onReport,
+    required this.onBlock,
     this.onDeleteEntry,
   });
 
   final List<LabEntry> entries;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final ValueChanged<LabEntry> onBlock;
   final Future<void> Function(LabEntry entry)? onDeleteEntry;
 
   @override
@@ -416,6 +515,7 @@ class LabRankList extends StatelessWidget {
               entry: entry,
               onVote: onVote,
               onReport: onReport,
+              onBlock: onBlock,
               onDeleteEntry: onDeleteEntry,
             ),
       ],
@@ -429,12 +529,14 @@ class LabEntryTile extends StatelessWidget {
     required this.entry,
     required this.onVote,
     required this.onReport,
+    required this.onBlock,
     this.onDeleteEntry,
   });
 
   final LabEntry entry;
   final ValueChanged<String> onVote;
   final ValueChanged<LabEntry> onReport;
+  final ValueChanged<LabEntry> onBlock;
   final Future<void> Function(LabEntry entry)? onDeleteEntry;
 
   @override
@@ -487,10 +589,7 @@ class LabEntryTile extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   l10n.labHidden,
-                  style: const TextStyle(
-                    color: TickColors.muted,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: TickColors.muted, fontSize: 12),
                 ),
               ),
             const SizedBox(height: 10),
@@ -509,6 +608,22 @@ class LabEntryTile extends StatelessWidget {
                     icon: const Icon(
                       Icons.flag_outlined,
                       size: 20,
+                      color: TickColors.muted,
+                    ),
+                  ),
+                if (!entry.mine)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    tooltip: l10n.ventBlock,
+                    onPressed: () => onBlock(entry),
+                    icon: const Icon(
+                      Icons.block_rounded,
+                      size: 18,
                       color: TickColors.muted,
                     ),
                   ),
@@ -579,9 +694,7 @@ class _LabVoteChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                voted
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_border_rounded,
+                voted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                 size: 18,
                 color: TickColors.ink,
               ),

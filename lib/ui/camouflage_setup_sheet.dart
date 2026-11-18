@@ -111,7 +111,7 @@ class CamouflageSetupPanel extends ConsumerWidget {
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          height: 48,
+          height: 54,
           child: FilledButton.icon(
             style: FilledButton.styleFrom(
               backgroundColor: TickColors.ink,
