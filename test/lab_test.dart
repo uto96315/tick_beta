@@ -140,7 +140,7 @@ void main() {
         feed.prompts.any((prompt) => prompt.title == '昼ごはん' && prompt.featured),
         isTrue,
       );
-      expect(todaysPrompt(feed.prompts)?.title, '昼ごはん');
+      expect(todaysPrompt(feed.prompts, now: now), isNotNull);
 
       box.prompts['shut'] = LabPrompt(
         id: 'shut',

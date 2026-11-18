@@ -19,6 +19,7 @@ class LabProfileSection extends ConsumerStatefulWidget {
 
 class _LabProfileSectionState extends ConsumerState<LabProfileSection> {
   late final TextEditingController _nick;
+  String? _syncedNick;
   var _busy = false;
 
   @override
@@ -37,8 +38,9 @@ class _LabProfileSectionState extends ConsumerState<LabProfileSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final app = ref.watch(appControllerProvider);
-    if (_nick.text != app.labNick) {
-      _nick.text = app.labNick;
+    if (_syncedNick != app.labNick) {
+      _syncedNick = app.labNick;
+      _syncNickAfterBuild(app.labNick);
     }
     final uid = app.auth?.uid ?? 'local';
     final hint = labName(uid);
@@ -92,6 +94,17 @@ class _LabProfileSectionState extends ConsumerState<LabProfileSection> {
         ],
       ),
     );
+  }
+
+  void _syncNickAfterBuild(String nick) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _syncedNick != nick || _nick.text == nick) return;
+      _nick.value = _nick.value.copyWith(
+        text: nick,
+        selection: TextSelection.collapsed(offset: nick.length),
+        composing: TextRange.empty,
+      );
+    });
   }
 
   Future<void> _pickAvatar() async {

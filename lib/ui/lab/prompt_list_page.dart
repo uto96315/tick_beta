@@ -91,7 +91,6 @@ class _LabListPageState extends ConsumerState<LabListPage> {
               ),
             );
           }
-          final today = todaysPrompt(ready.prompts);
           final metaKey = (ready.prompts.length, _format);
           if (_listMetaKey != metaKey) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,16 +102,26 @@ class _LabListPageState extends ConsumerState<LabListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (today == null) ...[
-                  Text(
-                    l10n.labTodayPreparingHelp,
-                    style: const TextStyle(
-                      color: TickColors.muted,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                JapanDateBuilder(
+                  builder: (context, now) {
+                    if (todaysPrompt(ready.prompts, now: now) != null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.labTodayPreparingHelp,
+                          style: const TextStyle(
+                            color: TickColors.muted,
+                            height: 1.4,
+                            ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    );
+                  },
+                ),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,

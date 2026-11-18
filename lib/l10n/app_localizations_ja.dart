@@ -543,6 +543,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get todoHourSection => '何時台にやる？';
 
   @override
+  String get todoDateSection => 'いつやる？';
+
+  @override
   String get todoHourChoice => '時間帯を指定';
 
   @override
@@ -1334,10 +1337,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get labToday => '今日のお題';
 
   @override
-  String get labTodayEmpty => '準備中';
+  String get labTodayLoading => '読み込み中…';
 
   @override
-  String get labTodayPreparingHelp => 'もうすぐ載る。';
+  String get labTodayLoadError => 'お題を読み込めません。タップして確認';
+
+  @override
+  String get labTodayEmpty => '今日は公開中のお題がありません';
+
+  @override
+  String get labTodayPreparingHelp => '今日は公開中のお題がありません。';
 
   @override
   String get labSeeAll => 'お題を見る';

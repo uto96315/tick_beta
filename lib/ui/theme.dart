@@ -100,7 +100,7 @@ class TickTheme {
         style: FilledButton.styleFrom(
           backgroundColor: TickColors.yellow,
           foregroundColor: ink,
-          minimumSize: const Size.fromHeight(54),
+          minimumSize: const Size(0, 54),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           shape: RoundedRectangleBorder(
@@ -111,7 +111,10 @@ class TickTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: ink,
-          minimumSize: const Size.fromHeight(54),
+          // A width of infinity is invalid when this button is placed in a
+          // Row (for example, beside the profile avatar). The parent can
+          // still make it full width; otherwise it uses its content width.
+          minimumSize: const Size(0, 54),
           textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           side: const BorderSide(color: TickColors.line),
@@ -218,6 +221,55 @@ class NowBuilder extends StatefulWidget {
 
   @override
   State<NowBuilder> createState() => _NowBuilderState();
+}
+
+/// Rebuilds at midnight in Japan, regardless of the device's timezone.
+class JapanDateBuilder extends StatefulWidget {
+  const JapanDateBuilder({super.key, required this.builder});
+
+  final Widget Function(BuildContext context, DateTime now) builder;
+
+  @override
+  State<JapanDateBuilder> createState() => _JapanDateBuilderState();
+}
+
+class _JapanDateBuilderState extends State<JapanDateBuilder> {
+  static const _japanOffset = Duration(hours: 9);
+
+  late DateTime _now;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    _scheduleMidnight();
+  }
+
+  void _scheduleMidnight() {
+    final utcNow = DateTime.now().toUtc();
+    final japanNow = utcNow.add(_japanOffset);
+    final nextMidnightUtc = DateTime.utc(
+      japanNow.year,
+      japanNow.month,
+      japanNow.day + 1,
+    ).subtract(_japanOffset);
+    _timer?.cancel();
+    _timer = Timer(nextMidnightUtc.difference(utcNow), () {
+      if (!mounted) return;
+      setState(() => _now = DateTime.now());
+      _scheduleMidnight();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _now);
 }
 
 class _NowBuilderState extends State<NowBuilder> {

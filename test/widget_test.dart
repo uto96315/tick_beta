@@ -149,6 +149,31 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('theme buttons can be laid out beside another widget', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TickTheme.light(),
+        home: Scaffold(
+          body: Row(
+            children: [
+              const SizedBox(width: 72, height: 72),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Choose photo'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('dark interval choices keep the other labels readable', (
     tester,
   ) async {
@@ -277,6 +302,47 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
+
+  testWidgets(
+    'settings can switch the mascot to a sloth without layout errors',
+    (tester) async {
+      tester.view.physicalSize = const Size(402, 1600);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.localeTestValue = const Locale('ja');
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.platformDispatcher.clearLocaleTestValue();
+      });
+      final persisted = PersistedState.seed(languageCode: 'ja');
+      persisted.settings = persisted.settings.copyWith(
+        tutorialSeen: true,
+        scheduleOnboarded: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [depsProvider.overrideWithValue(_testDeps(persisted))],
+          child: const TickApp(),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final sloth = find.byKey(const ValueKey('mascot-option-sloth'));
+      await tester.tap(sloth);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(tester.takeException(), isNull);
+      expect(persisted.settings.mascot, MascotKind.sloth);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
 
   testWidgets('an old build is blocked until the required update', (
     tester,

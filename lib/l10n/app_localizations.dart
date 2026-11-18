@@ -1154,6 +1154,12 @@ abstract class AppLocalizations {
   /// **'When should you do it?'**
   String get todoHourSection;
 
+  /// No description provided for @todoDateSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Which day?'**
+  String get todoDateSection;
+
   /// No description provided for @todoHourChoice.
   ///
   /// In en, this message translates to:
@@ -2708,16 +2714,28 @@ abstract class AppLocalizations {
   /// **'Today\'s prompt'**
   String get labToday;
 
+  /// No description provided for @labTodayLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading…'**
+  String get labTodayLoading;
+
+  /// No description provided for @labTodayLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load prompts. Tap to check.'**
+  String get labTodayLoadError;
+
   /// No description provided for @labTodayEmpty.
   ///
   /// In en, this message translates to:
-  /// **'In preparation'**
+  /// **'No prompt is open today'**
   String get labTodayEmpty;
 
   /// No description provided for @labTodayPreparingHelp.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon.'**
+  /// **'There are no open prompts today.'**
   String get labTodayPreparingHelp;
 
   /// No description provided for @labSeeAll.

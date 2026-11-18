@@ -175,14 +175,30 @@ List<LabPrompt> sortLabPrompts(List<LabPrompt> prompts) {
   return list;
 }
 
-LabPrompt? todaysPrompt(List<LabPrompt> prompts) {
-  final featured =
-      prompts
-          .where((prompt) => prompt.featured && prompt.phase == LabPhase.open)
-          .toList()
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  if (featured.isEmpty) return null;
-  return featured.first;
+const _japanUtcOffset = Duration(hours: 9);
+final _dailyPromptAnchorDate = DateTime.utc(2026, 11, 18);
+const _dailyPromptAnchorId = 'seed-ogiri-01';
+
+/// Rotates through open prompts by Japanese calendar day without a server write.
+LabPrompt? todaysPrompt(List<LabPrompt> prompts, {DateTime? now}) {
+  final instant = (now ?? DateTime.now()).toUtc();
+  final japanNow = instant.add(_japanUtcOffset);
+  final japanDate = DateTime.utc(japanNow.year, japanNow.month, japanNow.day);
+  final dayOffset = japanDate.difference(_dailyPromptAnchorDate).inDays;
+  final available =
+      prompts.where((prompt) => isAccepting(prompt, instant)).toList()
+        ..sort((a, b) {
+          final byCreation = a.createdAt.compareTo(b.createdAt);
+          return byCreation != 0 ? byCreation : a.id.compareTo(b.id);
+        });
+  if (available.isEmpty) return null;
+
+  final anchorIndex = available.indexWhere(
+    (prompt) => prompt.id == _dailyPromptAnchorId,
+  );
+  final startIndex = anchorIndex < 0 ? 0 : anchorIndex;
+  final index = (startIndex + dayOffset) % available.length;
+  return available[index < 0 ? index + available.length : index];
 }
 
 Map<int, int> tallyChoices(Iterable<LabEntry> entries, int choiceCount) {

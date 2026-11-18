@@ -559,6 +559,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todoHourSection => 'When should you do it?';
 
   @override
+  String get todoDateSection => 'Which day?';
+
+  @override
   String get todoHourChoice => 'Choose an hour';
 
   @override
@@ -1363,10 +1366,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labToday => 'Today\'s prompt';
 
   @override
-  String get labTodayEmpty => 'In preparation';
+  String get labTodayLoading => 'Loading…';
 
   @override
-  String get labTodayPreparingHelp => 'Coming soon.';
+  String get labTodayLoadError => 'Couldn\'t load prompts. Tap to check.';
+
+  @override
+  String get labTodayEmpty => 'No prompt is open today';
+
+  @override
+  String get labTodayPreparingHelp => 'There are no open prompts today.';
 
   @override
   String get labSeeAll => 'All prompts';

@@ -210,6 +210,7 @@ class _TodoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final date = MaterialLocalizations.of(context).formatMediumDate(todo.date);
     final time = todo.hour == null ? '' : l10n.todoHourLabel(todo.hour!);
     final priority = switch (todo.priority) {
       TodoPriority.low => l10n.todoPriorityLow,
@@ -245,20 +246,18 @@ class _TodoRow extends StatelessWidget {
                               : null,
                         ),
                       ),
-                      if (time.isNotEmpty ||
-                          todo.priority != TodoPriority.normal) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          [
-                            time,
-                            if (todo.priority != TodoPriority.normal) priority,
-                          ].where((value) => value.isNotEmpty).join(' · '),
-                          style: const TextStyle(
-                            color: TickColors.muted,
-                            fontSize: 12,
-                          ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          date,
+                          time,
+                          if (todo.priority != TodoPriority.normal) priority,
+                        ].where((value) => value.isNotEmpty).join(' · '),
+                        style: const TextStyle(
+                          color: TickColors.muted,
+                          fontSize: 12,
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
@@ -295,6 +294,7 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
   late final TextEditingController _title;
   late bool _hasHour;
   late int _hour;
+  late DateTime _date;
   late TodoPriority _priority;
 
   @override
@@ -305,6 +305,8 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
     );
     _hasHour = widget.todo?.hour != null;
     _hour = widget.todo?.hour ?? DateTime.now().hour;
+    final savedDate = widget.todo?.date ?? DateTime.now();
+    _date = DateTime(savedDate.year, savedDate.month, savedDate.day);
     _priority = widget.todo?.priority ?? TodoPriority.normal;
   }
 
@@ -323,6 +325,7 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
           id: widget.todo?.id,
           title: title,
           hour: _hasHour ? _hour : null,
+          date: _date,
           priority: _priority,
         );
     Navigator.pop(context);
@@ -360,6 +363,19 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
                     ? l10n.todoNewTask
                     : l10n.todoEdit,
                 hintText: l10n.todoTaskHint,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              l10n.todoDateSection,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _pickDate,
+              icon: const Icon(Icons.calendar_today_outlined),
+              label: Text(
+                MaterialLocalizations.of(context).formatMediumDate(_date),
               ),
             ),
             const SizedBox(height: 18),
@@ -432,4 +448,16 @@ class _TodoEditorState extends ConsumerState<_TodoEditor> {
     selected: _priority == priority,
     onSelected: (_) => setState(() => _priority = priority),
   );
+
+  Future<void> _pickDate() async {
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (selected != null && mounted) {
+      setState(() => _date = selected);
+    }
+  }
 }

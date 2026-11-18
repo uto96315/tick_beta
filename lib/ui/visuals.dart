@@ -156,8 +156,13 @@ class TickMascot extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!showFace) return SizedBox(width: size, height: size);
     final kind = MascotScope.of(context);
+    final asset = 'assets/images/character/${kind.folder}/${_files[_pose]}';
     return Image.asset(
-      'assets/images/character/${kind.folder}/${_files[_pose]}',
+      asset,
+      // A mascot change swaps every visible pose at once. Keep each image
+      // element distinct so a pending image decode cannot reuse the previous
+      // mascot's render object during a scrolling page's layout pass.
+      key: ValueKey(asset),
       width: size,
       height: size,
       fit: BoxFit.contain,

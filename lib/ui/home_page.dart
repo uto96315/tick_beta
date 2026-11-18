@@ -88,8 +88,11 @@ class _HomePageState extends ConsumerState<HomePage> {
             ? <TodoItem>[]
             : app.todos
                   .where(
-                    (todo) =>
-                        todoAppliesToHour(todo, currentSegment.start.hour),
+                    (todo) => todoAppliesToHour(
+                      todo,
+                      currentSegment.start,
+                      currentSegment.start.hour,
+                    ),
                   )
                   .toList();
         currentTodos.sort(
@@ -1731,7 +1734,14 @@ class _TodayPromptBanner extends ConsumerWidget {
         if (feed == null || labFeedPending(feed)) {
           return _TodayPromptTile(
             title: l10n.labToday,
-            subtitle: l10n.labTodayEmpty,
+            subtitle: l10n.labTodayLoading,
+            onTap: () => context.push('/lab'),
+          );
+        }
+        if (feed.remoteFailed && feed.prompts.isEmpty) {
+          return _TodayPromptTile(
+            title: l10n.labToday,
+            subtitle: l10n.labTodayLoadError,
             onTap: () => context.push('/lab'),
           );
         }

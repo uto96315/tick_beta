@@ -10,8 +10,28 @@ import 'package:tick/domain/schedule.dart';
 import 'package:tick/domain/segments.dart';
 import 'package:tick/domain/session_ops.dart';
 import 'package:tick/domain/sync_merge.dart';
+import 'package:tick/domain/todo.dart';
+import 'package:tick/lab/logic.dart';
+import 'package:tick/lab/models.dart';
 
 void main() {
+  test('a scheduled todo only applies on its selected calendar day', () {
+    final todo = TodoItem(
+      id: 'todo',
+      title: 'Submit report',
+      done: false,
+      hour: 10,
+      priority: TodoPriority.normal,
+      date: DateTime(2026, 11, 18),
+      createdAt: DateTime(2026, 11, 18),
+      updatedAt: DateTime(2026, 11, 18),
+    );
+
+    expect(todoAppliesToHour(todo, DateTime(2026, 11, 18, 10), 10), isTrue);
+    expect(todoAppliesToHour(todo, DateTime(2026, 11, 19, 10), 10), isFalse);
+    expect(todoAppliesToHour(todo, DateTime(2026, 11, 18, 11), 11), isFalse);
+  });
+
   test('last segment shrinks to the remainder', () {
     final start = DateTime(2026, 10, 26, 9);
     final end = DateTime(2026, 10, 26, 10, 10);
@@ -353,5 +373,35 @@ void main() {
     final later = now.add(const Duration(hours: 1));
     expect(chickBanterLines(const Locale('ja'), later).first,
         isNot(chickBanterLines(const Locale('ja'), now).first));
+  });
+
+  test('daily prompt rotates in sequence at Japan midnight', () {
+    LabPrompt prompt(String id, DateTime createdAt) => LabPrompt(
+      id: id,
+      title: id,
+      body: '',
+      category: LabCategory.stand,
+      format: LabFormat.ogiri,
+      phase: LabPhase.open,
+      createdAt: createdAt,
+    );
+
+    final prompts = [
+      prompt('seed-ogiri-01', DateTime.utc(2026, 1, 1)),
+      prompt('prompt-b', DateTime.utc(2026, 1, 2)),
+      prompt('prompt-c', DateTime.utc(2026, 1, 3)),
+    ];
+    expect(
+      todaysPrompt(prompts, now: DateTime.utc(2026, 11, 17, 14, 59))?.id,
+      'prompt-c',
+    );
+    expect(
+      todaysPrompt(prompts, now: DateTime.utc(2026, 11, 17, 15))?.id,
+      'seed-ogiri-01',
+    );
+    expect(
+      todaysPrompt(prompts, now: DateTime.utc(2026, 11, 18, 15))?.id,
+      'prompt-b',
+    );
   });
 }

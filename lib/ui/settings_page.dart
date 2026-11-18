@@ -192,6 +192,9 @@ class SettingsPage extends ConsumerWidget {
                                   children: [
                                     Image.asset(
                                       'assets/images/character/${kind.folder}/normal.png',
+                                      key: ValueKey(
+                                        'mascot-option-${kind.name}',
+                                      ),
                                       height: 64,
                                       width: 64,
                                     ),
@@ -237,11 +240,15 @@ class SettingsPage extends ConsumerWidget {
                   ListTile(
                     title: Row(
                       children: [
-                        Text(
-                          l10n.premium,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                        Expanded(
+                          child: Text(
+                            l10n.premium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),

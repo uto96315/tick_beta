@@ -134,19 +134,19 @@ class _LabHubPageState extends ConsumerState<LabHubPage> {
                     LabFeedError(onRetry: _retryFeed),
                     const SizedBox(height: 12),
                   ],
-                  if (today == null && ready.prompts.isEmpty)
-                    _LabEmptyToday(l10n: l10n)
-                  else if (today != null) ...[
-                    Builder(
-                      builder: (context) {
-                        _loadTodayEntryCount(today);
-                        return _TodayCard(
-                          prompt: today,
-                          entryCount: _todayEntryCount,
-                        );
-                      },
-                    ),
-                  ],
+                  JapanDateBuilder(
+                    builder: (context, now) {
+                      final dailyPrompt = todaysPrompt(ready.prompts, now: now);
+                      if (dailyPrompt == null) {
+                        return _LabEmptyToday(l10n: l10n);
+                      }
+                      _loadTodayEntryCount(dailyPrompt);
+                      return _TodayCard(
+                        prompt: dailyPrompt,
+                        entryCount: _todayEntryCount,
+                      );
+                    },
+                  ),
                   if (ready.prompts.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     _CategoryCard(

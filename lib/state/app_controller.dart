@@ -202,6 +202,7 @@ class AppController extends Notifier<AppState> {
     String? id,
     required String title,
     int? hour,
+    required DateTime date,
     TodoPriority priority = TodoPriority.normal,
   }) {
     final trimmed = title.trim();
@@ -217,6 +218,7 @@ class AppController extends Notifier<AppState> {
       done: previous?.done ?? false,
       hour: hour,
       priority: priority,
+      date: DateTime(date.year, date.month, date.day),
       createdAt: previous?.createdAt ?? now,
       updatedAt: now,
     );
@@ -238,6 +240,7 @@ class AppController extends Notifier<AppState> {
       done: !item.done,
       hour: item.hour,
       priority: item.priority,
+      date: item.date,
       createdAt: item.createdAt,
       updatedAt: _deps.clock.now(),
     );
