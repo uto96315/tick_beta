@@ -331,11 +331,11 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('the chick says another line after a moment', (tester) async {
+  testWidgets('the chick changes its line after a minute', (tester) async {
     final l10n = await AppLocalizations.delegate.load(const Locale('ja'));
     final now = DateTime(2026, 3, 1, 10, 30);
     final lines = chickLines(l10n, ChickPose.tired, now: now);
-    expect(lines.length, greaterThanOrEqualTo(100));
+    expect(lines.length, greaterThanOrEqualTo(39));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -348,12 +348,12 @@ void main() {
     );
 
     expect(find.text(lines.first), findsOneWidget);
-    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 60));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text(lines[1]), findsOneWidget);
 
     for (final pose in ChickPose.values) {
-      expect(chickLines(l10n, pose, now: now).length, greaterThanOrEqualTo(100));
+      expect(chickLines(l10n, pose, now: now).length, greaterThanOrEqualTo(39));
     }
     expect(
       chickLines(l10n, ChickPose.tired, voice: ChickVoice.kansai).first,

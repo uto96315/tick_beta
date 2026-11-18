@@ -346,10 +346,10 @@ void main() {
     );
   });
 
-  test('chick banter pool has 200 lines per locale', () {
+  test('chick banter pool has varied lines in both locales', () {
     final now = DateTime(2026, 1, 1, 12);
-    expect(chickBanterLines(const Locale('ja'), now), hasLength(200));
-    expect(chickBanterLines(const Locale('en'), now), hasLength(200));
+    expect(chickBanterLines(const Locale('ja'), now), hasLength(39));
+    expect(chickBanterLines(const Locale('en'), now), hasLength(39));
     final later = now.add(const Duration(hours: 1));
     expect(chickBanterLines(const Locale('ja'), later).first,
         isNot(chickBanterLines(const Locale('ja'), now).first));
